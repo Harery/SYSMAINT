@@ -1,0 +1,47 @@
+SYSMAINT V2.0.0 - NETWORK RETRY & ENHANCED LOCKING TESTS
+Date: 2025-11-09
+
+SUMMARY:
+- 8 tests executed
+- All passed
+
+TESTS:
+1. Syntax validation (bash -n) => PASS
+2. Version flag => PASS
+3. Help text shows new flags (--force-unlock, NETWORK_RETRY_*) => PASS
+4. Lock acquisition produces PID and creates .pid file => PASS
+5. Force unlock when no lock exists => PASS
+6. Force unlock stale lock (dead PID) => PASS
+7. Full dry-run integration (all phases, retry placeholders) => PASS
+8. retry_with_backoff unit script (success, partial failure, total failure) => PASS
+
+RETRY FUNCTION:
+- Exponential backoff: delay = base * 2^(attempt-1), capped at NETWORK_RETRY_MAX_DELAY
+- Captures exit code explicitly (preserves non-zero failure codes)
+- Logs each attempt, warnings, and final error
+
+LOCKING ENHANCEMENTS:
+- PID file: <lockfile>.pid
+- Safe force unlock: refuses if PID alive
+- Removes stale lock + pid when process dead
+- Logs holder PID when waiting
+
+CONFIG USED:
+  NETWORK_RETRY_COUNT=3
+  NETWORK_RETRY_BASE_DELAY=2
+  NETWORK_RETRY_MAX_DELAY=30
+  LOCK_WAIT_SECONDS=3
+
+EDGE CASES VERIFIED:
+- Missing lock file under --force-unlock => graceful
+- Stale PID (nonexistent process) => removed
+- Active lock holder => not force-unlocked (simulated)
+- Dry-run mode skips real apt operations but still logs logic
+
+NEXT VALIDATION (recommended):
+- Simulate real network failure (iptables -A OUTPUT -p tcp --dport 80 -j DROP)
+- Measure retry timings vs expected schedule
+- Stress test concurrent runs and lock contention
+- Add monitoring for retry count and lock wait duration
+
+STATUS: Production ready subset ✓

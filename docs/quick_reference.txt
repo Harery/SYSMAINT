@@ -1,0 +1,57 @@
+(See local /tmp copy for box drawing formatting; plain text version below)
+SYSMAINT V2.0.0 - QUICK REFERENCE GUIDE
+Network Retry & Enhanced Locking
+
+NEW FEATURES:
+- Network retry logic (exponential backoff)
+- Enhanced PID-based locking
+- Force unlock (--force-unlock)
+
+COMMON COMMANDS:
+  sudo ./sysmaint
+  sudo ./sysmaint --dry-run
+  ./sysmaint --version
+  ./sysmaint --help
+  sudo ./sysmaint --force-unlock
+  sudo ./sysmaint --json-summary
+
+CONFIG (env vars):
+  NETWORK_RETRY_COUNT=3 (max attempts)
+  NETWORK_RETRY_BASE_DELAY=2 (seconds)
+  NETWORK_RETRY_MAX_DELAY=30 (seconds cap)
+  LOCK_WAIT_SECONDS=3 (seconds to wait for lock)
+
+SCENARIOS:
+  Flaky network:
+    NETWORK_RETRY_COUNT=5 NETWORK_RETRY_BASE_DELAY=5 NETWORK_RETRY_MAX_DELAY=60 sudo ./sysmaint --json-summary
+  Fast CI:
+    NETWORK_RETRY_COUNT=1 LOCK_WAIT_SECONDS=10 sudo ./sysmaint
+  Debug lock:
+    cat /var/lock/sysmaint.lock.pid
+    ps -p $(cat /var/lock/sysmaint.lock.pid) -f
+    sudo ./sysmaint --force-unlock
+
+TROUBLESHOOTING:
+  Lock timeout (75): increase LOCK_WAIT_SECONDS or --force-unlock
+  Network failures: increase NETWORK_RETRY_COUNT / BASE_DELAY
+  Stale lock: use --force-unlock (only if PID not active)
+
+LOG PATTERNS:
+  "Lock acquired" / "Releasing lock" / "Attempting" / "WARNING" / "ERROR failed after"
+  Logs: /tmp/system-maintenance/sysmaint_*.log
+
+RETRY TIMING DEFAULT (base=2): 0s,2s,4s,8s,16s,30s(capped)
+AGGRESSIVE (base=5): 0s,5s,10s,20s,40s,60s(capped)
+
+SAFETY:
+  - Force unlock refuses active PID
+  - PID file cleaned on exit
+  - Dry-run safe (skips real commands)
+
+DEPLOYMENT CHECKLIST:
+  [ ] Dry-run test
+  [ ] Adjust retry vars for environment
+  [ ] Configure monitoring for retries & lock contention
+  [ ] Document runbook
+
+VERSION: 2.0.0  (Date: 2025-11-09)
