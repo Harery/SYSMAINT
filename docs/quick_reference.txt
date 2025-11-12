@@ -14,12 +14,28 @@ COMMON COMMANDS:
   ./sysmaint --help
   sudo ./sysmaint --force-unlock
   sudo ./sysmaint --json-summary
+  sudo ./sysmaint --no-json-summary     # override JSON_SUMMARY=true
+  sudo ./sysmaint --progress=adaptive   # live ETA panel
+  sudo ./sysmaint --reset-progress-history
 
 CONFIG (env vars):
   NETWORK_RETRY_COUNT=3 (max attempts)
   NETWORK_RETRY_BASE_DELAY=2 (seconds)
   NETWORK_RETRY_MAX_DELAY=30 (seconds cap)
   LOCK_WAIT_SECONDS=3 (seconds to wait for lock)
+  PROGRESS_MODE=adaptive (none|dots|countdown|bar|spinner|adaptive)
+  PROGRESS_WIDTH=30 (adaptive overall bar)
+  PROGRESS_PHASE_WIDTH=20 (adaptive phase bar)
+  STATE_DIR=/var/lib/sysmaint (timing persistence)
+
+JSON SUMMARY SCHEMA (v1.0):
+  schema_version: "1.0"
+  script_version: "2.0.0"
+  log_file_sha256: checksum of log at summary time
+  run_id, timestamp, repos, kernel, phase_timings, disk_usage
+  phase_disk_deltas_kb, phase_estimates_ema (EMA seconds per phase)
+  flatpak_scope_applied, thumbnail_freed_bytes
+  apt_signature_status, reboot_required, log_file
 
 SCENARIOS:
   Flaky network:

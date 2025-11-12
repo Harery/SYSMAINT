@@ -1,0 +1,141 @@
+2025-11-10 00:59:13 Lock acquired: /var/lock/sysmaint.lock (PID: 72117)
+2025-11-10 00:59:14 Host profile: cores scaling=0.85, ram scaling=1.00, net scaling=1.20
+2025-11-10 00:59:14 === Pre-flight health checks ===
+2025-11-10 00:59:14 Disk space check: 158GB available (OK)
+2025-11-10 00:59:14 /boot space check: 1589MB available (OK)
+2025-11-10 00:59:14 System load check: 3.41 (OK)
+2025-11-10 00:59:14 === Health checks complete ===
+2025-11-10 00:59:14 Capability detection: available={snap fwupdmgr cloud-init fstrim} unavailable={flatpak docker deborphan} mode=desktop guard=true
+2025-11-10 00:59:14 === System maintenance started (v2.1.0) ===
+2025-11-10 00:59:14 Run ID: 2025-11-10_005913_72117
+2025-11-10 00:59:14 Sequential execution mode
+2025-11-10 00:59:14 === Temporary directory cleanup start ===
+2025-11-10 00:59:14 DRY_RUN: would remove files in /tmp based on CLEAR_TMP_AGE_DAYS=1
+2025-11-10 00:59:14 === Temporary directory cleanup complete (dry-run) ===
+2025-11-10 00:59:14 Pre-flight: resolving any interrupted or broken states (safe to run).
+2025-11-10 00:59:14 + dpkg --configure -a
+2025-11-10 00:59:14 DRY_RUN: would run: dpkg --configure -a
+2025-11-10 00:59:14 + apt-get -y -f install
+2025-11-10 00:59:14 DRY_RUN: would run: apt-get -y -f install
+2025-11-10 00:59:14 === Repository validation start ===
+2025-11-10 00:59:14 Mirror diagnostics for distro: ubuntu
+2025-11-10 00:59:14 Mirror diagnostic: http://archive.ubuntu.com/ubuntu - 72ms
+2025-11-10 00:59:14 Mirror diagnostic: http://security.ubuntu.com/ubuntu - 210ms
+2025-11-10 00:59:14 Mirror diagnostic: http://us.archive.ubuntu.com/ubuntu - 69ms
+2025-11-10 00:59:14 === Repository validation complete ===
+2025-11-10 00:59:14 === Checking for missing APT repository public keys (NO_PUBKEY) ===
+2025-11-10 00:59:14 DRY_RUN: skipping NO_PUBKEY detection. Re-run without --dry-run to perform detection.
+2025-11-10 00:59:14 === Kernel status check ===
+2025-11-10 00:59:14 Current kernel: 6.14.0-35-generic
+2025-11-10 00:59:14 No kernel packages found among upgradable packages.
+2025-11-10 00:59:14 No reboot required (no /var/run/reboot-required file).
+2025-11-10 00:59:14 === Kernel status check complete ===
+2025-11-10 00:59:14 === APT maintenance start ===
+2025-11-10 00:59:14 Validating no conflicting package operations are running...
+2025-11-10 00:59:15 DRY_RUN: would run: apt-get update with retry logic
+2025-11-10 00:59:15 APT signature verification status: unknown
+2025-11-10 00:59:15 + apt-get -y -o Dpkg::Options::=--force-confold upgrade
+2025-11-10 00:59:15 DRY_RUN: would run: apt-get -y -o Dpkg::Options::=--force-confold upgrade
+2025-11-10 00:59:15 + apt-get -y -o Dpkg::Options::=--force-confold full-upgrade
+2025-11-10 00:59:15 DRY_RUN: would run: apt-get -y -o Dpkg::Options::=--force-confold full-upgrade
+2025-11-10 00:59:15 + apt-get -y autoremove --purge
+2025-11-10 00:59:15 DRY_RUN: would run: apt-get -y autoremove --purge
+2025-11-10 00:59:15 + apt-get -y autoclean
+2025-11-10 00:59:15 DRY_RUN: would run: apt-get -y autoclean
+2025-11-10 00:59:15 === APT maintenance complete ===
+2025-11-10 00:59:15 kernel_purge_phase: disabled (enable with --purge-kernels or PURGE_OLD_KERNELS=true).
+2025-11-10 00:59:15 post_kernel_finalize: skipped (kernel purge not enabled).
+2025-11-10 00:59:15 orphan_purge_phase: disabled (enable with --orphan-purge or ORPHAN_PURGE_ENABLED=true).
+2025-11-10 00:59:15 === Snap maintenance start ===
+2025-11-10 00:59:15 DRY_RUN: would run: snap refresh
+2025-11-10 00:59:16 === Snap maintenance complete ===
+2025-11-10 00:59:16 snap_cleanup_old: flag disabled (--no-snap-clean-old or env). Skipping.
+2025-11-10 00:59:16 snap_clear_cache: flag disabled (--no-snap-clear-cache or env). Skipping.
+2025-11-10 00:59:16 Flatpak not installed; skipping flatpak tasks.
+2025-11-10 00:59:16 === Firmware maintenance start ===
+2025-11-10 00:59:16 DRY_RUN: would run: fwupdmgr refresh --force
+2025-11-10 00:59:16 DRY_RUN: would run: fwupdmgr get-updates
+2025-11-10 00:59:16 No firmware updates available
+2025-11-10 00:59:16 === Firmware maintenance complete ===
+2025-11-10 00:59:16 === DNS cache maintenance start ===
+2025-11-10 00:59:16 DRY_RUN: would run: resolvectl flush-caches
+2025-11-10 00:59:16 DRY_RUN: would restart dnsmasq to clear cache
+2025-11-10 00:59:16 === DNS cache maintenance complete ===
+2025-11-10 00:59:16 === Journal maintenance start ===
+2025-11-10 00:59:16 DRY_RUN: would run: journalctl --vacuum-time=7d
+2025-11-10 00:59:16 DRY_RUN: would run: journalctl --vacuum-size=500M
+2025-11-10 00:59:16 === Journal maintenance complete ===
+2025-11-10 00:59:16 === Thumbnail cache maintenance start ===
+2025-11-10 00:59:16 DRY_RUN: would run: rm -rf /home/molife/.cache/thumbnails/*
+2025-11-10 00:59:16 Thumbnail cache size: 1.5MiB
+2025-11-10 00:59:16 === Thumbnail cache maintenance complete ===
+2025-11-10 00:59:16 === Crash dump purge start ===
+2025-11-10 00:59:16 Crash/coredump total size: 20MiB
+2025-11-10 00:59:16 === Crash dump purge complete (dry-run) ===
+2025-11-10 00:59:16 --fstrim not enabled; skipping filesystem TRIM.
+2025-11-10 00:59:16 drop_caches_phase: disabled (set DROP_CACHES_ENABLED=true or --drop-caches).
+2025-11-10 00:59:16 === Final upgrade phase start ===
+2025-11-10 00:59:16 DRY_RUN: would run: apt-get -y -o Dpkg::Options::=--force-confold full-upgrade
+2025-11-10 00:59:16 === Final upgrade phase complete (dry-run) ===
+2025-11-10 00:59:16 === Checking for failed systemd services ===
+2025-11-10 00:59:16 No failed services detected
+2025-11-10 00:59:16 === Failed services check complete ===
+2025-11-10 00:59:16 No reboot required.
+2025-11-10 00:59:16 === System maintenance finished successfully ===
+2025-11-10 00:59:16 WARNING: zombie process detected pid=13556 ppid=13534 cmd=
+2025-11-10 00:59:17 Zombie processes detected: 1
+2025-11-10 00:59:17 === Maintenance summary ===
+
+Repository summary:
+  OK: 0
+  Mismatch: 0
+  Unreachable/Missing: 0
+
+Missing repository public keys (NO_PUBKEY): 0
+  (Detection skipped under --dry-run)
+
+Kernel summary:
+  Current kernel: 6.14.0-35-generic
+  Kernel upgradable packages: 0
+  Reboot required: false
+
+APT signature verification: unknown
+
+Disk usage (root filesystem):
+  Before: 25517516 KB
+  After:  25517520 KB
+  Used:   4 KB (0.00 MB)
+  Per-phase disk deltas (freed=positive, used=negative):
+    journal_maintenance: 0 KB (no change)
+    snap_clear_cache: 0 KB (no change)
+    check_failed_services: 0 KB (no change)
+    apt_maintenance: 0 KB (no change)
+    dns_maintenance: -4 KB (used)
+    browser_cache_phase: 0 KB (no change)
+    detect_missing_pubkeys: 0 KB (no change)
+    post_kernel_finalize: 0 KB (no change)
+    clean_tmp: 0 KB (no change)
+    crash_dump_purge: 0 KB (no change)
+    validate_repos: 0 KB (no change)
+    orphan_purge_phase: 0 KB (no change)
+    snap_cleanup_old: 0 KB (no change)
+    snap_maintenance: 0 KB (no change)
+    kernel_status: 0 KB (no change)
+    kernel_purge_phase: 0 KB (no change)
+    firmware_maintenance: 0 KB (no change)
+    thumbnail_maintenance: 0 KB (no change)
+    fstrim_phase: 0 KB (no change)
+    fix_broken: 0 KB (no change)
+    upgrade_finalize: 0 KB (no change)
+    flatpak_maintenance: 0 KB (no change)
+    drop_caches_phase: 0 KB (no change)
+Crash dump freed: 20MiB
+Flatpak scope applied: auto
+
+2025-11-10 00:59:17 === End summary ===
+2025-11-10 00:59:17 JSON summary written to /tmp/system-maintenance/sysmaint_2025-11-10_005913_72117.json
+2025-11-10 00:59:17 DEBUG: JSON summary generation skipped due to _JSON_WRITTEN guard
+2025-11-10 00:59:17 Logging to /tmp/system-maintenance/sysmaint_2025-11-10_005913_72117.log
+2025-11-10 00:59:17 Log directory: /tmp/system-maintenance
+2025-11-10 00:59:17 Log file name: sysmaint_2025-11-10_005913_72117.log
+2025-11-10 00:59:17 Releasing lock: /var/lock/sysmaint.lock (PID: 72117)

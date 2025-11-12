@@ -1,0 +1,48 @@
+name: sysmaint dry-run matrix
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flags:
+          - ""
+          - "--upgrade"
+          - "--color=never --check-zombies --security-audit"
+          - "--browser-cache-report"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bash syntax check
+        run: bash -n sysmaint
+
+      - name: Shellcheck
+        run: shellcheck -S warning sysmaint || true
+
+      - name: Run sysmaint dry-run ${{ matrix.flags }}
+        env:
+          DRY_RUN: "true"
+          JSON_SUMMARY: "true"
+          CHECK_ZOMBIES: "true"
+          SECURITY_AUDIT_ENABLED: "true"
+        run: |
+          bash sysmaint ${{ matrix.flags }} || true
+          echo '--- JSON summary (if any) ---'
+          JSON_FILE=$(ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -n1 || true)
+          if [ -n "$JSON_FILE" ] && [ -f "$JSON_FILE" ]; then
+            echo "Using $JSON_FILE"
+            jq '.' "$JSON_FILE" || cat "$JSON_FILE"
+          else
+            echo "No JSON found in /tmp/system-maintenance/."
+          fi
+
+      - name: Ensure script parses help
+        run: |
+          bash sysmaint --help | head -n 40

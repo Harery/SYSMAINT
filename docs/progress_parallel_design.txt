@@ -1,0 +1,68 @@
+Title: Parallel Phase Progress Aggregation – Design Outline
+
+Goal
+- Enable future parallel execution of independent maintenance phases with accurate overall progress and ETA aggregation.
+
+Assumptions
+- Current phases are largely sequential; a subset can be executed concurrently when dependencies allow (e.g., cache cleanups vs diagnostics).
+- We already track per-phase timings and maintain EMA estimates across runs.
+
+Constraints
+- Keep TTY-only UI simple; avoid heavy dependencies (no jq, no tmux required).
+- Backward compatible: sequential mode remains default.
+
+Model
+- Represent phases and their dependencies as a DAG.
+  - Each phase Pi: { id, deps[], est_sec_ema, weight=est_sec_ema }
+  - Concurrency groups are the set of nodes with deps satisfied at a given time.
+
+Aggregation Logic (Key Idea)
+- For a concurrent group G running in parallel, group time ≈ max(est_i_remaining) across i ∈ G (not sum).
+- Overall remaining time = sum over future groups of group_time.
+- Overall progress % = elapsed / (elapsed + remaining).
+
+Per-Phase Progress
+- Each running phase i: pct_i = clamp( elapsed_i / est_i_ema, 0..0.99 ) until completion.
+- Completed phases contribute 100% with their actual durations updating EMA.
+
+Pseudo-code
+- Build ready queue from DAG (deps satisfied).
+- While running:
+  - R = set of currently running phases
+  - For each i ∈ R: compute pct_i and remaining_i
+  - group_time = max(remaining_i for i in R) or 0 if R empty
+  - For queued future groups (topologically batch by readiness): estimate group_time as max(est_i for i in group)
+  - remaining_total = group_time + sum(group_time for future groups)
+  - overall_pct = elapsed / (elapsed + remaining_total)
+
+UI Implications
+- Adaptive panel rows:
+  - Overall bar (unchanged); ETA uses aggregated remaining_total
+  - Multiline list of active phases (1-3 lines) with individual pct and short labels
+  - Next group preview: up to two phase IDs (or n phases)
+
+Data Persistence
+- Continue using EMA per phase (timings.json). Optionally persist DAG structure or inferred groups.
+
+Error Modes & Edge Cases
+- If estimates missing for phases in a group: fallback to conservative defaults per phase
+- If a long-tail phase overruns estimate significantly: cap pct at 99% and expand ETA accordingly
+- If concurrency shrinks to 0 (blocked): display waiting on deps state
+
+Integration Plan
+- Phase 1: Tag phases with dependency hints (deps=[]) and concurrency_group identifiers (optional).
+- Phase 2: Implement aggregator to compute remaining_total using current + queued groups.
+- Phase 3: Render multi-active-phase rows in panel; keep sequential logic when concurrency disabled.
+
+Testing Strategy
+- Simulate timelines with mocked phase durations; ensure aggregation matches max-of-group semantics.
+- Verify monotonic progress, stable ETA, and correct handling at phase boundaries.
+
+Non-Goals (initially)
+- True process-level parallel execution inside current bash (will require background jobs and careful logging/locking).
+- Dynamic rebalancing after phase failures (treat as sequential retry for now).
+
+Appendix: Minimal Data Contracts
+- timings.json: { phase: est_seconds }
+- dag.json (optional future): { phases: [{id, deps[]}...] }
+- panel contract: inputs { running_phases[], queue_groups[], elapsed_sec, estimates }
