@@ -1,0 +1,6 @@
+sysmaint usr/bin/
+packaging/systemd/sysmaint.service lib/systemd/system/
+packaging/systemd/sysmaint.timer lib/systemd/system/
+docs/man/sysmaint.1 usr/share/man/man1/
+packaging/completions/sysmaint.bash usr/share/bash-completion/completions/
+packaging/completions/_sysmaint usr/share/zsh/site-functions/

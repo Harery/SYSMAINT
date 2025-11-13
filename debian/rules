@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	echo "Nothing to build"
+
+override_dh_auto_install:
+	install -Dm755 sysmaint debian/sysmaint/usr/bin/sysmaint
+	install -Dm644 packaging/systemd/sysmaint.service debian/sysmaint/lib/systemd/system/sysmaint.service
+	install -Dm644 packaging/systemd/sysmaint.timer debian/sysmaint/lib/systemd/system/sysmaint.timer

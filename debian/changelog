@@ -1,0 +1,16 @@
+sysmaint (2.1.1-1) unstable; urgency=medium
+
+  * Honour --dry-run without requiring root: prevent non-interactive sudo
+    attempts when DRY_RUN is set, regardless of flag order. Updated tests
+    to cover edge cases; schema and smoke tests remain green.
+
+ -- sysmaint Maintainers <maintainers@example.com>  Wed, 12 Nov 2025 21:10:00 +0000
+
+sysmaint (2.1.0-1) unstable; urgency=medium
+
+  * Initial packaging of sysmaint v2.1.0.
+    - Optional final upgrade phase, color control, log truncation.
+    - Zombie and security diagnostics, browser cache report/purge.
+    - Adds systemd service and timer units.
+
+ -- sysmaint Maintainers <maintainers@example.com>  Wed, 12 Nov 2025 12:00:00 +0000

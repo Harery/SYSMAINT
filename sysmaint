@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # sysmaint — Ubuntu/Debian maintenance: APT + Snap update/upgrade + cleanup
-# Version: 2.1.0
+# Version: 2.1.1
 # Usage:
 #   sudo ./sysmaint
 #   AUTO_REBOOT=true sudo ./sysmaint   # optional auto-reboot if required
@@ -18,7 +18,7 @@
 set -Eeuo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-SCRIPT_VERSION="2.1.0"
+SCRIPT_VERSION="2.1.1"
 
 LOG_DIR="${LOG_DIR:-/tmp/system-maintenance}"
 # Ensure the log directory exists early so subsequent logging can proceed.
@@ -120,6 +120,11 @@ CHROME_CACHE_BYTES=0
 BROWSER_CACHE_PURGED_FLAG=false
 
 for _arg in "$@"; do
+  # Honor --dry-run as early as possible so root elevation is never attempted
+  # during preview runs, regardless of flag order.
+  if [[ "$_arg" == "--dry-run" ]]; then
+    DRY_RUN=true
+  fi
   if [[ "$_arg" == "--simulate-upgrade" ]]; then
     SIMULATE_UPGRADE=true
     break
@@ -1042,6 +1047,14 @@ record_phase_end() {
 }
 
 require_root() {
+  # Defensive: if --dry-run is present in args, set DRY_RUN early so we
+  # never attempt elevation during preview runs (regardless of prior parsing).
+  for _ra in "$@"; do
+    if [[ "$_ra" == "--dry-run" ]]; then
+      DRY_RUN=true
+      break
+    fi
+  done
   # Allow non-root when doing a dry-run so users can safely test the script.
   # If not running as root and not in DRY_RUN, attempt to re-exec with sudo
   # so users can simply run the script without typing sudo themselves.
@@ -3371,6 +3384,52 @@ Progress and timing:
 
 Locking and retry:
   --force-unlock               Force removal of stale lock (use with caution)
+
+Behavior overview (condensed)
+  Defaults (no flags)
+    | Area         | Default behavior                                               |
+    |--------------|----------------------------------------------------------------|
+    | APT          | update, upgrade, autoremove, autoclean                         |
+    | Snap/Flatpak | Snap refresh; Flatpak update if installed                      |
+    | Firmware     | fwupd check if installed                                       |
+    | Cleanup      | DNS cache, journal (7d/500M), thumbnails, crash dumps          |
+    | Temp         | Clear /tmp safely by age                                       |
+    | Diagnostics  | Check failed services and zombie processes                     |
+
+  Optional (opt-in)
+    | Feature          | Enable with                                           | Notes                                 |
+    |------------------|-------------------------------------------------------|---------------------------------------|
+    | Final upgrade    | --upgrade                                             | apt full-upgrade near the end         |
+    | Purge old kernels| --purge-kernels                                       | Pair with --keep-kernels=N (default 2)|
+    | Update GRUB      | --update-grub                                         | After kernel purge                    |
+    | Orphan purge     | --orphan-purge                                        | Remove orphaned pkgs                  |
+    | fstrim           | --fstrim                                              | SSD TRIM                              |
+    | Drop caches      | --drop-caches                                         | Clears page cache                     |
+    | Snap cleanup     | --snap-clean-old, --snap-clear-cache                  | Old revisions / cache                 |
+    | Security audit   | --security-audit                                      | shadow/gshadow/sudoers checks         |
+    | Browser caches   | --browser-cache-report, --browser-cache-purge         | Report or purge caches                |
+
+  Argument-controlled (change defaults)
+    | Setting          | Default        | Change with                               |
+    |------------------|----------------|-------------------------------------------|
+    | Auto pilot       | off            | --auto (assume -y, enable auto-reboot)    |
+    | Auto reboot delay| 30s            | --auto-reboot-delay=<sec>                 |
+    | JSON summary     | off            | JSON_SUMMARY=true or --json-summary       |
+    | Dry run          | off            | DRY_RUN=true or --dry-run                 |
+    | Color mode       | auto           | --color=auto|always|never                 |
+    | Log cap          | disabled       | --log-max-size-mb, --log-tail-keep-kb     |
+    | Snap             | on             | --no-snap                                 |
+    | Zombies check    | on             | --no-check-zombies                        |
+    | DNS cache        | on             | --no-clear-dns-cache                      |
+    | Journal vacuum   | on (7d/500M)   | --no-journal-vacuum, --journal-days=<N>   |
+    | Crash dumps      | on             | --no-clear-crash                          |
+    | /tmp cleanup     | on (age-safe)  | --no-clear-tmp, --clear-tmp-age=<days>    |
+    | Flatpak          | on if present  | --no-flatpak or scope flags               |
+    | Firmware         | on if present  | --no-firmware                             |
+    | Kernels kept     | 2              | --keep-kernels=<N> (with --purge-kernels) |
+    | Lock wait        | 3s             | --lock-wait-seconds=<N>                   |
+    | Desktop guard    | on             | --no-desktop-guard                        |
+    | Progress UI      | none           | --progress=none|dots|bar|spinner|adaptive |
 
 Environment (advanced/tuning):
   LOG_DIR=/path                 Log directory (default: /tmp/system-maintenance)

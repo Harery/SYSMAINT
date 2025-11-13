@@ -1,73 +1,64 @@
 (See local /tmp copy for box drawing formatting; plain text version below)
-SYSMAINT V2.0.0 - QUICK REFERENCE GUIDE
-Network Retry & Enhanced Locking
+SYSMAINT V2.1.1 - QUICK REFERENCE GUIDE
 
-NEW FEATURES:
-- Network retry logic (exponential backoff)
-- Enhanced PID-based locking
-- Force unlock (--force-unlock)
+HEADLINES (what it does)
+| Area         | Behavior                                                             |
+|--------------|----------------------------------------------------------------------|
+| APT          | update, upgrade, autoremove, autoclean                               |
+| Snap/Flatpak | Snap refresh; Flatpak update if installed                            |
+| Firmware     | fwupd check if installed                                             |
+| Cleanup      | DNS cache, journal (7d/500M), thumbnails, crash dumps, /tmp by age   |
+| Diagnostics  | Failed services and zombie process checks                            |
 
-COMMON COMMANDS:
-  sudo ./sysmaint
-  sudo ./sysmaint --dry-run
-  ./sysmaint --version
-  ./sysmaint --help
-  sudo ./sysmaint --force-unlock
-  sudo ./sysmaint --json-summary
-  sudo ./sysmaint --no-json-summary     # override JSON_SUMMARY=true
-  sudo ./sysmaint --progress=adaptive   # live ETA panel
-  sudo ./sysmaint --reset-progress-history
+COMMON COMMANDS
+  sudo ./sysmaint                     # normal run (safe defaults)
+  DRY_RUN=true JSON_SUMMARY=true ./sysmaint --dry-run --json-summary
+  sudo ./sysmaint --auto --auto-reboot-delay 45 --json-summary
+  sudo ./sysmaint --upgrade           # optional final full-upgrade
+  ./sysmaint --help | less
 
-CONFIG (env vars):
-  NETWORK_RETRY_COUNT=3 (max attempts)
-  NETWORK_RETRY_BASE_DELAY=2 (seconds)
-  NETWORK_RETRY_MAX_DELAY=30 (seconds cap)
-  LOCK_WAIT_SECONDS=3 (seconds to wait for lock)
-  PROGRESS_MODE=adaptive (none|dots|countdown|bar|spinner|adaptive)
-  PROGRESS_WIDTH=30 (adaptive overall bar)
-  PROGRESS_PHASE_WIDTH=20 (adaptive phase bar)
-  STATE_DIR=/var/lib/sysmaint (timing persistence)
+KEY FLAGS
+- Safety/flow: --dry-run, --json-summary, --auto, --auto-reboot-delay=N, --color=auto|always|never
+- Logs: --log-max-size-mb=MB, --log-tail-keep-kb=KB
+- Optional phases: --upgrade, --purge-kernels, --keep-kernels=N, --update-grub,
+                  --orphan-purge, --fstrim, --drop-caches,
+                  --browser-cache-report, --browser-cache-purge,
+                  --security-audit
+- Toggles: --no-snap, --no-flatpak, --no-firmware, --no-check-zombies, --no-clear-dns-cache,
+           --no-journal-vacuum, --no-clear-crash, --no-clear-tmp
+- Misc: --journal-days=N, --lock-wait-seconds=N, --progress=adaptive|dots|...,
+        --flatpak-user-only | --flatpak-system-only
 
-JSON SUMMARY SCHEMA (v1.0):
-  schema_version: "1.0"
-  script_version: "2.0.0"
-  log_file_sha256: checksum of log at summary time
-  run_id, timestamp, repos, kernel, phase_timings, disk_usage
-  phase_disk_deltas_kb, phase_estimates_ema (EMA seconds per phase)
-  flatpak_scope_applied, thumbnail_freed_bytes
-  apt_signature_status, reboot_required, log_file
+DEFAULTS (env/implicit)
+  AUTO_REBOOT=true
+  JSON_SUMMARY=false
+  DRY_RUN=false
+  COLOR_MODE=auto
+  CHECK_ZOMBIES=true
+  CLEAR_DNS_CACHE=true
+  CLEAR_JOURNAL=true (7d/500M)  # change days via --journal-days=N
+  CLEAR_THUMBNAILS=true
+  CLEAR_CRASH_DUMPS=true
+  CLEAR_TMP=true (safe by age)
+  LOG_MAX_SIZE_MB=0 (disabled)
+  KEEP_KERNELS=2 (only used with --purge-kernels)
 
-SCENARIOS:
-  Flaky network:
-    NETWORK_RETRY_COUNT=5 NETWORK_RETRY_BASE_DELAY=5 NETWORK_RETRY_MAX_DELAY=60 sudo ./sysmaint --json-summary
-  Fast CI:
-    NETWORK_RETRY_COUNT=1 LOCK_WAIT_SECONDS=10 sudo ./sysmaint
-  Debug lock:
-    cat /var/lock/sysmaint.lock.pid
-    ps -p $(cat /var/lock/sysmaint.lock.pid) -f
-    sudo ./sysmaint --force-unlock
+JSON HIGHLIGHTS (v1.0)
+  script_version, run_id, log_file, color_mode
+  repos/kernel/system info, phase_timings, disk_usage, disk_deltas
+  reboot_required, auto mode, progress metadata
+  final_upgrade_enabled, upgraded_count, removed_count
+  log_truncated, log_original_size_kb, log_final_size_kb
+  zombie_count, zombie_processes (limited), security audit fields
+  browser cache sizes and purge flag
 
-TROUBLESHOOTING:
-  Lock timeout (75): increase LOCK_WAIT_SECONDS or --force-unlock
-  Network failures: increase NETWORK_RETRY_COUNT / BASE_DELAY
-  Stale lock: use --force-unlock (only if PID not active)
+TROUBLESHOOTING
+  Exit 75 (lock): increase --lock-wait-seconds or use --force-unlock if stale
+  Network hiccups: tune NETWORK_RETRY_* env vars
+  No JSON file: set JSON_SUMMARY=true or pass --json-summary
 
-LOG PATTERNS:
-  "Lock acquired" / "Releasing lock" / "Attempting" / "WARNING" / "ERROR failed after"
+PATHS
   Logs: /tmp/system-maintenance/sysmaint_*.log
+  JSON: /tmp/system-maintenance/sysmaint_*.json
 
-RETRY TIMING DEFAULT (base=2): 0s,2s,4s,8s,16s,30s(capped)
-AGGRESSIVE (base=5): 0s,5s,10s,20s,40s,60s(capped)
-
-SAFETY:
-  - Force unlock refuses active PID
-  - PID file cleaned on exit
-  - Dry-run safe (skips real commands)
-
-DEPLOYMENT CHECKLIST:
-  [ ] Dry-run test
-  [ ] Adjust retry vars for environment
-  [ ] Configure monitoring for retries & lock contention
-  [ ] Document runbook
-
-VERSION: 2.0.0  (Date: 2025-11-09)
+VERSION: 2.1.1  (Date: 2025-11-12)

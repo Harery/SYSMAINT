@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1 — 2025-11-12
+
+Fixed
+- Non-root --dry-run no longer attempts elevation; DRY_RUN is honored regardless of flag order.
+- Edge-case tests updated; schema and smoke tests remain green.
+
 ## 2.1.0 — 2025-11-10
 
 Added
@@ -14,6 +20,7 @@ Added
 Improved
 - CLI parsing (getopt + fallback) gained `--upgrade`, new flags.
 - Usage documentation now includes new flags and environment variables.
+ - Documentation expanded: README "Behavior overview" (defaults/fixed/optional/args) and updated docs/quick_reference.txt to v2.1.0.
 
 Fixed
 - Stale lock handling and sequencing had stability improvements in prior cycle (2.0.x); retained.

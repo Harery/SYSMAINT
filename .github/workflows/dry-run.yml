@@ -43,6 +43,17 @@ jobs:
             echo "No JSON found in /tmp/system-maintenance/."
           fi
 
+      - name: Validate JSON against schema
+        run: |
+          pipx install jsonschema || pip install --user jsonschema || python3 -m pip install --user jsonschema || true
+          chmod +x tests/validate_json.py tests/validate_json.sh || true
+          bash tests/validate_json.sh
+
       - name: Ensure script parses help
         run: |
           bash sysmaint --help | head -n 40
+
+      - name: Run edge-case argument tests
+        run: |
+          chmod +x tests/args_edge.sh
+          bash tests/args_edge.sh

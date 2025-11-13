@@ -1,0 +1,63 @@
+.TH sysmaint 1 "November 2025" "sysmaint 2.1.1" "User Commands"
+.SH NAME
+sysmaint \- safe system maintenance for Ubuntu/Debian with JSON telemetry
+.SH SYNOPSIS
+.B sysmaint
+.RI [ options ]
+.SH DESCRIPTION
+.B sysmaint
+is a conservative maintenance orchestrator for Ubuntu/Debian systems.
+It performs safe APT updates and cleanup, supports Snap/Flatpak/fwupd,
+emits a rich JSON summary, and offers optional phases such as a final
+full-upgrade or kernel purge.
+
+By default it updates packages, cleans caches (journal, thumbnails, crash),
+clears /tmp by age, and performs diagnostics (failed services, zombies).
+
+.SH OPTIONS (HIGHLIGHTS)
+.TP
+.B --dry-run
+Preview actions without changes (recommended for first run).
+.TP
+.B --json-summary
+Write a JSON summary to $LOG_DIR/sysmaint_<RUN_ID>.json.
+.TP
+.B --upgrade
+Enable the final apt full-upgrade phase near the end (opt-in).
+.TP
+.B --purge-kernels
+Purge old kernels (pair with --keep-kernels=N). Consider --update-grub.
+.TP
+.B --security-audit
+Run minimal permissions audit (shadow/gshadow/sudoers).
+.TP
+.B --browser-cache-report | --browser-cache-purge
+Report or purge desktop browser caches.
+.TP
+.B --color=auto|always|never
+Control ANSI colors on terminal output.
+.TP
+.B --auto
+Autopilot: assume yes, allow auto reboot (see --auto-reboot-delay).
+
+For the full list, run: sysmaint --help
+
+.SH FILES
+.TP
+.B /usr/local/sbin/sysmaint
+Installed script path (typical).
+.TP
+.B /tmp/system-maintenance/
+Default LOG_DIR containing logs and JSON.
+
+.SH EXIT STATUS
+0 success; 1 general error; 10 repo validation failures; 20 missing APT keys;
+30 failed services; 75 lock timeout; 100 reboot required.
+
+.SH SEE ALSO
+.BR apt (8),
+.BR snap (8),
+.BR systemd (1)
+
+.SH AUTHOR
+sysmaint maintainers <maintainers@example.com>

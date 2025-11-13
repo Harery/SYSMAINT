@@ -1,0 +1,19 @@
+Source: sysmaint
+Section: admin
+Priority: optional
+Maintainer: sysmaint Maintainers <maintainers@example.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://example.com/sysmaint
+
+Package: sysmaint
+Architecture: all
+Depends: bash (>= 4.2), apt, systemd, ${misc:Depends}
+Recommends: fwupd, snapd
+Description: Safe system maintenance script with JSON telemetry
+ sysmaint is a conservative Ubuntu/Debian maintenance orchestrator that
+ updates packages, trims disk usage, and emits a rich JSON summary for
+ unattended operation. Features include optional final upgrade phase,
+ colorized logs, log truncation safeguards, zombie process detection,
+ minimal security audit, and browser cache reporting.
