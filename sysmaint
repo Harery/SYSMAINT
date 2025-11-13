@@ -3645,10 +3645,6 @@ if getopt --test >/dev/null 2>&1; then
       FLATPAK_SCOPE="user"
       shift
       ;;
-    --flatpak-user-only)
-      FLATPAK_SCOPE="user"
-      shift
-      ;;
     --flatpak-system-only)
       FLATPAK_SCOPE="system"
       shift
@@ -3659,10 +3655,6 @@ if getopt --test >/dev/null 2>&1; then
       ;;
     --parallel)
       PARALLEL_EXEC=true
-      shift
-      ;;
-    --no-firmware)
-      NO_FIRMWARE=true
       shift
       ;;
     --no-firmware)
@@ -3713,6 +3705,10 @@ if getopt --test >/dev/null 2>&1; then
       KEEP_KERNELS="${1#--keep-kernels=}"
       shift
       ;;
+    --keep-kernels)
+      KEEP_KERNELS="$2"
+      shift 2
+      ;;
     --orphan-purge)
       ORPHAN_PURGE_ENABLED=true
       shift
@@ -3720,18 +3716,6 @@ if getopt --test >/dev/null 2>&1; then
     --no-orphan-purge)
       ORPHAN_PURGE_ENABLED=false
       shift
-      ;;
-    --purge-kernels)
-      PURGE_OLD_KERNELS=true
-      shift
-      ;;
-    --no-purge-kernels)
-      PURGE_OLD_KERNELS=false
-      shift
-      ;;
-    --keep-kernels)
-      KEEP_KERNELS="$2"
-      shift 2
       ;;
     --upgrade)
       UPGRADE_PHASE_ENABLED=true
@@ -3739,14 +3723,6 @@ if getopt --test >/dev/null 2>&1; then
       ;;
     --update-grub)
       UPDATE_GRUB_ENABLED=true
-      shift
-      ;;
-    --orphan-purge)
-      ORPHAN_PURGE_ENABLED=true
-      shift
-      ;;
-    --no-orphan-purge)
-      ORPHAN_PURGE_ENABLED=false
       shift
       ;;
     --json-summary)
@@ -3757,20 +3733,8 @@ if getopt --test >/dev/null 2>&1; then
       JSON_SUMMARY=false
       shift
       ;;
-    --update-grub)
-      UPDATE_GRUB_ENABLED=true
-      shift
-      ;;
-    --update-grub)
-      UPDATE_GRUB_ENABLED=true
-      shift
-      ;;
     --simulate-upgrade)
       SIMULATE_UPGRADE=true
-      shift
-      ;;
-    --upgrade)
-      UPGRADE_PHASE_ENABLED=true
       shift
       ;;
     --auto-reboot)

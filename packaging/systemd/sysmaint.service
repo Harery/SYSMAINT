@@ -13,9 +13,9 @@ Group=root
 # Conservative defaults: dry-run is off; JSON summary on
 Environment=JSON_SUMMARY=true
 Environment=LOG_MAX_SIZE_MB=10
-ExecStart=/usr/local/sbin/sysmaint --auto --check-zombies --security-audit
+ExecStart=/usr/bin/sysmaint --auto --check-zombies --security-audit
 # For desktops, consider enabling cache report:
-# ExecStart=/usr/local/sbin/sysmaint --auto --check-zombies --security-audit --browser-cache-report
+# ExecStart=/usr/bin/sysmaint --auto --check-zombies --security-audit --browser-cache-report
 Nice=10
 IOSchedulingClass=best-effort
 IOSchedulingPriority=6
