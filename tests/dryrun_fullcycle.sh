@@ -29,6 +29,8 @@ validate_json() {
   json=$(LATEST_JSON)
   if [[ -n "$json" && -f "$json" ]]; then
     echo "[validate] Using $json"
+    # Give the writer a moment to close the file to avoid partial reads
+    sleep 0.2
     # Validate directly against schema without triggering another run
     if command -v python3 >/dev/null 2>&1; then
       if ! python3 - "$json" <<'PY'
