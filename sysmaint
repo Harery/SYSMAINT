@@ -4507,7 +4507,6 @@ stop_status_panel
 log "Logging to $LOG_FILE"
 log "Log directory: $LOG_DIR"
 log "Log file name: $(basename "$LOG_FILE")"
-  truncate_log_if_needed || true
 
 # Determine exit code based on findings
 EXIT_CODE=0

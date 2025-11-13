@@ -13,6 +13,8 @@ debian/sysmaint/
 
 # Test logs
 tests/*.log
+tests/*.pyc
+tests/__pycache__/
 
 # Temp files
 *.tmp
