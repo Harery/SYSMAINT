@@ -47,8 +47,9 @@ bash tests/dryrun_fullcycle.sh
 **What it does:**
 - Each case runs `sysmaint` with `DRY_RUN=true` and `JSON_SUMMARY=true`
 - Validates the resulting JSON against the schema after each run
+- Performs lightweight JSON assertions for key toggles (e.g., `final_upgrade_enabled`, `color_mode`, `security_audit_enabled`, `browser_cache_report/purge`, `kernel_purge_enabled`, `keep_kernels`, `auto_mode`, `auto_reboot_delay_seconds`, `journal_vacuum_time`, `desktop_guard_enabled`, `zombie_check_enabled`)
 - Non-destructive: all runs are dry-run only
-- Logs results inline (`[result] exit=<code>`, `JSON schema validation: OK`)
+- Logs results inline (`[result] exit=<code>`, `JSON schema validation: OK`, `[assert] ... -> OK/FAIL`)
 
 **Expected duration:** ~3-5 minutes (40+ test cases).
 

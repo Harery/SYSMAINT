@@ -197,7 +197,7 @@ This suite tests:
 - Broad combined: most optional features together
 - Negative sweep: disabling most defaults
 
-Each case validates the resulting JSON against the schema. Runs are non-destructive (DRY_RUN=true throughout).
+Each case validates the resulting JSON against the schema, and selected cases assert key JSON fields (e.g., `final_upgrade_enabled`, `color_mode`, `security_audit_enabled`, `browser_cache_*`, `kernel_purge_enabled`, `keep_kernels`, `auto_mode`, `auto_reboot_delay_seconds`, `journal_vacuum_time`, `desktop_guard_enabled`, `zombie_check_enabled`). Runs are non-destructive (DRY_RUN=true throughout).
 
 ### Edge-case argument tests
 

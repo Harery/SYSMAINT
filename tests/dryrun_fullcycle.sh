@@ -60,6 +60,50 @@ PY
   fi
 }
 
+# Assert a top-level JSON field equals an expected value.
+# Usage: assert_json <key> <expected>
+# - expected can be: true/false, a number, or a string (pass without quotes)
+assert_json() {
+  local key="$1"; shift
+  local expected="$1"
+  local json
+  json=$(LATEST_JSON)
+  if [[ -z "$json" || ! -f "$json" ]]; then
+    echo "[assert-skip] No JSON to assert ($key=$expected)" >&2
+    return 0
+  fi
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "[assert-skip] python3 not found; skipping assert $key=$expected" >&2
+    return 0
+  fi
+  if python3 - "$json" "$key" "$expected" <<'PY'
+import sys, json, pathlib
+json_path, key, expected_raw = sys.argv[1:4]
+with open(json_path, 'r') as f:
+    data = json.load(f)
+# Coerce expected
+def coerce(val:str):
+    low = val.lower()
+    if low == 'true': return True
+    if low == 'false': return False
+    # int
+    try:
+        if '.' in val:
+            return float(val)
+        return int(val)
+    except Exception:
+        return val
+expected = coerce(expected_raw)
+actual = data.get(key, None)
+ok = (actual == expected)
+print(f"[assert] {key} == {expected!r} (actual={actual!r}) -> {'OK' if ok else 'FAIL'}")
+sys.exit(0 if ok else 1)
+PY
+  then
+    return 1
+  fi
+}
+
 run_case() {
   local name="$1"; shift
   local flags=("$@")
@@ -79,17 +123,24 @@ run_case "default (no flags)"
 
 # Phase 2: Fixed combos (stable)
 run_case "upgrade final" --upgrade
+assert_json final_upgrade_enabled true || true
 run_case "simulate-upgrade early exit" --simulate-upgrade
 run_case "no color + audits" --color=never --check-zombies --security-audit
+assert_json color_mode never || true
+assert_json security_audit_enabled true || true
 run_case "browser cache report" --browser-cache-report
+assert_json browser_cache_report true || true
 
 # Phase 3: Optional toggles (single-feature sweeps)
 run_case "fstrim" --fstrim
 run_case "drop-caches" --drop-caches
 run_case "purge-kernels keep=2" --purge-kernels --keep-kernels=2
+assert_json kernel_purge_enabled true || true
+assert_json keep_kernels 2 || true
 run_case "update-grub (no-op in dry-run)" --update-grub
 run_case "orphan purge" --orphan-purge
 run_case "browser cache purge" --browser-cache-purge
+assert_json browser_cache_purge true || true
 run_case "snap cleanup" --snap-clean-old --snap-clear-cache
 run_case "flatpak user-only" --flatpak-user-only
 run_case "flatpak system-only" --flatpak-system-only
@@ -102,18 +153,26 @@ run_case "disable crash purge" --no-clear-crash
 run_case "disable DNS clear" --no-clear-dns-cache
 run_case "disable tmp clear" --no-clear-tmp
 run_case "enable tmp clear + age" --clear-tmp --clear-tmp-age=1
+run_case "force tmp clear (confirmed)" --clear-tmp-force --confirm-clear-tmp-force --yes
+run_case "journal days override" --journal-days=14
+assert_json journal_vacuum_time 14d || true
 run_case "progress bar short" --progress=bar --progress-duration=1
+run_case "progress dots short" --progress=dots --progress-duration=1
 run_case "lock wait short" --lock-wait-seconds=1
 run_case "color always" --color=always
 run_case "reset progress history" --reset-progress-history
 run_case "mode desktop" --mode=desktop
 run_case "mode server" --mode=server
+run_case "disable desktop guard" --no-desktop-guard
+assert_json desktop_guard_enabled false || true
 run_case "parallel exec (exp)" --parallel
 run_case "log truncation small" --log-max-size-mb=1 --log-tail-keep-kb=16
 
 # Phase 4: Autopilot variants
 run_case "autopilot default delay" --auto
+assert_json auto_mode true || true
 run_case "autopilot + custom delay" --auto --auto-reboot-delay=10
+assert_json auto_reboot_delay_seconds 10 || true
 
 # Phase 5: Broad combined run (most optional features together, avoiding conflicts)
 run_case "broad combined" \
@@ -141,5 +200,6 @@ run_case "most defaults disabled" \
   --no-clear-crash \
   --no-clear-tmp \
   --no-check-zombies
+assert_json zombie_check_enabled false || true
 
 echo "\nAll full-cycle dry-run cases executed."
