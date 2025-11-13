@@ -168,3 +168,53 @@ Optional: Create `/etc/sysmaint/sysmaint.env` to override environment (e.g. `LOG
 		```
 
 - Validate systemd hardening directives if you customize the service: `ProtectSystem=full`, `NoNewPrivileges=true`, and `PrivateTmp=true` are enabled by default in the provided unit.
+
+## Testing
+
+### Quick smoke test
+
+Run a fast baseline dry-run:
+
+```bash
+bash tests/smoke.sh
+```
+
+This runs the script with several argument combinations and validates JSON output.
+
+### Full-cycle test suite
+
+Run the comprehensive dry-run suite covering all flags progressively (default → fixed combos → optional → broad combined):
+
+```bash
+bash tests/dryrun_fullcycle.sh
+```
+
+This suite tests:
+- Default run (no flags)
+- Fixed combos: `--upgrade`, `--simulate-upgrade`, color/audit/zombies, browser cache report
+- Optional toggles: fstrim, drop-caches, kernel purge, orphan purge, snap/flatpak options, disable flags, progress modes, lock settings, log truncation, parallel exec
+- Autopilot variants: `--auto`, custom reboot delays
+- Broad combined: most optional features together
+- Negative sweep: disabling most defaults
+
+Each case validates the resulting JSON against the schema. Runs are non-destructive (DRY_RUN=true throughout).
+
+### Edge-case argument tests
+
+Verify argument parsing and non-root + dry-run combinations:
+
+```bash
+bash tests/args_edge.sh
+```
+
+### JSON schema validation
+
+Validate a specific JSON summary against the schema:
+
+```bash
+bash tests/validate_json.sh
+# Or manually:
+python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json /tmp/system-maintenance/sysmaint_<RUN_ID>.json
+```
+
+All tests run automatically in CI via `.github/workflows/dry-run.yml`.
