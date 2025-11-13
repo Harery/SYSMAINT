@@ -57,3 +57,29 @@ jobs:
         run: |
           chmod +x tests/args_edge.sh
           bash tests/args_edge.sh
+
+  full-cycle:
+    runs-on: ubuntu-latest
+    needs: dry-run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare validators
+        run: |
+          pipx install jsonschema || pip install --user jsonschema || python3 -m pip install --user jsonschema || true
+          chmod +x tests/validate_json.py tests/validate_json.sh || true
+
+      - name: Ensure executable bits
+        run: |
+          chmod +x sysmaint tests/dryrun_fullcycle.sh || true
+
+      - name: Bash syntax check
+        run: bash -n sysmaint
+
+      - name: Run full-cycle dry-run suite
+        env:
+          DRY_RUN: "true"
+          JSON_SUMMARY: "true"
+        run: |
+          bash tests/dryrun_fullcycle.sh

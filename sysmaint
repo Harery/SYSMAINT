@@ -3079,7 +3079,8 @@ print_summary() {
     fi
     
     # Per-phase disk deltas
-    if (( ${#PHASE_DISK_DELTAS[@]} > 0 )); then
+    set +u
+    if declare -p PHASE_DISK_DELTAS >/dev/null 2>&1 && (( ${#PHASE_DISK_DELTAS[@]} > 0 )); then
       printf '  Per-phase disk deltas (freed=positive, used=negative):\n' | tee -a "$LOG_FILE"
       for phase in "${!PHASE_DISK_DELTAS[@]}"; do
         local delta=${PHASE_DISK_DELTAS[$phase]}
@@ -3092,6 +3093,7 @@ print_summary() {
         fi
       done
     fi
+    set -u
   fi
   
   # Additional metrics summary
@@ -3197,17 +3199,20 @@ print_summary() {
       printf '  "disk_usage": {"before_kb": %s, "after_kb": %s, "saved_kb": %s},\n' "${DISK_BEFORE:-0}" "${DISK_AFTER:-0}" "${DISK_SAVED_KB}"
       # Per-phase disk deltas
       printf '  "phase_disk_deltas_kb": {\n'
-      local delta_keys=()
-      for key in "${!PHASE_DISK_DELTAS[@]}"; do
-        delta_keys+=("$key")
-      done
-      local didx=0 dtotal=${#delta_keys[@]}
-      for key in "${delta_keys[@]}"; do
-        ((didx++))
-        local dsep=","
-        [[ $didx -eq $dtotal ]] && dsep=""
-        printf '    "%s": %s%s\n' "$key" "${PHASE_DISK_DELTAS[$key]}" "$dsep"
-      done
+      set +u
+      if declare -p PHASE_DISK_DELTAS >/dev/null 2>&1 && (( ${#PHASE_DISK_DELTAS[@]} > 0 )); then
+        local delta_keys=()
+        for key in "${!PHASE_DISK_DELTAS[@]}"; do
+          delta_keys+=("$key")
+        done
+        local didx=0 dtotal=${#delta_keys[@]}
+        for key in "${delta_keys[@]}"; do
+          ((didx++))
+          local dsep=","; [[ $didx -eq $dtotal ]] && dsep=""
+          printf '    "%s": %s%s\n' "$key" "${PHASE_DISK_DELTAS[$key]}" "$dsep"
+        done
+      fi
+      set -u
       printf '  },\n'
       # EMA phase estimates (seconds)
       printf '  "phase_estimates_ema": {\n'
