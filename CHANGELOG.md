@@ -2,9 +2,14 @@
 
 ## 2.1.1 — 2025-11-12
 
+Added
+- Comprehensive full-cycle test suite (40+ cases) covering all flags progressively
+- tests/README.md with complete test documentation
+- CI integration: full-cycle job in dry-run workflow
+- Testing section in main README
+
 Fixed
-- Non-root --dry-run no longer attempts elevation; DRY_RUN is honored regardless of flag order.
-- Edge-case tests updated; schema and smoke tests remain green.
+- PHASE_DISK_DELTAS unbound variable error in parallel mode (set -u guards)
 
 ## 2.1.0 — 2025-11-10
 

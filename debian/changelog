@@ -1,5 +1,8 @@
 sysmaint (2.1.1-1) unstable; urgency=medium
 
+  * Added comprehensive full-cycle test suite (40+ cases).
+  * Added tests/README.md and CI integration.
+  * Fixed PHASE_DISK_DELTAS unbound variable in parallel mode.
   * Honour --dry-run without requiring root: prevent non-interactive sudo
     attempts when DRY_RUN is set, regardless of flag order. Updated tests
     to cover edge cases; schema and smoke tests remain green.

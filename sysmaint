@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # sysmaint — Ubuntu/Debian maintenance: APT + Snap update/upgrade + cleanup
 # Version: 2.1.1
+# License: MIT (see LICENSE file in repository root)
+# Copyright (c) 2025 sysmaint contributors
+#
 # Usage:
 #   sudo ./sysmaint
 #   AUTO_REBOOT=true sudo ./sysmaint   # optional auto-reboot if required
