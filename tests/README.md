@@ -1,5 +1,7 @@
 # Test Suite
 
+> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+
 Comprehensive test coverage for **sysmaint** (v2.1.1).
 
 ## Test scripts

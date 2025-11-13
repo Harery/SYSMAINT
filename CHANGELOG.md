@@ -1,5 +1,7 @@
 # Changelog
 
+> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+
 ## 2.1.1 — 2025-11-12
 
 Added

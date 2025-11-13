@@ -1,7 +1,7 @@
 Source: sysmaint
 Section: admin
 Priority: optional
-Maintainer: sysmaint Maintainers <maintainers@example.com>
+Maintainer: Mohamed Elharery <Mohamed@Harery.com>
 Build-Depends: debhelper-compat (= 13)
 Standards-Version: 4.6.2
 Rules-Requires-Root: no

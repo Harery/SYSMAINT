@@ -1,5 +1,7 @@
 # sysmaint Roadmap & Licensing Notes
 
+> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+
 ## Project License
 **sysmaint is released under the MIT License** (see LICENSE file in repository root).
 

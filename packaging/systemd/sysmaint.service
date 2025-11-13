@@ -1,3 +1,4 @@
+# Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 [Unit]
 Description=System Maintenance (sysmaint)
 Documentation=https://github.com/your-org/sysmaint

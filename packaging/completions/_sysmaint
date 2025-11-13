@@ -1,4 +1,6 @@
 #compdef sysmaint
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# (c) 2025 Mohamed Elharery
 _arguments \
   '--dry-run[Preview actions without changes]' \
   '--json-summary[Emit JSON summary]' \

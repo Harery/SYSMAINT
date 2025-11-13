@@ -1,4 +1,5 @@
 (See local /tmp copy for box drawing formatting; plain text version below)
+Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 SYSMAINT V2.1.1 - QUICK REFERENCE GUIDE
 
 HEADLINES (what it does)

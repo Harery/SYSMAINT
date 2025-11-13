@@ -9,6 +9,8 @@
 - Clean-room implementation status confirmed (no external code copied)
 - Licensing due diligence resolved in ROADMAP
 
+> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+
 ### ✅ Documentation Complete
 All user-facing and developer documentation up-to-date:
 
@@ -97,8 +99,7 @@ All user-facing and developer documentation up-to-date:
 ### License Details
 - **Type:** MIT License
 - **File:** LICENSE (in repository root)
-- **Copyright:** © 2025 sysmaint contributors
-
+- **Copyright:** © 2025 Mohamed Elharery
 ### Permissions
 ✅ Commercial use  
 ✅ Modification  
@@ -180,7 +181,7 @@ All user-facing and developer documentation up-to-date:
 - **Repository:** [To be configured]
 - **Issues:** [To be configured]
 - **Discussions:** [To be configured]
-- **Maintainers:** sysmaint contributors
+- **Maintainer:** Mohamed Elharery <Mohamed@Harery.com>
 
 ### How to Contribute
 See docs/ROADMAP.md "Contributing & Development" section.

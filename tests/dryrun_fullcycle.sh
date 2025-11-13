@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Full-cycle dry-run test suite for sysmaint
 # Runs progressively: default, fixed combos, optional toggles, and a broad combined run.
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# (c) 2025 Mohamed Elharery
 set -Eeuo pipefail
 
 # Always dry-run with JSON summary

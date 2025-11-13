@@ -1,3 +1,4 @@
+Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 Title: Parallel Phase Progress Aggregation – Design Outline
 
 Goal

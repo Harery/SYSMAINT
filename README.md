@@ -1,5 +1,7 @@
 # sysmaint (v2.1.1)
 
+> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+
 A safe, scriptable Ubuntu/Debian maintenance runner: APT + Snap updates, cleanup phases, rich JSON telemetry, and unattended/autopilot mode.
 
 ## Quick start

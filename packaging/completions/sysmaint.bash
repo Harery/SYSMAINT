@@ -1,5 +1,7 @@
 # bash completion for sysmaint
 # Copy to /usr/share/bash-completion/completions/sysmaint
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# (c) 2025 Mohamed Elharery
 _sysmaint()
 {
   local cur prev opts

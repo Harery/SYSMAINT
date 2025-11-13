@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# (c) 2025 Mohamed Elharery
 import json, sys, os
 try:
     import jsonschema

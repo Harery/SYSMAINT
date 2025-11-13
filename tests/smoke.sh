@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# (c) 2025 Mohamed Elharery
 set -euo pipefail
 cd "$(dirname "$0")/.."  # repo root (sysmaint script lives here)
 
