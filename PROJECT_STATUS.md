@@ -1,5 +1,7 @@
 # SYSMAINT PROJECT STATUS — 2025-11-12
 
+> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+
 ## 🎉 COMPLETED (v2.1.1)
 
 ### ✅ License Protection
