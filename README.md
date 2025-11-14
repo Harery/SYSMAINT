@@ -4,6 +4,19 @@
 
 A safe, scriptable Ubuntu/Debian maintenance runner: APT + Snap updates, cleanup phases, rich JSON telemetry, and unattended/autopilot mode.
 
+**License**: MIT | **Status**: Production Ready | **Tests**: 290+ scenarios (100% pass)
+
+## Documentation
+
+- **Complete Documentation**: See [DOCUMENTATION.md](DOCUMENTATION.md) for comprehensive guide
+  - Project overview and status
+  - Development roadmap (Stage 1 ✅ Complete, Stage 2 🚧 Planned)
+  - Complete changelog
+  - Testing & validation results (290+ scenarios)
+  - Audit & governance report (Grade A+)
+- **Quick Reference**: See below for common commands and flags
+- **Man Page**: `man sysmaint` (after installation)
+
 ## Quick start
 
 Preview (no changes, JSON summary):
@@ -220,3 +233,81 @@ python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json /tmp/sys
 ```
 
 All tests run automatically in CI via `.github/workflows/dry-run.yml`.
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# Normal run (safe defaults)
+sudo ./sysmaint
+
+# Dry-run with JSON summary
+DRY_RUN=true JSON_SUMMARY=true ./sysmaint --dry-run --json-summary
+
+# Autopilot with auto-reboot
+sudo ./sysmaint --auto --auto-reboot-delay 45 --json-summary
+
+# Optional final upgrade
+sudo ./sysmaint --upgrade
+
+# Help
+./sysmaint --help | less
+```
+
+### Key Flags Summary
+
+**Safety/Flow**:
+- `--dry-run`, `--json-summary`, `--auto`, `--auto-reboot-delay=N`
+- `--color=auto|always|never`
+
+**Optional Phases**:
+- `--upgrade`, `--purge-kernels`, `--keep-kernels=N`, `--update-grub`
+- `--orphan-purge`, `--fstrim`, `--drop-caches`
+- `--browser-cache-report`, `--browser-cache-purge`
+- `--security-audit`, `--check-zombies`
+
+**Disable Defaults**:
+- `--no-snap`, `--no-flatpak`, `--no-firmware`
+- `--no-check-zombies`, `--no-clear-dns-cache`
+- `--no-journal-vacuum`, `--no-clear-crash`, `--no-clear-tmp`
+
+**Configuration**:
+- `--journal-days=N`, `--lock-wait-seconds=N`
+- `--progress=adaptive|dots|spinner|bar|quiet`
+- `--log-max-size-mb=MB`, `--log-tail-keep-kb=KB`
+
+### Default Behaviors
+
+| Feature | Default | Override |
+|---------|---------|----------|
+| APT updates | ✅ Enabled | N/A (always) |
+| Snap refresh | ✅ Enabled | `--no-snap` |
+| Journal vacuum | ✅ 7 days | `--journal-days=N` or `--no-journal-vacuum` |
+| /tmp cleanup | ✅ By age | `--no-clear-tmp` |
+| Zombie check | ✅ Enabled | `--no-check-zombies` |
+| Final upgrade | ❌ Disabled | `--upgrade` |
+| Kernel purge | ❌ Disabled | `--purge-kernels` |
+| Browser cache | ❌ Disabled | `--browser-cache-report/purge` |
+
+### File Locations
+
+```
+Logs:   /tmp/system-maintenance/sysmaint_*.log
+JSON:   /tmp/system-maintenance/sysmaint_*.json
+Schema: docs/schema/sysmaint-summary.schema.json
+```
+
+### Troubleshooting
+
+- **Exit 75 (lock)**: Increase `--lock-wait-seconds` or use `--force-unlock` if stale
+- **Network issues**: Tune `NETWORK_RETRY_*` environment variables
+- **No JSON**: Set `JSON_SUMMARY=true` or pass `--json-summary`
+- **Permissions**: Run with `sudo` for actual maintenance (dry-run doesn't require root)
+
+## Version & Contact
+
+**Version**: 2.1.1 (November 14, 2025)  
+**Author**: Mohamed Elharery <Mohamed@Harery.com>  
+**License**: MIT License (see LICENSE file)  
+**Repository**: [GitHub](https://github.com/mohamedharery/sysmaint) _(to be configured)_
