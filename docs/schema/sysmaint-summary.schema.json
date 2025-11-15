@@ -52,6 +52,7 @@
     "firefox_cache_bytes": { "type": ["integer", "string"] },
     "chromium_cache_bytes": { "type": ["integer", "string"] },
     "chrome_cache_bytes": { "type": ["integer", "string"] },
+    "hostname": { "type": "string" },
     "reboot_required": { "type": ["boolean", "string"] },
     "reboot_recommended": { "type": ["boolean", "string"] },
     "log_file": { "type": "string" }

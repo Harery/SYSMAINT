@@ -3338,6 +3338,7 @@ print_summary() {
   printf '  "desktop_mode": "%s",\n' "$(escape_json "$DESKTOP_MODE")"
   printf '  "desktop_guard_enabled": %s,\n' "${DESKTOP_GUARD_ENABLED}"
   printf '  "os_description": "%s",\n' "$(escape_json "$OS_DESCRIPTION")"
+  printf '  "hostname": "%s",\n' "$(escape_json "$(hostname 2>/dev/null || echo 'unknown')")"
   printf '  "uptime_seconds": %s,\n' "${UPTIME_SECONDS}"
   printf '  "package_count": %s,\n' "${PACKAGE_COUNT}"
   printf '  "mem_total_kb": %s,\n' "${MEM_TOTAL_KB}"

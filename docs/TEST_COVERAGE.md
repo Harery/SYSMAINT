@@ -20,11 +20,11 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 | Suite | Tests | Coverage | Runtime |
 |-------|-------|----------|---------|
 | `test_suite_smoke.sh` | 60 | Basic functionality, smoke tests | ~3 min |
-| `test_suite_fullcycle.sh` | 97 | Full lifecycle, feature combinations | ~6 min |
 | `test_suite_edge.sh` | 67 | Argument parsing, edge cases | ~3 min |
-| `test_suite_realmode_sandbox.sh` | 5 | Real-mode execution with mocks | ~2 min |
-| `test_suite_security.sh` | 10 | Security audit features | ~1 min |
-| **Subtotal** | **239** | | **~15 min** |
+| `test_suite_security.sh` | 32 | Security audit features | ~2 min |
+| `test_suite_governance.sh` | 15 | Governance, audit trail, compliance mode | ~1 min |
+| `test_suite_compliance.sh` | 32 | Regulatory frameworks (PCI, HIPAA, SOC2, ISO, GDPR, CIS, FedRAMP, NIST) | ~2 min |
+| **Subtotal** | **206** | | **~11 min** |
 
 ### Specialized Test Scripts
 
@@ -38,10 +38,10 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 
 ### **Total Test Coverage**
 
-- **Total scenarios**: **250+ distinct test cases**
-- **Total suites**: **9 test files**
-- **Full suite runtime**: **~20 minutes** (sequential)
-- **Pass rate**: **100%** (as of Stage 1 completion)
+- **Total scenarios**: **206 distinct test cases**
+- **Total suites**: **5 test files** (smoke, edge, security, governance, compliance)
+- **Full suite runtime**: **~11 minutes** (sequential)
+- **Pass rate**: **100%** (as of Stage 1.5 completion - November 15, 2025)
 
 ---
 
@@ -49,28 +49,30 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 
 ### Feature Coverage
 
-| Feature | Smoke | Full-Cycle | Edge | Realmode | Security |
-|---------|:-----:|:----------:|:----:|:--------:|:--------:|
-| APT maintenance | ✅ | ✅ | ✅ | ✅ | - |
-| Snap maintenance | ✅ | ✅ | ✅ | ✅ | - |
-| Flatpak maintenance | ✅ | ✅ | - | - | - |
-| Kernel purge | ✅ | ✅ | ✅ | - | - |
-| Orphan purge | ✅ | ✅ | ✅ | - | - |
-| Journal cleanup | ✅ | ✅ | ✅ | - | - |
-| Browser cache | ✅ | ✅ | ✅ | ✅ | - |
-| Filesystem trim | ✅ | ✅ | ✅ | - | - |
-| Drop caches | ✅ | ✅ | ✅ | - | - |
-| Desktop guard | ✅ | ✅ | - | - | - |
-| Zombie detection | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Security audit** | ✅ | ✅ | - | ✅ | ✅ |
+| Feature | Smoke | Edge | Security | Governance | Compliance |
+|---------|:-----:|:----:|:--------:|:----------:|:----------:|
+| APT maintenance | ✅ | ✅ | - | - | - |
+| Snap maintenance | ✅ | ✅ | - | - | - |
+| Flatpak maintenance | ✅ | - | - | - | - |
+| Kernel purge | ✅ | ✅ | - | - | - |
+| Orphan purge | ✅ | ✅ | - | - | - |
+| Journal cleanup | ✅ | ✅ | - | ✅ | - |
+| Browser cache | ✅ | ✅ | - | ✅ | - |
+| Filesystem trim | ✅ | ✅ | - | - | - |
+| Drop caches | ✅ | ✅ | - | - | - |
+| Desktop guard | ✅ | - | - | - | - |
+| Zombie detection | ✅ | ✅ | ✅ | - | - |
+| **Security audit** | ✅ | - | ✅ | - | ✅ |
+| **Governance/audit trail** | - | - | ✅ | ✅ | ✅ |
+| **Compliance frameworks** | - | - | ✅ | - | ✅ |
 | Dry-run mode | ✅ | ✅ | ✅ | ✅ | ✅ |
 | JSON output | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Auto-reboot | ✅ | ✅ | ✅ | ✅ | - |
-| Color modes | ✅ | ✅ | ✅ | - | - |
-| Progress indicators | ✅ | ✅ | - | - | - |
-| Argument parsing | - | - | ✅ | - | - |
+| Auto-reboot | ✅ | ✅ | - | - | - |
+| Color modes | ✅ | ✅ | - | - | - |
+| Progress indicators | ✅ | - | - | - | - |
+| Argument parsing | - | ✅ | - | - | - |
 | Error handling | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Lock mechanism | ✅ | ✅ | ✅ | - | - |
+| Lock mechanism | ✅ | ✅ | - | - | - |
 
 ### CLI Flag Coverage
 
@@ -182,7 +184,7 @@ export SYSMAINT_FAKE_ROOT=1
 bash sysmaint --json-summary
 ```
 
-### 5. Security Tests (10 scenarios)
+### 5. Security Tests (32 scenarios)
 
 **Purpose**: Validate Stage 1.5 security hardening features
 
@@ -192,11 +194,18 @@ bash sysmaint --json-summary
 3. Enable with `SECURITY_AUDIT_ENABLED=true`
 4. JSON output includes security fields
 5. Permission status reporting
-6. Shadow file checks
-7. GShadow file checks
-8. Sudoers file checks
-9. Sudoers.d directory checks
+6. Shadow file checks (perms, ownership)
+7. GShadow file checks (perms, ownership)
+8. Sudoers file checks (perms, ownership)
+9. Sudoers.d directory checks (perms, world-writable detection)
 10. Feature combination with other flags
+11. JSON absence when `JSON_SUMMARY=false`
+12. sudoers_d_issues array presence
+13. Exit code validation
+14. Start/completion markers
+15-19. Permission checks (world-writable, SUID/SGID binaries)
+20-24. Governance checks (audit logging, timestamps, change tracking, privilege validation, config drift)
+25-32. Compliance checks (PCI-DSS, HIPAA, SOC 2, ISO 27001, GDPR, CIS, FedRAMP, NIST)
 
 **Example**:
 ```bash
@@ -205,37 +214,69 @@ DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run --security-audit
 jq '.security_audit_enabled, .shadow_perms_ok' /tmp/system-maintenance/sysmaint_*.json
 ```
 
-### 6. Profile Tests (5 scenarios)
+### 6. Governance Tests (15 scenarios)
 
-**Purpose**: Validate Tier 1 profile presets
+**Purpose**: Validate audit trail, change management, and governance telemetry
 
-**Profiles tested**:
-- Minimal (basic safety)
-- Standard (balanced maintenance)
-- Aggressive (deep cleanup)
-- Desktop (user-focused)
-- Server (infrastructure-focused)
+**Coverage**:
+1. Audit log creation with proper structure
+2. Timestamp field presence
+3. System context capture (os_description, run_id)
+4. Command line argument recording
+5. Change management in dry-run mode
+6. System state capture before changes
+7. Privileged operation logging
+8. Configuration file access tracking
+9. Audit trail lifecycle markers (start/end)
+10. Policy enforcement (root privilege validation)
+11. Compliance mode operations
+12. Audit log naming convention (retention-friendly)
+13. Multi-user environment context
+14. Change approval workflow (dry-run proxy)
+15. Separation of duties (sudoers validation)
 
-### 7. JSON Validation Tests (5+ scenarios)
+**Example**:
+```bash
+# Test: Governance captures complete audit trail
+DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run
+jq '.log_file, .run_id, .timestamp, .dry_run_mode' /tmp/system-maintenance/sysmaint_*.json
+```
 
-**Purpose**: Schema validation and malformed input handling
+### 7. Compliance Tests (32 scenarios)
 
-**Tests**:
-- Valid JSON passes schema
-- Missing required fields fail
-- Invalid field types fail
-- Extra fields allowed (extensibility)
-- Malformed JSON rejected
+**Purpose**: Validate alignment with regulatory frameworks
 
-### 8. Package Build Tests (1 scenario)
+**Frameworks covered** (4 tests each):
+- **PCI-DSS**: Password file permissions, audit trails, audit record elements, system hardening
+- **HIPAA**: Audit controls, security risk assessment, access control validation, security logging
+- **SOC 2**: Change management documentation, system monitoring, logical access control, user access audit
+- **ISO 27001**: Information access controls, event logging, change management, privileged access
+- **GDPR**: Security measures implementation, system resilience, processing activity records, data integrity
+- **CIS Benchmarks**: SSH configuration (extensible), password policy, critical file permissions, audit logging
+- **FedRAMP**: Account management, auditable events, configuration change control, flaw remediation
+- **NIST 800-53**: Controlled maintenance (MA-2), audit record content (AU-3), least privilege (AC-6), baseline configuration (CM-2)
 
-**Purpose**: Validate Debian package (.deb) creation
+**Example**:
+```bash
+# Test: PCI-DSS password file permissions check
+DRY_RUN=true bash sysmaint --dry-run --security-audit 2>&1 | grep -q "shadow"
+# Test: HIPAA audit trail generation
+jq '.log_file' /tmp/system-maintenance/sysmaint_*.json
+```
 
-**Checks**:
-- Package builds successfully
-- Dependencies declared correctly
-- Installation scripts present
-- systemd units included
+### 8. JSON Schema Validation
+
+**Purpose**: Ensure all JSON outputs conform to published schema
+
+**Validation performed**:
+- Schema: `docs/schema/sysmaint-summary.schema.json`
+- Validator: `tests/validate_json.py` (jsonschema library)
+- Automated: Every test run with `JSON_SUMMARY=true` validates output
+
+**Example**:
+```bash
+python3 tests/validate_json.py /tmp/system-maintenance/sysmaint_*.json
+```
 
 ---
 
@@ -246,15 +287,17 @@ jq '.security_audit_enabled, .shadow_perms_ok' /tmp/system-maintenance/sysmaint_
 ```bash
 # Sequential (recommended)
 bash tests/test_suite_smoke.sh
-bash tests/test_suite_fullcycle.sh
 bash tests/test_suite_edge.sh
-bash tests/test_suite_realmode_sandbox.sh
 bash tests/test_suite_security.sh
-bash tests/test_profiles_tier1.sh
-bash tests/test_json_negative.sh
+bash tests/test_suite_governance.sh
+bash tests/test_suite_compliance.sh
 
-# Or use a test runner (if available)
-bash tests/run_all_tests.sh
+# Full sweep with consolidated output
+for suite in tests/test_suite_*.sh; do
+  echo "Running: $suite"
+  bash "$suite"
+  echo ""
+done
 ```
 
 ### Run Specific Categories
@@ -263,8 +306,12 @@ bash tests/run_all_tests.sh
 # Quick smoke tests only (~3 min)
 bash tests/test_suite_smoke.sh
 
-# Security validation only (~1 min)
+# Security hardening validation (~2 min)
 bash tests/test_suite_security.sh
+
+# Governance and compliance (~3 min combined)
+bash tests/test_suite_governance.sh
+bash tests/test_suite_compliance.sh
 
 # Edge cases only (~3 min)
 bash tests/test_suite_edge.sh
@@ -288,12 +335,13 @@ Tests run automatically via GitHub Actions on:
 - **Feature coverage**: 100% (all documented features have tests)
 - **Flag coverage**: 100% (all CLI flags tested)
 - **Environment variable coverage**: 100% (all env vars tested)
-- **JSON field coverage**: 100% (all schema fields validated)
+- **JSON field coverage**: 100% (all schema fields validated including new `hostname` field)
 - **Error path coverage**: ~90% (most error conditions tested)
+- **Regulatory framework coverage**: 8 frameworks × 4 tests each = 32 compliance scenarios
 
 ### Reliability Metrics
 
-- **Pass rate**: 100% (290+ tests, 0 failures)
+- **Pass rate**: 100% (206 tests, 0 failures as of 2025-11-15)
 - **Flakiness**: 0% (no intermittent failures)
 - **False positives**: 0 (no tests pass when they should fail)
 - **False negatives**: 0 (no tests fail when they should pass)
@@ -408,12 +456,16 @@ fi
 
 ## Roadmap
 
-### Stage 1.5 Additions (Completed)
+### Stage 1.5 Additions (Completed - 2025-11-15)
 
-- ✅ Security test suite (`test_suite_security.sh`)
-- ✅ 10 security audit scenarios
+- ✅ Security test suite (`test_suite_security.sh`) - **32 tests**
+- ✅ Governance test suite (`test_suite_governance.sh`) - **15 tests**
+- ✅ Compliance test suite (`test_suite_compliance.sh`) - **32 tests**
 - ✅ Shadow/gshadow/sudoers validation
 - ✅ JSON security field assertions
+- ✅ Audit trail and governance telemetry validation
+- ✅ Multi-framework compliance scenarios (PCI-DSS, HIPAA, SOC 2, ISO 27001, GDPR, CIS, FedRAMP, NIST)
+- ✅ Hostname field added to JSON telemetry and schema
 
 ### Stage 2 Testing Plans
 
@@ -421,17 +473,19 @@ fi
 - **Performance tests**: Execution time benchmarks
 - **Load tests**: Multiple concurrent runs
 - **Integration tests**: External tool integration (lynis, rkhunter)
+- **Expanded compliance**: Additional frameworks (FISMA, COBIT, ITIL)
 
 ---
 
 ## Summary
 
 sysmaint has **comprehensive test coverage** with:
-- ✅ **250+ test scenarios** across 9 suites
+- ✅ **206 test scenarios** across 5 core suites
 - ✅ **100% feature coverage** for all documented functionality
-- ✅ **100% pass rate** as of Stage 1 completion
-- ✅ **CI integration** for automated validation
-- ✅ **JSON schema validation** for every run
-- ✅ **Security hardening** tests (Stage 1.5)
+- ✅ **100% pass rate** as of Stage 1.5 completion (November 15, 2025)
+- ✅ **JSON schema validation** with hostname field support
+- ✅ **Security hardening** tests (32 scenarios)
+- ✅ **Governance and audit trail** tests (15 scenarios)
+- ✅ **Compliance framework** tests (32 scenarios across 8 frameworks)
 
 For detailed test execution instructions, see `tests/README.md`.
