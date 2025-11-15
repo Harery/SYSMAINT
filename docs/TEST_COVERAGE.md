@@ -24,7 +24,8 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 | `test_suite_security.sh` | 32 | Security audit features | ~2 min |
 | `test_suite_governance.sh` | 15 | Governance, audit trail, compliance mode | ~1 min |
 | `test_suite_compliance.sh` | 32 | Regulatory frameworks (PCI, HIPAA, SOC2, ISO, GDPR, CIS, FedRAMP, NIST) | ~2 min |
-| **Subtotal** | **206** | | **~11 min** |
+| `test_suite_performance.sh` | 25+ | Performance benchmarks with regression detection | ~15 min |
+| **Subtotal** | **231+** | | **~26 min** |
 
 ### Specialized Test Scripts
 
@@ -38,9 +39,9 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 
 ### **Total Test Coverage**
 
-- **Total scenarios**: **206 distinct test cases**
-- **Total suites**: **5 test files** (smoke, edge, security, governance, compliance)
-- **Full suite runtime**: **~11 minutes** (sequential)
+- **Total scenarios**: **231+ distinct test cases** (206 functional + 25+ performance)
+- **Total suites**: **6 test files** (smoke, edge, security, governance, compliance, performance)
+- **Full suite runtime**: **~26 minutes** (sequential, including benchmarks)
 - **Pass rate**: **100%** (as of Stage 1.5 completion - November 15, 2025)
 
 ---
@@ -356,6 +357,25 @@ Tests run automatically via GitHub Actions on:
 ---
 
 ## Adding New Tests
+
+### Performance Benchmarks
+
+To add new performance tests, edit `tests/test_suite_performance.sh`:
+
+```bash
+# Add to appropriate section
+run_benchmark "feature-new-thing" --dry-run --new-feature --json-summary
+```
+
+Key functions:
+- `run_benchmark "name" [args...]` - Run timed test with statistics
+- `calculate_stats` - Compute avg/min/max/median from array
+- `check_threshold` - Compare against performance thresholds
+
+Performance thresholds (configurable via environment variables):
+- `THRESHOLD_FAST=3.0` - Fast tests (<3s)
+- `THRESHOLD_ACCEPTABLE=10.0` - Acceptable tests (<10s)
+- `THRESHOLD_SLOW=30.0` - Slow tests (<30s)
 
 ### 1. Identify Test Suite
 
