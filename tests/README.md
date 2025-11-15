@@ -67,6 +67,20 @@ Minimal "real-mode" sanity suite that keeps `DRY_RUN` disabled while safely inte
 	```
 
 > ⚠️ The sandbox is for CI/development only. Never set `SYSMAINT_FAKE_ROOT=1` or use the shimbed PATH on production machines.
+### `test_suite_security.sh` — 10 tests
+
+Security audit feature validation suite.
+
+- **Coverage:** Security audit enable/disable, permission checks for shadow/gshadow/sudoers files, JSON output validation, feature combinations.
+- **Purpose:** Validate security hardening features introduced in Stage 1.5.
+- **Runtime:** ~1 minute.
+- **Run:**
+	```bash
+	bash tests/test_suite_security.sh
+	```
+
+---
+
 
 ---
 
