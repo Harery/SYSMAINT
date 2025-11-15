@@ -1,0 +1,5 @@
+# Exclude timestamped benchmark runs
+benchmark_*.csv
+
+# Keep baseline references
+!baseline_*.csv

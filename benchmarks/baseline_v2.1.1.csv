@@ -1,0 +1,25 @@
+Test Name,Avg Time (s),Min Time (s),Max Time (s),Median Time (s),Avg Memory (KB),Status
+scale-journal-365d,3.386,3.28,3.46,3.42,81468,ACCEPTABLE
+json-full-telemetry,3.573,3.44,3.83,3.45,81235,ACCEPTABLE
+feature-browser-cache,3.550,3.50,3.61,3.54,81451,ACCEPTABLE
+scale-journal-1d,3.523,3.45,3.58,3.54,81347,ACCEPTABLE
+scale-kernel-10,3.453,3.44,3.47,3.45,81300,ACCEPTABLE
+baseline-minimal,3.256,3.03,3.63,3.11,81583,ACCEPTABLE
+scale-journal-30d,3.710,3.38,4.30,3.45,81397,ACCEPTABLE
+json-disabled,3.663,3.57,3.82,3.60,81399,ACCEPTABLE
+feature-orphan-purge,4.186,4.07,4.37,4.12,87236,ACCEPTABLE
+baseline-default,3.576,3.37,3.80,3.56,81409,ACCEPTABLE
+load-moderate,3.606,3.52,3.73,3.57,81400,ACCEPTABLE
+baseline-with-upgrade,3.710,3.55,3.85,3.73,81625,ACCEPTABLE
+json-enabled,3.680,3.57,3.88,3.59,81425,ACCEPTABLE
+scale-kernel-5,3.533,3.32,3.75,3.53,81388,ACCEPTABLE
+scale-kernel-1,3.536,3.42,3.75,3.44,81332,ACCEPTABLE
+display-quiet,3.660,3.36,3.81,3.81,81360,ACCEPTABLE
+feature-security-audit,3.503,3.34,3.72,3.45,81520,ACCEPTABLE
+load-heavy,4.983,4.10,6.29,4.56,87353,ACCEPTABLE
+feature-kernel-purge,3.916,3.68,4.13,3.94,81413,ACCEPTABLE
+display-dots,3.546,3.45,3.65,3.54,81477,ACCEPTABLE
+feature-check-zombies,3.333,3.24,3.40,3.36,81276,ACCEPTABLE
+display-spinner,3.733,3.61,3.92,3.67,81352,ACCEPTABLE
+load-maximum,4.460,4.14,4.66,4.58,87333,ACCEPTABLE
+display-countdown,3.606,3.59,3.62,3.61,81435,ACCEPTABLE

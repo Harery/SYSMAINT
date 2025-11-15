@@ -55,6 +55,36 @@ calculate_stats() {
     echo "$avg $min $max $median"
 }
 
+# Integer statistics (for memory in KB)
+calculate_stats_int() {
+    local values=("$@")
+    local sum=0
+    local count=${#values[@]}
+
+    # Calculate sum (integers)
+    for val in "${values[@]}"; do
+        sum=$((sum + val))
+    done
+    # Integer average (rounded)
+    local avg=$(( (sum + count/2) / count ))
+
+    # Min/Max (integers)
+    local min=${values[0]}
+    local max=${values[0]}
+    for val in "${values[@]}"; do
+        (( val < min )) && min=$val
+        (( val > max )) && max=$val
+    done
+
+    # Median (sort integers)
+    IFS=$'\n' sorted=($(printf '%s\n' "${values[@]}" | sort -n))
+    unset IFS
+    local mid=$((count / 2))
+    local median=${sorted[$mid]}
+
+    echo "$avg $min $max $median"
+}
+
 # Benchmark runner
 run_benchmark() {
     local test_name="$1"
@@ -94,7 +124,7 @@ run_benchmark() {
     
     # Calculate statistics
     read avg min max median < <(calculate_stats "${times[@]}")
-    read mem_avg mem_min mem_max mem_median < <(calculate_stats "${mem_peaks[@]}")
+    read mem_avg mem_min mem_max mem_median < <(calculate_stats_int "${mem_peaks[@]}")
     
     # Store results
     TIMINGS["$test_name"]="$avg,$min,$max,$median"
