@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+cmd_name="$1"
+shift || true
+printf '[realmodesandbox] %s %s\n' "$cmd_name" "$*" >&2
+# Simulate light work for commands that expect stdout noise
+case "$cmd_name" in
+  apt|apt-get|apt-cache|dpkg|dpkg-query)
+    echo "Reading package lists..."
+    echo "Building dependency tree..."
+    ;;
+  snap)
+    echo "All snaps up to date"
+    ;;
+  flatpak)
+    echo "Looking for updates..."
+    ;;
+  systemctl)
+    # Keep stdout empty so callers that parse output behave normally
+    :
+    ;;
+  ping)
+    echo "PING placeholder"
+    ;;
+  *)
+    :
+    ;;
+ esac
+exit 0

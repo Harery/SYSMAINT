@@ -19,14 +19,14 @@ run_test() {
         # Verify JSON summary
         local json_file=$(ls -t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -1)
         if [ -f "$json_file" ] && grep -q '"script_version"' "$json_file"; then
-            ((PASSED++))
+            PASSED=$((PASSED + 1))
         else
             echo "[WARN] JSON summary missing"
-            ((FAILED++))
+            FAILED=$((FAILED + 1))
         fi
     else
         echo "❌ FAIL (exit: $?)"
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
     fi
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Consolidated Full-Cycle Test Suite - Standard + Advanced (85 tests)
+# Consolidated Full-Cycle Test Suite - Standard + Advanced + Combos (97 tests)
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # (c) 2025 Mohamed Elharery
 
@@ -86,17 +86,17 @@ run_case() {
   if [ $rc -eq 0 ]; then
     echo "✅ PASS"
     validate_json
-    ((PASSED++))
+    PASSED=$((PASSED + 1))
   else
     echo "❌ FAIL (exit: $rc)"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
   fi
   return 0
 }
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║  CONSOLIDATED FULL-CYCLE TEST SUITE (85 Tests)            ║"
-echo "║  Standard (60) + Advanced (25)                            ║"
+echo "║  CONSOLIDATED FULL-CYCLE TEST SUITE (97 Tests)            ║"
+echo "║  Standard (60) + Advanced (25) + Combos (12)              ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -225,6 +225,21 @@ run_case "adv-cicd-verbose" --progress=dots --color=always --upgrade --security-
 run_case "adv-cicd-silent" --progress=quiet --color=never --upgrade --purge-kernels --orphan-purge --dry-run
 run_case "adv-cicd-monitor" --progress=spinner --color=auto --security-audit --check-zombies --dry-run
 run_case "adv-cicd-scheduled" --progress=quiet --upgrade --journal-days=14 --purge-kernels --keep-kernels=3 --dry-run
+
+echo ""
+echo "=== Phase 7: Feature Combination Gallery (12) ==="
+run_case "combo-triple-upgrade-kernel-journal" --upgrade --purge-kernels --keep-kernels=3 --journal-days=7 --dry-run
+run_case "combo-triple-security-browser-zombies" --security-audit --browser-cache-report --check-zombies --dry-run
+run_case "combo-triple-filesystems" --fstrim --orphan-purge --drop-caches --dry-run
+run_case "combo-triple-display" --color=always --progress=spinner --upgrade --dry-run
+run_case "combo-triple-desktop" --no-snap-clean-old --no-clear-tmp --no-desktop-guard --dry-run
+run_case "combo-triple-kernel-reboot" --journal-days=14 --purge-kernels --auto-reboot --dry-run
+run_case "combo-triple-browser-security" --browser-cache-purge --security-audit --upgrade --dry-run
+run_case "combo-triple-fs-journal" --fstrim --journal-days=7 --purge-kernels --dry-run
+run_case "combo-quad-maintenance" --upgrade --purge-kernels --orphan-purge --journal-days=7 --dry-run
+run_case "combo-quad-security-stack" --security-audit --check-zombies --upgrade --browser-cache-report --dry-run
+run_case "combo-quad-filesystem" --fstrim --drop-caches --orphan-purge --clear-tmp-force --dry-run
+run_case "combo-quad-display" --color=never --progress=quiet --upgrade --security-audit --dry-run
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════╗"

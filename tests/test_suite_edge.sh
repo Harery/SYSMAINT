@@ -16,10 +16,10 @@ test_ok() {
     echo -n "[TEST] $name: "
     if bash "$SCRIPT" "$@" >/dev/null 2>&1; then
         echo "✅ PASS"
-        ((PASSED++))
+        PASSED=$((PASSED + 1))
     else
         echo "❌ FAIL (exit: $?)"
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
     fi
 }
 
@@ -29,10 +29,10 @@ test_warn() {
     echo -n "[TEST] $name: "
     if bash "$SCRIPT" "$@" >/dev/null 2>&1; then
         echo "⚠️  WARN (expected nonzero)"
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
     else
         echo "✅ PASS (nonzero expected)"
-        ((PASSED++))
+        PASSED=$((PASSED + 1))
     fi
 }
 

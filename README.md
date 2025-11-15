@@ -37,6 +37,28 @@ Run with optional final upgrade phase:
 sudo ./sysmaint --upgrade
 ```
 
+## Tier 1 profile launcher (Stage 2)
+
+Use `./sysmaint_profiles.sh` for guided presets that bundle the most common flows. Each profile previews the command, highlights risk/time estimates, and requests confirmation before running unless `--yes` is supplied.
+
+| Key | Profile | Purpose | Command Highlights | Est. Time | Risk |
+|-----|---------|---------|--------------------|-----------|------|
+| `minimal` | Minimal Preview | Safest telemetry-only dry-run | `--dry-run --json-summary` | ~2 min | None |
+| `standard` | Standard Autopilot | Weekly unattended maintenance | `--auto --json-summary --auto-reboot-delay 45` | ~5 min | Low |
+| `desktop` | Desktop Cleanup | Adds browser cache purge + colorful progress | `--browser-cache-report --browser-cache-purge --progress=spinner` | ~6 min | Medium |
+| `server` | Server Hardened | Security audit + zombie scan + upgrade | `--upgrade --security-audit --check-zombies --auto` | ~8 min | Medium |
+| `aggressive` | Aggressive Cleanup | Max disk reclamation incl. kernel purge | `--upgrade --purge-kernels --keep-kernels=2 --orphan-purge --fstrim --drop-caches` | ~10 min | High |
+
+Example: preview the desktop profile without running it, then launch standard autopilot without prompts.
+
+```bash
+# Preview only
+./sysmaint_profiles.sh --profile desktop --print-command
+
+# Run standard profile immediately (Tier 1, Stage 2)
+./sysmaint_profiles.sh --profile standard --yes
+```
+
 ## Notable flags
 
 - `--upgrade` — Final apt full-upgrade near the end (opt-in). JSON: `final_upgrade_enabled` and counts.
@@ -70,6 +92,7 @@ sudo LOG_MAX_SIZE_MB=10 JSON_SUMMARY=true ./sysmaint --upgrade --check-zombies -
 The JSON written to `$LOG_DIR/sysmaint_<RUN_ID>.json` includes:
 - Repositories status, kernel info, phase timings, disk deltas
 - Capabilities, skipped capabilities, system info (os, uptime, mem, disk)
+- Dry-run indicator: `dry_run_mode` shows whether the run actually mutated the system
 - Autopilot state and reboot recommendation
 - Final upgrade telemetry when `--upgrade` is used
 - Color mode, log truncation status and sizes
@@ -186,53 +209,76 @@ Optional: Create `/etc/sysmaint/sysmaint.env` to override environment (e.g. `LOG
 
 ## Testing
 
-### Quick smoke test
+### Suite 1: Smoke regression (`tests/test_suite_smoke.sh`, 60 tests)
 
-Run a fast baseline dry-run:
-
-```bash
-bash tests/smoke.sh
-```
-
-This runs the script with several argument combinations and validates JSON output.
-
-### Full-cycle test suite
-
-Run the comprehensive dry-run suite covering all flags progressively (default → fixed combos → optional → broad combined):
+- Combines the former `smoke.sh`, `smoke_extended.sh`, and `smoke_ultra.sh` flows.
+- Exercises default, upgrade, color, browser cache, zombie/audit, filesystem, kernel/journal, snap/flatpak, tmp cleanup, desktop guard, and auto/parallel mixes.
 
 ```bash
-bash tests/dryrun_fullcycle.sh
+bash tests/test_suite_smoke.sh
 ```
 
-This suite tests:
-- Default run (no flags)
-- Fixed combos: `--upgrade`, `--simulate-upgrade`, color/audit/zombies, browser cache report
-- Optional toggles: fstrim, drop-caches, kernel purge, orphan purge, snap/flatpak options, disable flags, progress modes, lock settings, log truncation, parallel exec
-- Autopilot variants: `--auto`, custom reboot delays
-- Broad combined: most optional features together
-- Negative sweep: disabling most defaults
+### Suite 2: Edge parser (`tests/test_suite_edge.sh`, 67 tests)
 
-Each case validates the resulting JSON against the schema, and selected cases assert key JSON fields (e.g., `final_upgrade_enabled`, `color_mode`, `security_audit_enabled`, `browser_cache_*`, `kernel_purge_enabled`, `keep_kernels`, `auto_mode`, `auto_reboot_delay_seconds`, `journal_vacuum_time`, `desktop_guard_enabled`, `zombie_check_enabled`). Runs are non-destructive (DRY_RUN=true throughout).
-
-### Edge-case argument tests
-
-Verify argument parsing and non-root + dry-run combinations:
+- Merges `args_edge.sh`, `edge_extended.sh`, and `edge_advanced.sh` into one argument torture suite.
+- Covers help/version, non-root + dry-run combos, ordering permutations, duplicate/conflicting flags, expected failures, and stress bundles.
 
 ```bash
-bash tests/args_edge.sh
+bash tests/test_suite_edge.sh
 ```
 
-### JSON schema validation
+### Suite 3: Full-cycle lifecycle (`tests/test_suite_fullcycle.sh`, 97 tests)
 
-Validate a specific JSON summary against the schema:
+- Successor to `dryrun_fullcycle.sh`, `fullcycle_advanced.sh`, and the combo gallery.
+- Seven phases: defaults, feature toggles, progress/display, advanced ops, combined desktop/server mixes, negative sweeps, and curated feature-combo triples/quads.
+- Every case sets `DRY_RUN=true JSON_SUMMARY=true`, validates against the JSON schema, and asserts key fields like `final_upgrade_enabled`, `desktop_guard_enabled`, `auto_mode`, `zombie_check_enabled`, etc.
+
+```bash
+bash tests/test_suite_fullcycle.sh
+```
+
+### JSON schema validation helpers
 
 ```bash
 bash tests/validate_json.sh
-# Or manually:
 python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json /tmp/system-maintenance/sysmaint_<RUN_ID>.json
+bash tests/test_json_negative.sh
 ```
 
-All tests run automatically in CI via `.github/workflows/dry-run.yml`.
+### Sandbox real-mode suite (`tests/test_suite_realmode_sandbox.sh`)
+
+Exercises representative non-dry-run flows with `SYSMAINT_FAKE_ROOT=1` and mocked binaries so CI can ensure "real" executions stay healthy.
+
+```bash
+bash tests/test_suite_realmode_sandbox.sh
+```
+
+### Tier 1 profile launcher tests (`tests/test_profiles_tier1.sh`)
+
+Confirms each preset in `sysmaint_profiles.sh` emits the expected flags and supports extra arguments.
+
+```bash
+bash tests/test_profiles_tier1.sh
+```
+
+### Package build validation (`tests/test_package_build.sh`)
+
+Builds the `.deb` in a temp directory and (when `lintian` is installed) lint-checks the artifact.
+
+```bash
+bash tests/test_package_build.sh
+```
+
+### Run everything
+
+```bash
+bash tests/test_suite_smoke.sh && \
+bash tests/test_suite_edge.sh  && \
+bash tests/test_suite_fullcycle.sh && \
+bash tests/validate_json.sh
+```
+
+All suites stay in dry-run mode and run automatically in `.github/workflows/dry-run.yml`.
 
 ## Quick Reference
 

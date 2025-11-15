@@ -1,95 +1,114 @@
-# Test Suite
+# Test Suite Overview
 
-> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+> © 2025 Mohamed Elharery <Mohamed@Harery.com>
 
-Comprehensive test coverage for **sysmaint** (v2.1.1).
+sysmaint v2.1.1 ships three consolidated bash suites (plus a JSON validator pair) that cover every documented scenario. Each suite forces `DRY_RUN=true`, so they are safe to execute anywhere.
 
-## Test scripts
+## Test Suites
 
-### `smoke.sh`
+### `test_suite_smoke.sh` — 60 tests
 
-Quick baseline dry-run tests with several argument combinations. Validates JSON output and checks for basic execution success.
+Baseline + advanced smoke coverage combining the former `smoke.sh`, `smoke_extended.sh`, and `smoke_ultra.sh` flows.
 
-**Run:**
-
-```bash
-bash tests/smoke.sh
-```
-
-**Coverage:**
-- Default run
-- `--upgrade` final phase
-- Color modes (never, always)
-- Browser cache report
-- Zombie detection and security audit
-
-**Exit codes:**
-- 0 = pass
-- Non-zero = fail
+- **Structure:** Basic (6), Extended (filesystems, kernel/journal, browser cache, snap, tmp, desktop guard), Advanced (auto/parallel combos, rapid cycles, audit/zombie guard mixes).
+- **Purpose:** Fast regression net for the most common flag mixes.
+- **Runtime:** ~3 minutes.
+- **Run:**
+	```bash
+	bash tests/test_suite_smoke.sh
+	```
 
 ---
 
-### `dryrun_fullcycle.sh`
+### `test_suite_fullcycle.sh` — 97 tests
 
-**Full-cycle progressive test suite** covering all available flags in stages:
+Full progressive lifecycle suite (formerly `dryrun_fullcycle.sh`, `fullcycle_advanced.sh`, and `combo_advanced.sh`).
 
-1. **Default:** No flags
-2. **Fixed combos:** Stable multi-flag combinations (upgrade, simulate-upgrade, audits, browser cache)
-3. **Optional toggles:** Individual feature flags tested one-by-one (fstrim, drop-caches, kernel purge, orphan purge, snap/flatpak options, progress modes, lock settings, log truncation, parallel exec)
-4. **Autopilot variants:** `--auto`, custom reboot delays
-5. **Broad combined:** Most optional features together (avoiding conflicts)
-6. **Negative sweep:** Disabling most defaults with `--no-*` flags
-
-**Run:**
-
-```bash
-bash tests/dryrun_fullcycle.sh
-```
-
-**What it does:**
-- Each case runs `sysmaint` with `DRY_RUN=true` and `JSON_SUMMARY=true`
-- Validates the resulting JSON against the schema after each run
-- Performs lightweight JSON assertions for key toggles (e.g., `final_upgrade_enabled`, `color_mode`, `security_audit_enabled`, `browser_cache_report/purge`, `kernel_purge_enabled`, `keep_kernels`, `auto_mode`, `auto_reboot_delay_seconds`, `journal_vacuum_time`, `desktop_guard_enabled`, `zombie_check_enabled`)
-- Non-destructive: all runs are dry-run only
-- Logs results inline (`[result] exit=<code>`, `JSON schema validation: OK`, `[assert] ... -> OK/FAIL`)
-
-**Expected duration:** ~3-5 minutes (40+ test cases).
+- **Phases:**
+	1. Defaults + upgrade/autopilot basics
+	2. Individual feature toggles (fstrim, drop-caches, kernel purge, orphan/orphan, snap/flatpak, locks/logging)
+	3. Progress + visual modes (color, progress styles, animation)
+	4. Advanced operations (desktop guard, zombie scan, audit sweeps)
+	5. Combined desktop/server mixes
+	6. Negative sweeps using `--no-*` flags
+	7. Feature combination gallery (12 curated combos)
+- **Assertions:** JSON schema validation plus targeted field checks (`final_upgrade_enabled`, `desktop_guard_enabled`, `auto_mode`, etc.).
+- **Runtime:** ~6 minutes.
+- **Run:**
+	```bash
+	bash tests/test_suite_fullcycle.sh
+	```
 
 ---
 
-### `args_edge.sh`
+### `test_suite_edge.sh` — 67 tests
 
-Edge-case argument parsing and non-root dry-run validation. Tests:
-- Help and version flags
-- Non-root user + `--dry-run` combinations
-- Argument order independence
-- Early exit paths (e.g., `--simulate-upgrade`)
+Argument parser torture suite that merges `args_edge.sh`, `edge_extended.sh`, and `edge_advanced.sh`.
 
-**Run:**
-
-```bash
-bash tests/args_edge.sh
-```
-
-**Expected output:** `Passed 6/6` (or similar count).
+- **Coverage:** help/version, non-root dry-run paths, ordering permutations, duplicate/contradicting flags, stress bundles, failure expectations.
+- **Runtime:** ~3 minutes.
+- **Run:**
+	```bash
+	bash tests/test_suite_edge.sh
+	```
 
 ---
 
-### `validate_json.sh`
+### `test_suite_realmode_sandbox.sh` — 5 tests
 
-JSON schema validation wrapper. Runs a dry-run to produce JSON, then validates against the schema.
+Minimal "real-mode" sanity suite that keeps `DRY_RUN` disabled while safely intercepting privileged binaries.
 
-**Run:**
+- **Mechanics:** Prepends `tests/mocks/realmodesandbox/bin` to `PATH`, sets `SYSMAINT_FAKE_ROOT=1`, and lets the shimbed commands absorb every destructive action.
+- **Purpose:** Proves core flows (default, upgrade, auto, browser cache, audit/zombie) succeed without `--dry-run`, validating the final JSON fields (`dry_run_mode=false`, `final_upgrade_enabled`, etc.).
+- **Runtime:** ~2 minutes.
+- **Run:**
+	```bash
+	bash tests/test_suite_realmode_sandbox.sh
+	```
+
+> ⚠️ The sandbox is for CI/development only. Never set `SYSMAINT_FAKE_ROOT=1` or use the shimbed PATH on production machines.
+
+---
+
+### JSON Schema Helpers
+
+- `validate_json.sh`: convenience wrapper that triggers a dry run then validates the most recent summary.
+- `validate_json.py`: generic validator (requires `jsonschema`).
+- `test_json_negative.sh`: crafts malformed JSON to ensure the validator fails loudly.
 
 ```bash
 bash tests/validate_json.sh
-```
-
-**Manual validation:**
-
-```bash
 python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json /tmp/system-maintenance/sysmaint_<RUN_ID>.json
+bash tests/test_json_negative.sh
 ```
+
+---
+
+### Tier 1 profile helper (`test_profiles_tier1.sh`)
+
+Sanity checks for `sysmaint_profiles.sh` (Stage 2 Tier 1) to ensure presets emit the expected CLI flags.
+
+- **What it covers:**
+	- Minimal preview profile always sets `--dry-run --json-summary`.
+	- Server profile toggles security audit + zombie checks.
+	- Extra CLI flags are forwarded to the generated command.
+- **Run:**
+	```bash
+	bash tests/test_profiles_tier1.sh
+	```
+
+---
+
+### Debian package validation (`test_package_build.sh`)
+
+Builds the `.deb` inside a temporary directory using `dpkg-buildpackage` and verifies the resulting artifact with `dpkg-deb --info`.
+
+- Installs no files on the host—the temporary tree is deleted after the check.
+- Requires standard packaging tools (`dpkg-buildpackage`, `dpkg-deb`, `rsync`).
+- Run locally or via CI:
+	```bash
+	bash tests/test_package_build.sh
+	```
 
 ---
 
@@ -98,18 +117,13 @@ python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json /tmp/sys
 From the repo root:
 
 ```bash
-bash tests/smoke.sh && \
-bash tests/args_edge.sh && \
-bash tests/validate_json.sh && \
-bash tests/dryrun_fullcycle.sh
+bash tests/test_suite_smoke.sh && \
+bash tests/test_suite_edge.sh && \
+bash tests/test_suite_fullcycle.sh && \
+bash tests/validate_json.sh
 ```
 
-Or use the CI workflow locally (requires `act` or push to trigger GitHub Actions):
-
-```bash
-# View the workflow
-cat .github/workflows/dry-run.yml
-```
+Tip: suites print numbered banners (e.g., `Phase 3 (Toggle Arc) — Test 44/97`). If a counter drifts, update the script before merging.
 
 ---
 
@@ -123,29 +137,38 @@ cat .github/workflows/dry-run.yml
 
 ## CI integration
 
-All tests run automatically on push/PR via `.github/workflows/dry-run.yml`:
+`.github/workflows/dry-run.yml` orchestrates:
 
-- **dry-run job (matrix):** Runs smoke tests with various flag combinations.
-- **full-cycle job:** Executes the full-cycle suite after the matrix passes.
-- **Schema validation:** Validates JSON output against the schema in each job.
-- **Edge tests:** Runs argument edge-case validation.
+- **dry-run matrix:** Invokes the smoke + edge suites across supported shells.
+- **full-cycle job:** Runs `test_suite_fullcycle.sh` once all validators finish.
+- **JSON check:** Executes `validate_json.sh` to keep schema drift in check.
 
 ---
 
 ## Adding new tests
 
-To add a new test case to the full-cycle suite:
-
-1. Edit `tests/dryrun_fullcycle.sh`
-2. Add a new `run_case` call with descriptive name and flags
-3. Run the suite locally to verify
-4. Commit and push (CI will validate)
+1. Choose the closest suite:
+	- `test_suite_smoke.sh` → quick flag coverage / regression
+	- `test_suite_edge.sh` → parser/validation behaviors
+	- `test_suite_fullcycle.sh` → JSON assertions + staged flows
+2. Add a `run_test`, `test_ok`, or `run_case` entry with a descriptive label and flags.
+3. Keep counters and section headers accurate.
+4. Run the suite locally before pushing; CI will rerun it.
 
 Example:
 
 ```bash
-run_case "new feature test" --new-flag --other-flag
+run_case "upgrade-with-progressive-flag" --upgrade --progress=bar --dry-run
 ```
+
+---
+
+## Troubleshooting
+
+- **Where did my artifacts go?** Replays live in `/tmp/system-maintenance`. Purge stale files with `rm -rf /tmp/system-maintenance/sysmaint_*`. The packaging test keeps everything in a temporary directory that is deleted automatically.
+- **Missing Python deps:** Install `pipx install jsonschema` (or `python3 -m pip install --user jsonschema`) before running the schema or negative tests.
+- **Packaging toolchain:** `tests/test_package_build.sh` expects `dpkg-buildpackage`, `dpkg-deb`, `lintian`, and `rsync`. On Ubuntu runners, run `sudo apt-get install -y debhelper devscripts lintian rsync` first.
+- **sandbox suite warnings:** The real-mode sandbox fakes privileged binaries via `tests/mocks/realmodesandbox/bin`. If you see "command not found" errors, ensure that directory still contains the shim executables and that `SYSMAINT_FAKE_ROOT=1` is set.
 
 ---
 
@@ -155,3 +178,7 @@ run_case "new feature test" --new-flag --other-flag
 - JSON schema validation requires `python3` and the `jsonschema` module (`pip install jsonschema` or `pipx install jsonschema`).
 - If a test fails, check the log file in `/tmp/system-maintenance/` for details.
 - The full-cycle suite may produce warnings for transient file access issues (e.g., JSON not yet closed); these are non-fatal and retry logic handles them.
+
+## Historical scripts
+
+`smoke.sh`, `smoke_extended.sh`, `smoke_ultra.sh`, `args_edge.sh`, `edge_extended.sh`, `edge_advanced.sh`, `dryrun_fullcycle.sh`, `fullcycle_advanced.sh`, `comprehensive_rapid.sh`, and `combo_advanced.sh` were merged into the suites above. Refer to the `v2.1.1-pre-consolidation` tag if you ever need their exact layouts.

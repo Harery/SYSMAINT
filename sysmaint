@@ -123,6 +123,25 @@ CHROMIUM_CACHE_BYTES=0
 CHROME_CACHE_BYTES=0
 BROWSER_CACHE_PURGED_FLAG=false
 
+# Sandbox helpers: allow controlled "real-mode" tests without sudo by setting
+# SYSMAINT_FAKE_ROOT=1 and providing stubbed binaries via PATH. Never enable
+# this mode on production systems.
+FAKE_ROOT_ACTIVE=false
+FAKE_ROOT_NOTICE_SHOWN=false
+if [[ "${SYSMAINT_FAKE_ROOT:-0}" == "1" && $EUID -ne 0 ]]; then
+  FAKE_ROOT_ACTIVE=true
+fi
+
+is_effective_root() {
+  if [[ $EUID -eq 0 ]]; then
+    return 0
+  fi
+  if [[ "$FAKE_ROOT_ACTIVE" == "true" ]]; then
+    return 0
+  fi
+  return 1
+}
+
 for _arg in "$@"; do
   # Honor --dry-run as early as possible so root elevation is never attempted
   # during preview runs, regardless of flag order.
@@ -414,6 +433,13 @@ MEM_BEFORE_KB=0
 MEM_AFTER_KB=0
 SWAP_BEFORE_KB=0
 SWAP_AFTER_KB=0
+OS_DESCRIPTION="${OS_DESCRIPTION:-Unknown}"
+UPTIME_SECONDS="${UPTIME_SECONDS:-0}"
+PACKAGE_COUNT="${PACKAGE_COUNT:-0}"
+MEM_TOTAL_KB="${MEM_TOTAL_KB:-0}"
+MEM_AVAILABLE_KB_START="${MEM_AVAILABLE_KB_START:-0}"
+SWAP_TOTAL_KB="${SWAP_TOTAL_KB:-0}"
+DISK_ROOT_TOTAL_KB="${DISK_ROOT_TOTAL_KB:-0}"
 
 # ---- Kernel/orphan purge controls (defaults) ----
 PURGE_OLD_KERNELS="${PURGE_OLD_KERNELS:-false}"
@@ -1059,44 +1085,55 @@ require_root() {
       break
     fi
   done
-  # Allow non-root when doing a dry-run so users can safely test the script.
+
+  # Dry-runs and sandboxed fake-root sessions may proceed without elevation.
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    return 0
+  fi
+
+  if is_effective_root; then
+    if [[ "$FAKE_ROOT_ACTIVE" == "true" && "$FAKE_ROOT_NOTICE_SHOWN" != "true" ]]; then
+      log "SYSMAINT_FAKE_ROOT=1 detected: bypassing sudo for sandbox validation. Do not enable this mode on production systems."
+      FAKE_ROOT_NOTICE_SHOWN=true
+    fi
+    return 0
+  fi
+
   # If not running as root and not in DRY_RUN, attempt to re-exec with sudo
   # so users can simply run the script without typing sudo themselves.
-  if [[ "${DRY_RUN:-false}" != "true" && $EUID -ne 0 ]]; then
-      if command -v sudo >/dev/null 2>&1; then
-        log "Attempting non-interactive sudo elevation..."
-        # Preserve a curated set of environment variables across sudo to avoid
-        # losing flags like DRY_RUN, CLEAR_TMP, ASSUME_YES, etc. We will only
-        # attempt non-interactive elevation; do NOT fall back to interactive
-        # sudo because that prompts the user, which we avoid.
-        preserve_env=(
-          DRY_RUN CLEAR_TMP CLEAR_TMP_FORCE CLEAR_TMP_AGE_DAYS ASSUME_YES
-          AUTO_REBOOT LOG_DIR LOCKFILE JSON_SUMMARY SIMULATE_UPGRADE FIX_MISSING_KEYS
-          NO_SNAP PROGRESS_MODE PROGRESS_DURATION LOCK_WAIT_SECONDS
-          WAIT_MAX_RETRIES WAIT_TIMEOUT_SECONDS STALE_LOCK_THRESHOLD ONLY_CHECK_LOCKS FORCE_STAT_LOCK_CHECK
-        )
+  if command -v sudo >/dev/null 2>&1; then
+    log "Attempting non-interactive sudo elevation..."
+    # Preserve a curated set of environment variables across sudo to avoid
+    # losing flags like DRY_RUN, CLEAR_TMP, ASSUME_YES, etc. We will only
+    # attempt non-interactive elevation; do NOT fall back to interactive
+    # sudo because that prompts the user, which we avoid.
+    preserve_env=(
+      DRY_RUN CLEAR_TMP CLEAR_TMP_FORCE CLEAR_TMP_AGE_DAYS ASSUME_YES
+      AUTO_REBOOT LOG_DIR LOCKFILE JSON_SUMMARY SIMULATE_UPGRADE FIX_MISSING_KEYS
+      NO_SNAP PROGRESS_MODE PROGRESS_DURATION LOCK_WAIT_SECONDS
+      WAIT_MAX_RETRIES WAIT_TIMEOUT_SECONDS STALE_LOCK_THRESHOLD ONLY_CHECK_LOCKS FORCE_STAT_LOCK_CHECK
+    )
 
-        env_prefix=(env)
-        for v in "${preserve_env[@]}"; do
-          if [[ -n "${!v:-}" ]]; then
-            val="${!v//\"/\\\"}"
-            env_prefix+=("$v=$val")
-          fi
-        done
+    env_prefix=(env)
+    for v in "${preserve_env[@]}"; do
+      if [[ -n "${!v:-}" ]]; then
+        val="${!v//\"/\\\"}"
+        env_prefix+=("$v=$val")
+      fi
+    done
 
-        # Attempt non-interactive sudo. If it fails, exit with a clear message
-        # rather than prompting for password to avoid interrupting the user.
-        if sudo -n true >/dev/null 2>&1; then
-          exec sudo -E "${env_prefix[@]}" bash "$0" "$@"
-        else
-          echo "ERROR: This script requires root privileges. Non-interactive sudo failed (password required)." >&2
-          echo "Run with 'sudo' interactively, or configure passwordless sudo for this user if you want unattended runs." >&2
-          exit 1
-        fi
+    # Attempt non-interactive sudo. If it fails, exit with a clear message
+    # rather than prompting for password to avoid interrupting the user.
+    if sudo -n true >/dev/null 2>&1; then
+      exec sudo -E "${env_prefix[@]}" bash "$0" "$@"
     else
-      echo "ERROR: run as root (use sudo)." >&2
+      echo "ERROR: This script requires root privileges. Non-interactive sudo failed (password required)." >&2
+      echo "Run with 'sudo' interactively, or configure passwordless sudo for this user if you want unattended runs." >&2
       exit 1
     fi
+  else
+    echo "ERROR: run as root (use sudo)." >&2
+    exit 1
   fi
 }
 
@@ -3179,6 +3216,7 @@ print_summary() {
       printf '  "log_file_sha256": "%s",\n' "$lf_hash"
       printf '  "run_id": "%s",\n' "$(escape_json "$RUN_ID")"
       printf '  "timestamp": "%s",\n' "$timestamp"
+  printf '  "dry_run_mode": %s,\n' "${DRY_RUN}"
       printf '  "repos": {"ok": %s, "mismatch": %s, "unreachable": %s},\n' "$repo_ok_json" "$repo_mismatch_json" "$repo_fail_json"
       printf '  "kernel": {"current": "%s", "upgradable": %s},\n' "$(escape_json "$(uname -r)")" "$kernel_up_json"
       printf '  "missing_pubkeys": %s,\n' "$missing_keys_json"
