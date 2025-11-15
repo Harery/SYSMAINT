@@ -16,6 +16,7 @@ A safe, scriptable Ubuntu/Debian maintenance runner: APT + Snap updates, cleanup
   - Audit & governance report (Grade A+)
 - **Security Hardening**: See [docs/SECURITY.md](docs/SECURITY.md) for security audit guide (Stage 1.5)
 - **Test Coverage**: See [docs/TEST_COVERAGE.md](docs/TEST_COVERAGE.md) for detailed test documentation
+- **Performance Benchmarking**: See [docs/PERFORMANCE.md](docs/PERFORMANCE.md) for benchmark guide
 - **Quick Reference**: See below for common commands and flags
 - **Man Page**: `man sysmaint` (after installation)
 
