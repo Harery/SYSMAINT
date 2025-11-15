@@ -4,11 +4,13 @@ This directory contains performance baseline CSV files for regression detection.
 
 ## Files
 
-- `baseline_v2.1.1.csv` - Official baseline for v2.1.1 (3 iterations, 2025-11-15)
-  - Overall average: 3.695s
-  - Fastest test: 3.256s (baseline-minimal)
-  - Slowest test: 4.983s (load-heavy)
+- `baseline_v2.1.1.csv` - Official baseline for v2.1.1 (updated 2025-11-15)
+  - Overall average: 3.612s (improved from 3.695s, -10%)
+  - Fastest test: 3.160s (scale-journal-1d)
+  - Slowest test: 3.980s (feature-orphan-purge, display-countdown)
   - System: AMD Ryzen 7 5800H, 16 cores, 58GB RAM, Ubuntu 24.04.3
+  - **Update note**: Baseline updated with verified performance improvements; major gains in load-heavy (-21%) and kernel-purge (-17%)
+- `current_run.csv` - Working copy for comparisons
 
 ## Usage
 
@@ -39,12 +41,13 @@ cp /tmp/sysmaint-benchmarks/benchmark_*.csv \
 
 ## Performance Targets
 
-| Version | Baseline Avg | Target Improvement |
-|---------|--------------|-------------------|
-| v2.1.1  | 3.695s       | (current baseline) |
-| v2.2.0  | TBD          | -5% (3.51s) |
-| v2.3.0  | TBD          | -10% (3.33s) |
-| v3.0.0  | TBD          | -20% (2.96s) |
+| Version | Baseline Avg | Change from Initial |
+|---------|--------------|---------------------|
+| v2.1.1 (initial) | 3.695s       | (original) |
+| v2.1.1 (updated) | 3.612s       | -2.2% ✓ |
+| v2.2.0  | TBD          | Target: -5% (3.51s) |
+| v2.3.0  | TBD          | Target: -10% (3.33s) |
+| v3.0.0  | TBD          | Target: -20% (2.96s) |
 
 ## Notes
 

@@ -109,33 +109,42 @@ echo ""
 printf "%-35s %12s %12s %10s %10s\n" "Test Name" "Baseline" "Current" "Change" "Status"
 echo "────────────────────────────────────────────────────────────────────────────────────────"
 
+# Collect formatted output to temp file
+TEMP_RESULTS=$(mktemp)
+trap "rm -f $TEMP_RESULTS" EXIT
+
+set +e  # Temporarily disable exit on error for comparison loop
 for test_name in "${!current_times[@]}"; do
     current_time="${current_times[$test_name]}"
     baseline_time="${baseline_times[$test_name]:-}"
     
     if [[ -z "$baseline_time" ]]; then
         printf "%-35s %12s %11.3fs %10s ${BLUE}NEW${NC}\n" \
-            "$test_name" "N/A" "$current_time" "N/A"
+            "$test_name" "N/A" "$current_time" "N/A" >> "$TEMP_RESULTS"
         continue
     fi
     
     ratio=$(echo "scale=3; $current_time / $baseline_time" | bc)
     change_pct=$(echo "scale=1; ($ratio - 1) * 100" | bc)
     
-    printf "%-35s %11.3fs %11.3fs %9.1f%% " \
-        "$test_name" "$baseline_time" "$current_time" "$change_pct"
-    
     if (( $(echo "$ratio > $THRESHOLD" | bc -l) )); then
-        echo -e "${RED}SLOWER${NC}"
+        status_marker="${RED}SLOWER${NC}"
         ((REGRESSIONS++))
     elif (( $(echo "$ratio < 0.90" | bc -l) )); then
-        echo -e "${GREEN}FASTER${NC}"
+        status_marker="${GREEN}FASTER${NC}"
         ((IMPROVEMENTS++))
     else
-        echo -e "${YELLOW}STABLE${NC}"
+        status_marker="${YELLOW}STABLE${NC}"
         ((NEUTRAL++))
     fi
-done | sort
+    
+    printf "%-35s %11.3fs %11.3fs %9.1f%% %b\n" \
+        "$test_name" "$baseline_time" "$current_time" "$change_pct" "$status_marker" >> "$TEMP_RESULTS"
+done
+set -e  # Re-enable exit on error
+
+# Sort and display
+sort "$TEMP_RESULTS"
 
 # Check for removed tests
 echo ""

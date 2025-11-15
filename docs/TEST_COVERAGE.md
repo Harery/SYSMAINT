@@ -9,7 +9,7 @@
 
 ## Overview
 
-sysmaint has **300+ test scenarios** across **9 test suites** covering functional, edge case, integration, security, and packaging validation.
+sysmaint has **240+ test scenarios** across **8 active test suites** covering functional, edge case, integration, security, performance, and packaging validation. The former exhaustive full-cycle suite has been retired in favor of a lightweight param-driven combo generator and focused real-mode integration tests.
 
 ---
 
@@ -25,7 +25,9 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 | `test_suite_governance.sh` | 15 | Governance, audit trail, compliance mode | ~1 min |
 | `test_suite_compliance.sh` | 32 | Regulatory frameworks (PCI, HIPAA, SOC2, ISO, GDPR, CIS, FedRAMP, NIST) | ~2 min |
 | `test_suite_performance.sh` | 25+ | Performance benchmarks with regression detection | ~15 min |
-| **Subtotal** | **231+** | | **~26 min** |
+| `test_suite_combos.sh` | 40 | Representative multi-flag interactions (param-driven) | ~2 min |
+| `test_suite_realmode.sh` | 5 | Non-dry-run integration (sandboxed) | ~1 min |
+| **Subtotal** | **240+** | | **~29 min** |
 
 ### Specialized Test Scripts
 
@@ -39,9 +41,9 @@ sysmaint has **300+ test scenarios** across **9 test suites** covering functiona
 
 ### **Total Test Coverage**
 
-- **Total scenarios**: **231+ distinct test cases** (206 functional + 25+ performance)
-- **Total suites**: **6 test files** (smoke, edge, security, governance, compliance, performance)
-- **Full suite runtime**: **~26 minutes** (sequential, including benchmarks)
+- **Total scenarios**: **240+ distinct test cases** (200+ functional + 25+ performance + 40 combos + 5 real-mode)
+- **Total suites**: **8 test files** (smoke, edge, security, governance, compliance, performance, combos, realmode)
+- **Full suite runtime**: **~29 minutes** (sequential, including benchmarks)
 - **Pass rate**: **100%** (as of Stage 1.5 completion - November 15, 2025)
 
 ---
@@ -123,7 +125,19 @@ All **50+ environment variables** tested:
 DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run
 ```
 
-### 2. Full-Cycle Tests (97 scenarios)
+### 2. Combo Generator Suite (Param-Driven ~40 scenarios)
+
+**Purpose**: Replace exhaustive legacy full-cycle enumeration with curated, param-driven multi-flag interaction tests.
+
+**Strategy**: Deterministic sampling across upgrade, security, display, resource, desktop, and negation flag sets to validate representative intersections without runtime explosion.
+
+**Example**:
+```bash
+# Combined upgrade + security + display scenario
+DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run --upgrade --security-audit --check-zombies --color=always --progress=spinner
+```
+
+**Legacy Note**: The previous `test_suite_fullcycle.sh` (97 tests) is deprecated and moved to `tests/legacy/`.
 
 **Purpose**: Comprehensive feature validation and lifecycle testing
 
@@ -161,7 +175,7 @@ DRY_RUN=true bash sysmaint --dry-run --security-audit --check-zombies \
 bash sysmaint --clear-tmp --no-clear-tmp  # Should handle gracefully
 ```
 
-### 4. Realmode Sandbox Tests (5 scenarios)
+### 4. Real-Mode Integration Tests (5 scenarios)
 
 **Purpose**: Validate non-dry-run execution without system modification
 
@@ -487,7 +501,7 @@ fi
 - ✅ Multi-framework compliance scenarios (PCI-DSS, HIPAA, SOC 2, ISO 27001, GDPR, CIS, FedRAMP, NIST)
 - ✅ Hostname field added to JSON telemetry and schema
 
-### Stage 2 Testing Plans
+### Stage 2 Testing Plans (Updated)
 
 - **UI testing**: Interactive mode, wizard flows
 - **Performance tests**: Execution time benchmarks
@@ -500,7 +514,7 @@ fi
 ## Summary
 
 sysmaint has **comprehensive test coverage** with:
-- ✅ **206 test scenarios** across 5 core suites
+- ✅ **240+ test scenarios** across 8 active suites
 - ✅ **100% feature coverage** for all documented functionality
 - ✅ **100% pass rate** as of Stage 1.5 completion (November 15, 2025)
 - ✅ **JSON schema validation** with hostname field support

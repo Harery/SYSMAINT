@@ -2,9 +2,13 @@
 
 > Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 
+![Performance](https://img.shields.io/badge/performance-passing-brightgreen)
+![Security Scan](https://img.shields.io/badge/security%20scan-weekly-blue)
+![Tests](https://img.shields.io/badge/tests-240%2B%20passing-success)
+
 A safe, scriptable Ubuntu/Debian maintenance runner: APT + Snap updates, cleanup phases, rich JSON telemetry, and unattended/autopilot mode.
 
-**License**: MIT | **Status**: Production Ready | **Tests**: 290+ scenarios (100% pass)
+**License**: MIT | **Status**: Production Ready | **Tests**: 240+ active scenarios (100% pass)
 
 ## Documentation
 
@@ -12,7 +16,7 @@ A safe, scriptable Ubuntu/Debian maintenance runner: APT + Snap updates, cleanup
   - Project overview and status
   - Development roadmap (Stage 1 ✅ Complete, Stage 2 🚧 Planned)
   - Complete changelog
-  - Testing & validation results (290+ scenarios)
+	- Testing & validation results (240+ active scenarios)
   - Audit & governance report (Grade A+)
 - **Security Hardening**: See [docs/SECURITY.md](docs/SECURITY.md) for security audit guide (Stage 1.5)
 - **Test Coverage**: See [docs/TEST_COVERAGE.md](docs/TEST_COVERAGE.md) for detailed test documentation
@@ -230,14 +234,13 @@ bash tests/test_suite_smoke.sh
 bash tests/test_suite_edge.sh
 ```
 
-### Suite 3: Full-cycle lifecycle (`tests/test_suite_fullcycle.sh`, 97 tests)
+### Suite 3: Combo interactions (`tests/test_suite_combos.sh`, ~40 tests)
 
-- Successor to `dryrun_fullcycle.sh`, `fullcycle_advanced.sh`, and the combo gallery.
-- Seven phases: defaults, feature toggles, progress/display, advanced ops, combined desktop/server mixes, negative sweeps, and curated feature-combo triples/quads.
-- Every case sets `DRY_RUN=true JSON_SUMMARY=true`, validates against the JSON schema, and asserts key fields like `final_upgrade_enabled`, `desktop_guard_enabled`, `auto_mode`, `zombie_check_enabled`, etc.
+- Param-driven representative multi-flag combinations (upgrade/security/display/resource/desktop/negations).
+- Lightweight replacement for deprecated full-cycle suite; faster, easier to maintain.
 
 ```bash
-bash tests/test_suite_fullcycle.sh
+bash tests/test_suite_combos.sh
 ```
 
 ### JSON schema validation helpers
@@ -248,12 +251,12 @@ python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json /tmp/sys
 bash tests/test_json_negative.sh
 ```
 
-### Sandbox real-mode suite (`tests/test_suite_realmode_sandbox.sh`)
+### Real-mode integration suite (`tests/test_suite_realmode.sh`)
 
 Exercises representative non-dry-run flows with `SYSMAINT_FAKE_ROOT=1` and mocked binaries so CI can ensure "real" executions stay healthy.
 
 ```bash
-bash tests/test_suite_realmode_sandbox.sh
+bash tests/test_suite_realmode.sh
 ```
 
 ### Tier 1 profile launcher tests (`tests/test_profiles_tier1.sh`)
@@ -272,16 +275,70 @@ Builds the `.deb` in a temp directory and (when `lintian` is installed) lint-che
 bash tests/test_package_build.sh
 ```
 
-### Run everything
+### Run everything (core + combos + realmode)
 
 ```bash
 bash tests/test_suite_smoke.sh && \
 bash tests/test_suite_edge.sh  && \
-bash tests/test_suite_fullcycle.sh && \
+bash tests/test_suite_combos.sh && \
+bash tests/test_suite_realmode.sh && \
 bash tests/validate_json.sh
 ```
 
 All suites stay in dry-run mode and run automatically in `.github/workflows/dry-run.yml`.
+
+### Performance Regression Gate
+
+Automated CI workflow (`.github/workflows/performance.yml`) runs on every PR:
+- Executes quick benchmark suite (1 iteration per test)
+- Compares against committed baseline (`benchmarks/baseline_v2.2.0.csv`)
+- Fails build if any test shows >20% regression
+- Uploads benchmark artifacts for analysis
+
+**Local validation:**
+```bash
+# Run quick benchmark
+BENCHMARK_RUNS=1 bash tests/test_suite_performance.sh
+
+# Compare against baseline
+bash tests/benchmark_compare.sh \
+  benchmarks/baseline_v2.2.0.csv \
+  /tmp/sysmaint-benchmarks/benchmark_$(date +%Y%m%d)_*.csv
+```
+
+### External Security Scanners
+
+Optional integration with lynis and rkhunter for enhanced security validation:
+
+**Run scanners:**
+```bash
+# Basic run (generates JSON summary + logs)
+bash sysmaint_scanners.sh
+
+# With thresholds (exit non-zero on violations)
+LYNIS_MIN_SCORE=80 RKHUNTER_MAX_WARNINGS=5 bash sysmaint_scanners.sh
+
+# Disable specific scanners
+SCAN_LYNIS=false bash sysmaint_scanners.sh
+SCAN_RKHUNTER=false bash sysmaint_scanners.sh
+```
+
+**Test scanner integration:**
+```bash
+bash tests/test_suite_scanners.sh
+```
+
+**Artifacts:**
+- Summary: `scanner_artifacts/summary_<timestamp>.json`
+- Lynis report: `scanner_artifacts/lynis_<timestamp>.log`
+- RKHunter report: `scanner_artifacts/rkhunter_<timestamp>.log`
+- Auto-cleanup: Files older than `SCANNER_RETENTION_DAYS` (default: 30)
+
+**CI Integration:**
+- Weekly scheduled scans (`.github/workflows/security-scan.yml`)
+- Threshold-based pass/fail
+- 90-day artifact retention
+- PR comments with scan summary
 
 ## Quick Reference
 
@@ -353,6 +410,26 @@ Schema: docs/schema/sysmaint-summary.schema.json
 - **Network issues**: Tune `NETWORK_RETRY_*` environment variables
 - **No JSON**: Set `JSON_SUMMARY=true` or pass `--json-summary`
 - **Permissions**: Run with `sudo` for actual maintenance (dry-run doesn't require root)
+
+## CI/CD Integration
+
+### GitHub Actions Workflows
+
+**Performance Regression Gate** (`.github/workflows/performance.yml`):
+- Runs on every PR and push to main
+- Executes 1-iteration benchmark suite (~5 min)
+- Compares against `benchmarks/baseline_v2.1.1.csv`
+- Fails if any test shows >20% regression
+- Uploads artifacts for 90 days
+
+**Security Scanning** (`.github/workflows/security-scan.yml`):
+- Runs weekly (Sunday 02:00 UTC) and on security-related changes
+- Installs lynis + rkhunter
+- Enforces thresholds (lynis ≥70, rkhunter warnings ≤10)
+- Comments scan results on PRs
+- Retains artifacts for 90 days
+
+Both workflows can be triggered manually via workflow_dispatch.
 
 ## Version & Contact
 

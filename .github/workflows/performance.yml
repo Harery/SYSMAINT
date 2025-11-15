@@ -1,0 +1,49 @@
+name: Performance Regression
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up bash
+        run: echo "Using bash $BASH_VERSION"
+
+      - name: Run performance suite (reduced runs)
+        env:
+          BENCHMARK_RUNS: 1
+        run: |
+          bash tests/test_suite_performance.sh
+          ls -1 /tmp/sysmaint-benchmarks
+
+      - name: Locate current report
+        id: report
+        run: |
+          latest=$(ls -t /tmp/sysmaint-benchmarks/benchmark_*.csv | head -n1)
+          echo "latest=$latest" >> $GITHUB_OUTPUT
+
+      - name: Compare with baseline
+        run: |
+          bash tests/benchmark_compare.sh benchmarks/baseline_v2.2.0.csv "${{ steps.report.outputs.latest }}"
+
+      - name: Upload benchmark artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-benchmarks
+          path: |
+            /tmp/sysmaint-benchmarks/benchmark_*.csv
+            benchmarks/baseline_v2.2.0.csv
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Benchmark comparison completed."

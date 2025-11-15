@@ -19,3 +19,4 @@ tests/__pycache__/
 # Temp files
 *.tmp
 *~
+scanner_artifacts/
