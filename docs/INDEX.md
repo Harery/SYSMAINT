@@ -67,4 +67,4 @@ Function: Maps purpose → file; lists owner topics and quick links
 ---
 
 Maintainer: Mohamed Elharery <Mohamed@Harery.com>
-Last updated: 2025-11-15 (post-consolidation cleanup)
+Last updated: November 15, 2025 (post-consolidation cleanup)

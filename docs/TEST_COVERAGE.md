@@ -322,7 +322,7 @@ bash tests/test_suite_edge.sh
 ### Continuous Integration
 
 Tests run automatically via GitHub Actions on:
-- Every commit to `main`
+ - Every commit to `master`
 - Pull requests
 - Manual workflow dispatch
 
