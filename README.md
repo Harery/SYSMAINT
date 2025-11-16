@@ -119,13 +119,19 @@ sudo ./sysmaint --upgrade --security-audit --check-zombies --json-summary
 
 Previously separate scripts `sysmaint_profiles.sh` and `sysmaint_scanners.sh` removed. Use embedded subcommands. Legacy full-cycle suite replaced by `test_suite_combos.sh`.
 
-## Where Next
+## Documentation Map
 
-- Read: `docs/INDEX.md` (map)
-- Tests: `docs/TEST_COVERAGE.md`
-- Security: `docs/SECURITY.md`
-- Performance: `docs/PERFORMANCE.md`
- - Changelog: `CHANGELOG.md`
+**Primary Docs** (single purpose per file):
+- Testing & Coverage → `docs/TEST_COVERAGE.md` (suites, counts, JSON schema validation)
+- Security Hardening → `docs/SECURITY.md` (audit, best practices, lynis/rkhunter)
+- Performance & Baselines → `docs/PERFORMANCE.md` (benchmarks, regression gate, CSV outputs)
+- Changelog → `CHANGELOG.md` (release notes, SemVer)
+
+**Topic Ownership**:
+- Core usage, flags, examples → this README
+- Test execution, coverage matrix → `docs/TEST_COVERAGE.md`
+- Security audit details, permissions → `docs/SECURITY.md`
+- Benchmarks, performance gate → `docs/PERFORMANCE.md`
 
 ## Contact
 
