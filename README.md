@@ -131,3 +131,10 @@ Previously separate scripts `sysmaint_profiles.sh` and `sysmaint_scanners.sh` re
 
 Author: Mohamed Elharery <Mohamed@Harery.com>
 MIT Licensed. Safe to run dry-first. Contributions welcome.
+
+## Modularization Summary (2025-11-16)
+
+- Extracted common utilities, JSON generation, and subcommands into `lib/` while keeping 100% backward compatibility.
+- Merged progress UI into `lib/utils.sh` and removed `lib/progress.sh` to reduce file count.
+- Removed on-disk monolith backup (`sysmaint.monolith`) since Git history preserves it.
+- All suites remain green: smoke (65), edge (67), JSON (2), security (36), governance (18), compliance (32), scanners (10), sandbox (5).

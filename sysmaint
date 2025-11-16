@@ -39,9 +39,7 @@ fi
 if [[ -f "$SCRIPT_DIR/lib/subcommands.sh" ]]; then
   source "$SCRIPT_DIR/lib/subcommands.sh"
 fi
-if [[ -f "$SCRIPT_DIR/lib/progress.sh" ]]; then
-  source "$SCRIPT_DIR/lib/progress.sh"
-fi
+# progress UI functions are now included in lib/utils.sh
 
 LOG_DIR="${LOG_DIR:-/tmp/system-maintenance}"
 # Ensure the log directory exists early so subsequent logging can proceed.
