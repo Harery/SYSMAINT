@@ -220,6 +220,45 @@ else
 fi
 
 # ==============================================================================
+# Test 16: Unique run_id per execution
+# ==============================================================================
+run_test "Governance assigns unique run_id per run"
+DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run >/dev/null 2>&1 || true
+f1=$(ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -1)
+rid1=$(grep '"run_id"' "$f1" 2>/dev/null | head -1 || echo "")
+sleep 2
+DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run >/dev/null 2>&1 || true
+f2=$(ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -1)
+rid2=$(grep '"run_id"' "$f2" 2>/dev/null | head -1 || echo "")
+if [[ -n "$rid1" && -n "$rid2" && "$rid1" != "$rid2" ]]; then
+  pass "Unique run_id per run"
+else
+  fail "run_id not unique across runs (rid1='$rid1' rid2='$rid2')"
+fi
+
+# ==============================================================================
+# Test 17: JSON includes log_file field
+# ==============================================================================
+run_test "Governance JSON includes log_file path"
+json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+if [[ -f "$json_file" ]] && grep -q '"log_file"' "$json_file"; then
+  pass "JSON contains log_file"
+else
+  fail "JSON missing log_file"
+fi
+
+# ==============================================================================
+# Test 18: JSON includes hostname
+# ==============================================================================
+run_test "Governance JSON includes hostname"
+json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+if [[ -f "$json_file" ]] && grep -q '"hostname"' "$json_file"; then
+  pass "JSON contains hostname"
+else
+  fail "JSON missing hostname"
+fi
+
+# ==============================================================================
 # Summary
 # ==============================================================================
 echo ""

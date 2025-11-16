@@ -1,5 +1,10 @@
 # Security Hardening Guide
 
+Name: Security Hardening
+Purpose: Enable and interpret audit; best practices and integrations
+Need: Operational security posture and compliance readiness
+Function: Explain checks, outputs, remediation, and tool integrations
+
 > Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 
 **Version**: 2.1.1  

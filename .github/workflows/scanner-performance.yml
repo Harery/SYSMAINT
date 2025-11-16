@@ -1,0 +1,43 @@
+name: Scanner Performance
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly Sunday 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  scanner-perf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure executable bits
+        run: |
+          chmod +x sysmaint tests/test_suite_scanner_performance.sh || true
+
+      - name: Run scanner performance suite
+        continue-on-error: true
+        run: |
+          bash tests/test_suite_scanner_performance.sh
+
+      - name: Upload scanner artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scanner-artifacts
+          path: |
+            scanner_artifacts/summary_*.json
+            scanner_artifacts/*.log
+          retention-days: 30
+
+      - name: Upload suite logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scanner-perf-logs
+          path: |
+            /tmp/system-maintenance/sysmaint_*.log
+            /tmp/system-maintenance/sysmaint_*.json
+          retention-days: 7

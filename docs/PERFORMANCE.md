@@ -1,5 +1,10 @@
 # Performance Benchmarking Guide
 
+Name: Performance & Baselines
+Purpose: Benchmark, compare, and gate regressions in CI
+Need: Detect slowdowns and track performance trends across releases
+Function: How to run benchmarks, manage baselines, and interpret results
+
 > © 2025 Mohamed Elharery <Mohamed@Harery.com>
 
 **Version**: 2.1.1  

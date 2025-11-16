@@ -143,6 +143,35 @@ run_test "ultra-display-quiet" --color=auto --progress=quiet
 run_test "ultra-display-always-quiet" --color=always --progress=quiet
 run_test "ultra-display-never-spinner" --color=never --progress=spinner
 
+# === Profiles Subcommand Tests (Tier 1) ===
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║  PROFILES SUBCOMMAND TESTS                                 ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+
+profiles_test() {
+  local label="$1" output="$2" needle="$3"
+  echo -n "Test: $label... "
+  if [[ "$output" == *"$needle"* ]]; then
+    echo "✅ PASS"
+    PASSED=$((PASSED + 1))
+  else
+    echo "❌ FAIL (expected '$needle')"
+    FAILED=$((FAILED + 1))
+  fi
+}
+
+minimal_cmd=$(bash "$SCRIPT" profiles --profile minimal --print-command 2>/dev/null || echo "")
+profiles_test "minimal includes --dry-run" "$minimal_cmd" "--dry-run"
+profiles_test "minimal includes --json-summary" "$minimal_cmd" "--json-summary"
+
+server_cmd=$(bash "$SCRIPT" profiles --profile server --print-command 2>/dev/null || echo "")
+profiles_test "server includes --security-audit" "$server_cmd" "--security-audit"
+profiles_test "server includes --check-zombies" "$server_cmd" "--check-zombies"
+
+extra_cmd=$(bash "$SCRIPT" profiles --profile desktop --print-command -- --color=never 2>/dev/null || echo "")
+profiles_test "extra flags appended" "$extra_cmd" "--color=never"
+
 echo ""
 echo "╔════════════════════════════════════════════════════════════╗"
 echo "║  CONSOLIDATED SMOKE TEST RESULTS                           ║"

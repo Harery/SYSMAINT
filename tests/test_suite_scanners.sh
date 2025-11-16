@@ -3,7 +3,7 @@
 set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-SCANNER_SCRIPT="$REPO_ROOT/sysmaint_scanners.sh"
+SYSMAINT="$REPO_ROOT/sysmaint"
 
 PASSED=0 FAILED=0 TOTAL=0
 pass(){ echo "✅ $1"; PASSED=$((PASSED+1)); TOTAL=$((TOTAL+1)); }
@@ -22,21 +22,21 @@ test_run() {
   fi
 }
 
-if [[ ! -f "$SCANNER_SCRIPT" ]]; then
-  echo "Scanner script missing" >&2; exit 1;
+if [[ ! -f "$SYSMAINT" ]]; then
+  echo "sysmaint missing" >&2; exit 1;
 fi
 
 # Test 1: default invocation (may skip if tools absent)
-test_run "default-run" bash "$SCANNER_SCRIPT"
+test_run "default-run" bash "$SYSMAINT" scanners
 
 # Test 2: disable lynis
-test_run "no-lynis" env SCAN_LYNIS=false bash "$SCANNER_SCRIPT"
+test_run "no-lynis" env SCAN_LYNIS=false bash "$SYSMAINT" scanners
 
 # Test 3: disable rkhunter
-test_run "no-rkhunter" env SCAN_RKHUNTER=false bash "$SCANNER_SCRIPT"
+test_run "no-rkhunter" env SCAN_RKHUNTER=false bash "$SYSMAINT" scanners
 
 # Test 4: both disabled (should still produce summary file)
-test_run "none" env SCAN_LYNIS=false SCAN_RKHUNTER=false bash "$SCANNER_SCRIPT"
+test_run "none" env SCAN_LYNIS=false SCAN_RKHUNTER=false bash "$SYSMAINT" scanners
 
 # Test 5: Verify summary file presence
 LATEST_SUMMARY=$(ls -1t "$REPO_ROOT"/scanner_artifacts/summary_*.json 2>/dev/null | head -n1 || true)
@@ -72,7 +72,7 @@ MOCK_LYNIS="$MOCK_OUT/lynis_mock_$(date -u +%Y%m%dT%H%M%SZ).log"
 echo "Hardening index : [50]" > "$MOCK_LYNIS"
 # If lynis is not installed, test passes as we can't validate threshold
 if command -v lynis >/dev/null 2>&1; then
-  if env LYNIS_MIN_SCORE=999 SCAN_RKHUNTER=false bash "$SCANNER_SCRIPT" >/dev/null 2>&1; then
+  if env LYNIS_MIN_SCORE=999 SCAN_RKHUNTER=false bash "$SYSMAINT" scanners >/dev/null 2>&1; then
     fail "threshold-low-score (should have failed with score below 999)"
   else
     pass "threshold-low-score (correctly failed)"
@@ -84,7 +84,7 @@ rm -f "$MOCK_LYNIS"
 
 # Test 8: Threshold enforcement - acceptable score passes
 echo "[TEST $((TOTAL+1))] threshold-pass"
-if env LYNIS_MIN_SCORE=0 bash "$SCANNER_SCRIPT" >/dev/null 2>&1; then
+if env LYNIS_MIN_SCORE=0 bash "$SYSMAINT" scanners >/dev/null 2>&1; then
   pass "threshold-pass"
 else
   fail "threshold-pass"
@@ -96,7 +96,7 @@ TEMP_OLD="$REPO_ROOT/scanner_artifacts/summary_20240901T000000Z.json"
 touch -t 202409010000 "$TEMP_OLD" 2>/dev/null || touch "$TEMP_OLD"
 if [[ -f "$TEMP_OLD" ]]; then
   # Run with short retention to trigger cleanup
-  env RETENTION_DAYS=30 bash "$SCANNER_SCRIPT" >/dev/null 2>&1 || true
+  env RETENTION_DAYS=30 bash "$SYSMAINT" scanners >/dev/null 2>&1 || true
   if [[ ! -f "$TEMP_OLD" ]]; then
     pass "artifact-cleanup (old file removed)"
   else
@@ -114,7 +114,7 @@ fi
 
 # Test 10: Missing tools handling
 echo "[TEST $((TOTAL+1))] missing-tools"
-if env PATH=/nonexistent SCAN_LYNIS=true SCAN_RKHUNTER=true bash "$SCANNER_SCRIPT" >/dev/null 2>&1; then
+if env PATH=/nonexistent SCAN_LYNIS=true SCAN_RKHUNTER=true bash "$SYSMAINT" scanners >/dev/null 2>&1; then
   pass "missing-tools (gracefully handled)"
 else
   # Should not fail hard when tools missing

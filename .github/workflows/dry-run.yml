@@ -47,13 +47,8 @@ jobs:
       - name: Validate JSON against schema
         run: |
           pipx install jsonschema || pip install --user jsonschema || python3 -m pip install --user jsonschema || true
-          chmod +x tests/validate_json.py tests/validate_json.sh || true
-          bash tests/validate_json.sh
-
-      - name: Run JSON negative tests
-        run: |
-          chmod +x tests/test_json_negative.sh
-          bash tests/test_json_negative.sh
+          chmod +x tests/validate_json.py tests/test_json_validation.sh || true
+          bash tests/test_json_validation.sh
 
       - name: Ensure script parses help
         run: |
@@ -74,12 +69,7 @@ jobs:
           chmod +x tests/test_suite_realmode_sandbox.sh
           bash tests/test_suite_realmode_sandbox.sh
 
-      - name: Run Tier 1 profile tests
-        run: |
-          chmod +x sysmaint_profiles.sh tests/test_profiles_tier1.sh
-          bash tests/test_profiles_tier1.sh
-
-  full-cycle:
+  feature-combos:
     runs-on: ubuntu-latest
     needs: dry-run
     steps:
@@ -89,25 +79,25 @@ jobs:
       - name: Prepare validators
         run: |
           pipx install jsonschema || pip install --user jsonschema || python3 -m pip install --user jsonschema || true
-          chmod +x tests/validate_json.py tests/validate_json.sh || true
+          chmod +x tests/validate_json.py tests/test_json_validation.sh || true
 
       - name: Ensure executable bits
         run: |
-          chmod +x sysmaint tests/test_suite_fullcycle.sh || true
+          chmod +x sysmaint tests/test_suite_combos.sh || true
 
       - name: Bash syntax check
         run: bash -n sysmaint
 
-      - name: Run full-cycle dry-run suite
+      - name: Run feature combinations suite
         env:
           DRY_RUN: "true"
           JSON_SUMMARY: "true"
         run: |
-          bash tests/test_suite_fullcycle.sh
+          bash tests/test_suite_combos.sh
 
   package-build:
     runs-on: ubuntu-latest
-    needs: full-cycle
+    needs: feature-combos
     steps:
       - name: Checkout
         uses: actions/checkout@v4

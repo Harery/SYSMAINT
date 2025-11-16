@@ -1,5 +1,10 @@
 # sysmaint Test Coverage Summary
 
+Name: Testing & Coverage
+Purpose: Single source for test suites, counts, and execution
+Need: Run, verify, and understand quality gates across scenarios
+Function: Document suites, examples, JSON schema validation, and specialized scripts
+
 > Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 
 **Version**: 2.1.1  
@@ -19,25 +24,25 @@ sysmaint has **240+ test scenarios** across **8 active test suites** covering fu
 
 | Suite | Tests | Coverage | Runtime |
 |-------|-------|----------|---------|
-| `test_suite_smoke.sh` | 60 | Basic functionality, smoke tests | ~3 min |
+| `test_suite_smoke.sh` | 65 | Basic functionality, smoke tests (includes profiles) | ~3 min |
 | `test_suite_edge.sh` | 67 | Argument parsing, edge cases | ~3 min |
 | `test_suite_security.sh` | 32 | Security audit features | ~2 min |
 | `test_suite_governance.sh` | 15 | Governance, audit trail, compliance mode | ~1 min |
 | `test_suite_compliance.sh` | 32 | Regulatory frameworks (PCI, HIPAA, SOC2, ISO, GDPR, CIS, FedRAMP, NIST) | ~2 min |
 | `test_suite_performance.sh` | 25+ | Performance benchmarks with regression detection | ~15 min |
-| `test_suite_combos.sh` | 40 | Representative multi-flag interactions (param-driven) | ~2 min |
-| `test_suite_realmode.sh` | 5 | Non-dry-run integration (sandboxed) | ~1 min |
+| `test_suite_combos.sh` | 28 | Representative multi-flag interactions (param-driven) | ~2 min |
+| `test_suite_realmode_sandbox.sh` | 5 | Non-dry-run integration (sandboxed) | ~1 min |
 | **Subtotal** | **240+** | | **~29 min** |
 
 ### Specialized Test Scripts
 
 | Script | Tests | Coverage | Runtime |
 |--------|-------|----------|---------|
-| `test_profiles_tier1.sh` | 5 | Profile preset validation | ~1 min |
-| `test_json_negative.sh` | 5 | JSON validation failure cases | <1 min |
+| `test_json_validation.sh` | 2 | JSON schema validation (positive + negative) | <1 min |
+| `test_suite_scanners.sh` | 10 | External scanner integration | ~2 min |
 | `test_package_build.sh` | 1 | Debian package build | ~2 min |
-| `validate_json.sh` | N/A | JSON schema validation wrapper | <1 min |
-| **Subtotal** | **11+** | | **~4 min** |
+| `test_suite_scanner_performance.sh` | 6 | External scanner timing + artifacts | ~5–10 min |
+| **Subtotal** | **19+** | | **~10–15 min** |
 
 ### **Total Test Coverage**
 
@@ -125,7 +130,7 @@ All **50+ environment variables** tested:
 DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run
 ```
 
-### 2. Combo Generator Suite (Param-Driven ~40 scenarios)
+### 2. Combo Generator Suite (Param-Driven ~28 scenarios)
 
 **Purpose**: Replace exhaustive legacy full-cycle enumeration with curated, param-driven multi-flag interaction tests.
 
@@ -137,25 +142,7 @@ DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run
 DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run --upgrade --security-audit --check-zombies --color=always --progress=spinner
 ```
 
-**Legacy Note**: The previous `test_suite_fullcycle.sh` (97 tests) is deprecated and moved to `tests/legacy/`.
-
-**Purpose**: Comprehensive feature validation and lifecycle testing
-
-**Phases**:
-1. Defaults and upgrade basics (10 tests)
-2. Individual feature toggles (15 tests)
-3. Progress and visual modes (12 tests)
-4. Advanced operations (18 tests)
-5. Desktop/server mixes (12 tests)
-6. Negative flag sweeps (18 tests)
-7. Feature combinations (12 tests)
-
-**Example**:
-```bash
-# Test: Full security sweep with all audit features
-DRY_RUN=true bash sysmaint --dry-run --security-audit --check-zombies \
-  --orphan-purge --browser-cache-report
-```
+<!-- Legacy full-cycle suite removed; combos provide representative coverage with less runtime. -->
 
 ### 3. Edge Case Tests (67 scenarios)
 
@@ -199,7 +186,7 @@ export SYSMAINT_FAKE_ROOT=1
 bash sysmaint --json-summary
 ```
 
-### 5. Security Tests (32 scenarios)
+### 5. Security Tests (36 scenarios)
 
 **Purpose**: Validate Stage 1.5 security hardening features
 
@@ -220,7 +207,7 @@ bash sysmaint --json-summary
 14. Start/completion markers
 15-19. Permission checks (world-writable, SUID/SGID binaries)
 20-24. Governance checks (audit logging, timestamps, change tracking, privilege validation, config drift)
-25-32. Compliance checks (PCI-DSS, HIPAA, SOC 2, ISO 27001, GDPR, CIS, FedRAMP, NIST)
+25-36. Compliance and governance extensions (PCI-DSS, HIPAA, SOC 2, ISO 27001, GDPR, CIS, FedRAMP, NIST; plus JSON field presence including `zombie_count`, precedence checks, and sudoers.d issues array validation)
 
 **Example**:
 ```bash
@@ -229,7 +216,7 @@ DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run --security-audit
 jq '.security_audit_enabled, .shadow_perms_ok' /tmp/system-maintenance/sysmaint_*.json
 ```
 
-### 6. Governance Tests (15 scenarios)
+### 6. Governance Tests (18 scenarios)
 
 **Purpose**: Validate audit trail, change management, and governance telemetry
 
@@ -335,7 +322,7 @@ bash tests/test_suite_edge.sh
 ### Continuous Integration
 
 Tests run automatically via GitHub Actions on:
-- Every commit to `master`
+- Every commit to `main`
 - Pull requests
 - Manual workflow dispatch
 
@@ -459,14 +446,12 @@ fi
    ```
 
 2. **Update test counts** when adding tests:
-   - This document
-   - `tests/README.md`
-   - `DOCUMENTATION.md`
+  - This document
 
 3. **Validate JSON schema** after sysmaint changes:
-   ```bash
-   bash tests/validate_json.sh
-   ```
+  ```bash
+  bash tests/test_json_validation.sh
+  ```
 
 4. **Review CI logs** for intermittent failures
 
@@ -522,4 +507,76 @@ sysmaint has **comprehensive test coverage** with:
 - ✅ **Governance and audit trail** tests (15 scenarios)
 - ✅ **Compliance framework** tests (32 scenarios across 8 frameworks)
 
-For detailed test execution instructions, see `tests/README.md`.
+For detailed test execution instructions, use this document and the index at `docs/INDEX.md`.
+
+## Flag Duplication Matrix
+
+Generated: 2025-11-15T19:09:07Z
+Suites: 8
+
+| Flag | Smoke | Edge | Security | Governance | Compliance | Performance | Combos | RealMode |
+|------|:-----:|:----:|:--------:|:----------:|:----------:|:-----------:|:------:|:-------:|
+| --auto | ✅ | ✅ |  |  |  |  |  | ✅ |
+| --auto-reboot | ✅ | ✅ |  |  |  |  |  | ✅ |
+| --auto-reboot-delay | ✅ | ✅ |  |  |  |  |  | ✅ |
+| --auto-reboot-delay=0 |  | ✅ |  |  |  |  |  |  |
+| --auto-reboot-delay=15 | ✅ |  |  |  |  |  |  |  |
+| --auto-reboot-delay=30 |  | ✅ |  |  |  |  |  |  |
+| --auto-reboot-delay=300 |  | ✅ |  |  |  |  |  |  |
+| --auto-reboot-delay=45 |  |  |  |  |  |  |  | ✅ |
+| --auto-reboot-delay=60 | ✅ | ✅ |  |  |  |  |  |  |
+| --browser-cache-purge | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ |
+| --browser-cache-report | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ |
+| --check-zombies | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ |
+| --clear-journal |  |  |  |  |  | ✅ |  |  |
+| --clear-tmp | ✅ | ✅ |  |  |  |  |  |  |
+| --clear-tmp-force | ✅ | ✅ |  |  |  |  |  |  |
+| --color=always | ✅ | ✅ |  |  |  |  | ✅ |  |
+| --color=auto | ✅ |  |  |  |  |  | ✅ |  |
+| --color=never | ✅ | ✅ |  |  |  |  | ✅ |  |
+| --definitely-unknown-flag |  | ✅ |  |  |  |  |  |  |
+| --drop-caches | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --dry-run |  | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |  |
+| --fstrim | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --help |  | ✅ |  |  |  |  |  |  |
+| --journal-days=1 | ✅ | ✅ |  |  |  | ✅ |  |  |
+| --journal-days=14 | ✅ | ✅ |  |  |  |  |  |  |
+| --journal-days=21 | ✅ |  |  |  |  |  |  |  |
+| --journal-days=3 | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --journal-days=30 | ✅ |  |  |  |  | ✅ |  |  |
+| --journal-days=365 |  | ✅ |  |  |  | ✅ |  |  |
+| --journal-days=42 |  | ✅ |  |  |  |  |  |  |
+| --journal-days=5 |  | ✅ |  |  |  |  |  |  |
+| --journal-days=60 | ✅ |  |  |  |  |  |  |  |
+| --journal-days=7 | ✅ | ✅ |  |  |  |  |  |  |
+| --journal-days=90 | ✅ |  |  |  |  |  |  |  |
+| --json-summary |  |  |  |  |  | ✅ |  | ✅ |
+| --keep-kernels=1 | ✅ | ✅ |  |  |  | ✅ |  |  |
+| --keep-kernels=10 |  | ✅ |  |  |  | ✅ |  |  |
+| --keep-kernels=2 | ✅ | ✅ |  |  |  |  | ✅ |  |
+| --keep-kernels=3 | ✅ | ✅ |  |  |  |  |  |  |
+| --keep-kernels=4 | ✅ | ✅ |  |  |  |  |  |  |
+| --keep-kernels=5 | ✅ |  |  |  |  | ✅ |  |  |
+| --no-check-zombies |  |  |  |  |  |  | ✅ |  |
+| --no-clear-tmp | ✅ | ✅ |  |  |  |  | ✅ |  |
+| --no-desktop-guard | ✅ | ✅ |  |  |  |  |  |  |
+| --no-flatpak |  |  |  |  |  |  | ✅ |  |
+| --no-journal-vacuum |  |  |  |  |  |  | ✅ |  |
+| --no-snap | ✅ | ✅ |  |  |  |  | ✅ |  |
+| --no-snap-clean-old | ✅ | ✅ |  |  |  |  |  |  |
+| --no-snap-clear-cache | ✅ | ✅ |  |  |  |  |  |  |
+| --orphan-purge | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --progress=bar |  |  |  |  |  |  | ✅ |  |
+| --progress=countdown |  |  |  |  |  | ✅ |  |  |
+| --progress=dots | ✅ | ✅ |  |  |  | ✅ |  |  |
+| --progress=quiet | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --progress=spinner | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --purge-kernels | ✅ | ✅ |  |  |  | ✅ | ✅ |  |
+| --security-audit | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| --upgrade | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| --version |  | ✅ |  |  |  |  |  |  |
+
+Summary:
+- Total unique flags: 59
+- Legacy full-cycle suite deprecated (see legacy folder).
+- Normalization: quotes/parens/punctuation removed; canonical pattern enforced.

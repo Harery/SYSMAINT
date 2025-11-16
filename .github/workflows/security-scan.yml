@@ -9,7 +9,7 @@ on:
     branches: [ main ]
     paths:
       - 'sysmaint'
-      - 'sysmaint_scanners.sh'
+      - 'sysmaint'
       - '.github/workflows/security-scan.yml'
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
           sudo rkhunter --update || true
           sudo rkhunter --propupd || true
 
-      - name: Run scanner orchestrator
+      - name: Run scanner orchestrator (embedded)
         id: scan
         continue-on-error: true
         env:
@@ -39,7 +39,7 @@ jobs:
           RKHUNTER_MAX_WARNINGS: 10
           RETENTION_DAYS: 7
         run: |
-          bash sysmaint_scanners.sh
+          bash sysmaint scanners
 
       - name: Upload scan artifacts
         if: always()

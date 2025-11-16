@@ -417,6 +417,51 @@ else
 fi
 
 # ==============================================================================
+# Test 29: Security - Flag overrides env=false
+# ==============================================================================
+run_test "Security audit flag overrides env false"
+output=$(DRY_RUN=true SECURITY_AUDIT_ENABLED=false JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+if echo "$output" | grep -q "=== Security audit start ==="; then
+  pass "Flag overrides env=false for security audit"
+else
+  fail "Flag did not override env=false"
+fi
+
+# ==============================================================================
+# Test 30: Security - JSON marks security_audit_enabled true
+# ==============================================================================
+run_test "JSON marks security_audit_enabled true when enabled"
+DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run --security-audit >/dev/null 2>&1 || true
+jf=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+if [[ -f "$jf" ]] && grep -q '"security_audit_enabled": true' "$jf"; then
+  pass "JSON shows security_audit_enabled=true"
+else
+  fail "JSON missing or security_audit_enabled not true"
+fi
+
+# ==============================================================================
+# Test 31: Security - JSON includes zombie_count field
+# ==============================================================================
+run_test "JSON includes zombie_count field"
+jf=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+if [[ -f "$jf" ]] && grep -q '"zombie_count"' "$jf"; then
+  pass "JSON contains zombie_count"
+else
+  fail "JSON missing zombie_count"
+fi
+
+# ==============================================================================
+# Test 32: Security - sudoers_d_issues is array
+# ==============================================================================
+run_test "JSON sudoers_d_issues is an array"
+jf=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+if [[ -f "$jf" ]] && grep -q '"sudoers_d_issues": \[' "$jf"; then
+  pass "sudoers_d_issues is an array"
+else
+  fail "sudoers_d_issues not represented as an array"
+fi
+
+# ==============================================================================
 # Summary
 # ==============================================================================
 echo ""
