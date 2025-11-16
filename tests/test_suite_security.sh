@@ -42,6 +42,11 @@ cleanup() {
 
 trap cleanup EXIT
 
+# Helper: get the most recent JSON summary by mtime
+latest_json() {
+  ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -1 || true
+}
+
 # ==============================================================================
 # Test 1: Security audit disabled by default
 # ==============================================================================
@@ -82,7 +87,7 @@ run_test "JSON output includes security audit fields"
 json_file="/tmp/sysmaint-security-test-$$.json"
 DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run --security-audit >/dev/null 2>&1 || true
 # Find the JSON file
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(latest_json)
 if [[ -f "$json_file" ]]; then
   if grep -q '"security_audit_enabled"' "$json_file" && \
      grep -q '"shadow_perms_ok"' "$json_file" && \
@@ -180,7 +185,7 @@ fi
 # ==============================================================================
 run_test "JSON includes sudoers_d_issues array"
 DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run --security-audit >/dev/null 2>&1 || true
-jf=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+jf=$(latest_json)
 if [[ -f "$jf" ]] && grep -q '"sudoers_d_issues"' "$jf"; then
   pass "sudoers_d_issues present"
 else
@@ -432,7 +437,7 @@ fi
 # ==============================================================================
 run_test "JSON marks security_audit_enabled true when enabled"
 DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run --security-audit >/dev/null 2>&1 || true
-jf=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+jf=$(latest_json)
 if [[ -f "$jf" ]] && grep -q '"security_audit_enabled": true' "$jf"; then
   pass "JSON shows security_audit_enabled=true"
 else
@@ -443,7 +448,7 @@ fi
 # Test 31: Security - JSON includes zombie_count field
 # ==============================================================================
 run_test "JSON includes zombie_count field"
-jf=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+jf=$(latest_json)
 if [[ -f "$jf" ]] && grep -q '"zombie_count"' "$jf"; then
   pass "JSON contains zombie_count"
 else
