@@ -351,33 +351,6 @@ logger -t sysmaint -p local0.info -f /tmp/system-maintenance/sysmaint_*.json
 
 ---
 
-## Roadmap: Stage 1.5 Security Enhancements
-
-### Planned Additions
-
-1. **SELinux/AppArmor profile validation**:
-   - Check if mandatory access control is enabled
-   - Validate policy configurations
-
-2. **Extended file checks**:
-   - `/etc/passwd` permissions
-   - SSH configuration (`/etc/ssh/sshd_config`)
-   - Cron job permissions
-
-3. **Security scanning hooks**:
-   - Integration with `lynis`, `rkhunter`, `chkrootkit`
-   - Option to run external scanners automatically
-
-4. **Custom validation rules**:
-   - User-defined security checks via `/etc/sysmaint-security.d/`
-   - Plugin architecture for organization-specific rules
-
-5. **Remediation mode**:
-   - `--fix-security-issues` flag to automatically correct permissions
-   - Dry-run preview before making changes
-
----
-
 ## Summary
 
 - **Security audit is optional** - enable with `--security-audit` or `SECURITY_AUDIT_ENABLED=true`

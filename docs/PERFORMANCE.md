@@ -12,11 +12,7 @@ Function: How to run benchmarks, manage baselines, and interpret results
 
 ---
 
-## Overview
-
-sysmaint includes a comprehensive performance benchmarking suite to track execution time, memory usage, and detect performance regressions across releases.
-
----
+<!-- Overview trimmed: Quick Start below provides immediate entry. The suite tracks time/memory and detects regressions. -->
 
 ## Quick Start
 
