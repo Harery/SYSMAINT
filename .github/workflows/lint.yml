@@ -1,0 +1,28 @@
+name: Lint Shell Scripts
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install shellcheck & shfmt
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+          curl -sSL https://github.com/mvdan/sh/releases/latest/download/shfmt_v3.7.0_linux_amd64 -o shfmt
+          chmod +x shfmt
+          sudo mv shfmt /usr/local/bin/shfmt
+      - name: Run shellcheck
+        run: |
+          set -e
+          shellcheck $(git ls-files '*.sh')
+      - name: Run shfmt diff
+        run: |
+          set -e
+          shfmt -d $(git ls-files '*.sh')

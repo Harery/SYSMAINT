@@ -9,6 +9,7 @@
     "script_version",
     "run_id",
     "timestamp",
+    "checksum_sha256",
     "disk_usage",
     "final_upgrade_enabled",
     "color_mode",
@@ -25,6 +26,7 @@
     "script_version": { "type": "string" },
     "run_id": { "type": "string" },
     "timestamp": { "type": "string" },
+    "checksum_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "disk_usage": {
       "type": "object",
       "required": ["before_kb", "after_kb", "saved_kb"],

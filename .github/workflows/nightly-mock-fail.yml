@@ -1,0 +1,62 @@
+name: Nightly Mock Failure Injection
+
+on:
+  schedule:
+    - cron: '15 2 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  mock-failure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select failing mocks
+        id: select
+        run: |
+          ALL="apt,apt-get,dpkg,flatpak,snap,systemctl,update-grub,fwupdmgr,deborphan"
+          # Pick 3 random unique commands
+          IFS=',' read -r -a arr <<<"$ALL"
+          picks=()
+          for i in {1..3}; do
+            r=${arr[$((RANDOM % ${#arr[@]}))]}
+            # ensure uniqueness
+            if [[ " ${picks[*]} " != *" $r "* ]]; then picks+=("$r"); fi
+          done
+          FAIL_LIST=$(IFS=','; echo "${picks[*]}")
+          echo "Selected failing mocks: $FAIL_LIST"
+          echo "fail_list=$FAIL_LIST" >> "$GITHUB_OUTPUT"
+
+      - name: Run real-mode sandbox (baseline)
+        env:
+          DRY_RUN: false
+          JSON_SUMMARY: true
+        run: |
+          bash tests/test_suite_realmode.sh || echo "Realm mode baseline exited non-zero"
+
+      - name: Run mock failure test (if present)
+        env:
+          REALMODE_FAIL_LIST: ${{ steps.select.outputs.fail_list }}
+          DRY_RUN: false
+          JSON_SUMMARY: true
+        run: |
+          if [[ -f tests/test_mock_failures.sh ]]; then
+            bash tests/test_mock_failures.sh
+          else
+            echo "test_mock_failures.sh not yet present; skipping"
+          fi
+
+      - name: Upload latest JSON summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-mock-json
+          path: /tmp/system-maintenance/*.json
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-mock-logs
+          path: /tmp/system-maintenance/*.log

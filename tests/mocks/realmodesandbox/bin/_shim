@@ -2,6 +2,15 @@
 cmd_name="$1"
 shift || true
 printf '[realmodesandbox] %s %s\n' "$cmd_name" "$*" >&2
+# Optional failure simulation: REALMODE_FAIL_LIST="cmd1,cmd2" or REALMODE_FAIL_ON_ARG="pattern"
+should_fail=false
+if [[ -n "${REALMODE_FAIL_LIST:-}" ]]; then
+  IFS=',' read -r -a _fail_list <<<"$REALMODE_FAIL_LIST"
+  for f in "${_fail_list[@]}"; do [[ "$f" == "$cmd_name" ]] && should_fail=true; done
+fi
+if [[ -n "${REALMODE_FAIL_ON_ARG:-}" ]]; then
+  for arg in "$@"; do [[ "$arg" == *"$REALMODE_FAIL_ON_ARG"* ]] && should_fail=true; done
+fi
 # Simulate light work for commands that expect stdout noise
 case "$cmd_name" in
   apt|apt-get|apt-cache|dpkg|dpkg-query)
@@ -25,4 +34,8 @@ case "$cmd_name" in
     :
     ;;
  esac
+if $should_fail; then
+  printf '[realmodesandbox] simulated failure for %s\n' "$cmd_name" >&2
+  exit 42
+fi
 exit 0

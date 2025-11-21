@@ -3372,14 +3372,22 @@ print_summary() {
   printf '  "mem_available_start_kb": %s,\n' "${MEM_AVAILABLE_KB_START}"
   printf '  "swap_total_kb": %s,\n' "${SWAP_TOTAL_KB}"
   printf '  "disk_root_total_kb": %s,\n' "${DISK_ROOT_TOTAL_KB}"
-  printf '  "log_file": "%s"\n' "$(escape_json "$LOG_FILE")"
+  printf '  "log_file": "%s",\n' "$(escape_json "$LOG_FILE")"
+  printf '  "checksum_sha256": "PLACEHOLDER"\n'
       printf '}\n'
     } >"$JSON_FILE" 2>>"$LOG_FILE"
+    # Compute checksum over placeholder version then replace placeholder
+    if command -v sha256sum >/dev/null 2>&1; then
+      sum=$(sha256sum "$JSON_FILE" | awk '{print $1}' || echo "unavailable")
+      sed -i "s/\"checksum_sha256\": \"PLACEHOLDER\"/\"checksum_sha256\": \"$sum\"/" "$JSON_FILE" 2>>"$LOG_FILE" || true
+    else
+      sum="unavailable"
+    fi
     set -e
     trap on_err ERR
     # Validate JSON write
     if [[ -s "$JSON_FILE" ]]; then
-      log "JSON summary written to $JSON_FILE"
+      log "JSON summary written to $JSON_FILE (checksum=$sum)"
     else
       log "ERROR: JSON summary not written (file missing or empty): $JSON_FILE"
     fi

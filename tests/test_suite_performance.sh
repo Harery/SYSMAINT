@@ -31,28 +31,37 @@ calculate_stats() {
     local values=("$@")
     local sum=0
     local count=${#values[@]}
-    
-    # Calculate average
     for val in "${values[@]}"; do
         sum=$(echo "$sum + $val" | bc)
     done
-    local avg=$(echo "scale=3; $sum / $count" | bc)
-    
-    # Calculate min/max
-    local min=${values[0]}
-    local max=${values[0]}
+    local avg=0
+    if (( count > 0 )); then
+        avg=$(echo "scale=3; $sum / $count" | bc)
+    fi
+    local min=${values[0]:-0}
+    local max=${values[0]:-0}
     for val in "${values[@]}"; do
         if (( $(echo "$val < $min" | bc -l) )); then min=$val; fi
         if (( $(echo "$val > $max" | bc -l) )); then max=$val; fi
     done
-    
-    # Calculate median (simple sort)
     IFS=$'\n' sorted=($(sort -n <<<"${values[*]}"))
     unset IFS
     local mid=$((count / 2))
-    local median=${sorted[$mid]}
-    
-    echo "$avg $min $max $median"
+    local median=${sorted[$mid]:-0}
+    # Percentiles (nearest-rank)
+    local p90=0 p95=0 p99=0
+    if (( count > 0 )); then
+        local idx90=$(( (90*count + 99) / 100 - 1 ))
+        local idx95=$(( (95*count + 99) / 100 - 1 ))
+        local idx99=$(( (99*count + 99) / 100 - 1 ))
+        (( idx90 < 0 )) && idx90=0; (( idx90 >= count )) && idx90=$((count-1))
+        (( idx95 < 0 )) && idx95=0; (( idx95 >= count )) && idx95=$((count-1))
+        (( idx99 < 0 )) && idx99=0; (( idx99 >= count )) && idx99=$((count-1))
+        p90=${sorted[$idx90]:-0}
+        p95=${sorted[$idx95]:-0}
+        p99=${sorted[$idx99]:-0}
+    fi
+    echo "$avg $min $max $median $p90 $p95 $p99"
 }
 
 # Integer statistics (for memory in KB)
@@ -123,16 +132,16 @@ run_benchmark() {
     done
     
     # Calculate statistics
-    read avg min max median < <(calculate_stats "${times[@]}")
+    read avg min max median p90 p95 p99 < <(calculate_stats "${times[@]}")
     read mem_avg mem_min mem_max mem_median < <(calculate_stats_int "${mem_peaks[@]}")
     
     # Store results
-    TIMINGS["$test_name"]="$avg,$min,$max,$median"
+    TIMINGS["$test_name"]="$avg,$min,$max,$median,$p90,$p95,$p99"
     MEMORY_PEAKS["$test_name"]="$mem_avg,$mem_min,$mem_max,$mem_median"
     
     # Display summary
-    printf "  ${GREEN}Time:${NC}   avg=%.3fs  min=%.3fs  max=%.3fs  median=%.3fs\n" \
-        "$avg" "$min" "$max" "$median"
+        printf "  ${GREEN}Time:${NC}   avg=%.3fs  min=%.3fs  max=%.3fs  median=%.3fs  p90=%.3fs  p95=%.3fs  p99=%.3fs\n" \
+            "$avg" "$min" "$max" "$median" "$p90" "$p95" "$p99"
     printf "  ${GREEN}Memory:${NC} avg=%dKB  min=%dKB  max=%dKB  median=%dKB\n" \
         "$mem_avg" "$mem_min" "$mem_max" "$mem_median"
     echo ""
@@ -252,7 +261,7 @@ echo ""
 
 # Create CSV report
 REPORT_FILE="$RESULTS_DIR/benchmark_$(date +%Y%m%d_%H%M%S).csv"
-echo "Test Name,Avg Time (s),Min Time (s),Max Time (s),Median Time (s),Avg Memory (KB),Status" > "$REPORT_FILE"
+echo "Test Name,Avg Time (s),Min Time (s),Max Time (s),Median Time (s),p90 (s),p95 (s),p99 (s),Avg Memory (KB),Status" > "$REPORT_FILE"
 
 echo "Performance Rankings:"
 echo ""
@@ -261,7 +270,7 @@ echo "────────────────────────�
 
 # Sort by average time
 for test_name in "${!TIMINGS[@]}"; do
-    IFS=',' read -r avg min max median <<< "${TIMINGS[$test_name]}"
+    IFS=',' read -r avg min max median p90 p95 p99 <<< "${TIMINGS[$test_name]}"
     IFS=',' read -r mem_avg mem_min mem_max mem_median <<< "${MEMORY_PEAKS[$test_name]}"
     
     printf "%-35s %9.3fs %9.3fs %9.3fs  " "$test_name" "$avg" "$min" "$max"
@@ -274,7 +283,7 @@ for test_name in "${!TIMINGS[@]}"; do
     elif (( $(echo "$avg >= $THRESHOLD_SLOW" | bc -l) )); then
         status="SLOW"
     fi
-    echo "$test_name,$avg,$min,$max,$median,$mem_avg,$status" >> "$REPORT_FILE"
+    echo "$test_name,$avg,$min,$max,$median,$p90,$p95,$p99,$mem_avg,$status" >> "$REPORT_FILE"
 done | sort -t, -k2 -n
 
 echo ""
@@ -349,15 +358,15 @@ echo ""
 # Calculate overall statistics
 all_times=()
 for test_name in "${!TIMINGS[@]}"; do
-    IFS=',' read -r avg min max median <<< "${TIMINGS[$test_name]}"
+    IFS=',' read -r avg min max median p90 p95 p99 <<< "${TIMINGS[$test_name]}"
     all_times+=("$avg")
 done
 
 if [[ ${#all_times[@]} -gt 0 ]]; then
-    read overall_avg overall_min overall_max overall_median < <(calculate_stats "${all_times[@]}")
-    printf "Overall average time: %.3fs\n" "$overall_avg"
-    printf "Fastest test: %.3fs\n" "$overall_min"
-    printf "Slowest test: %.3fs\n" "$overall_max"
+    read overall_avg overall_min overall_max overall_median overall_p90 overall_p95 overall_p99 < <(calculate_stats "${all_times[@]}")
+    printf "Overall average time: %.3fs (median=%.3fs p90=%.3fs p95=%.3fs p99=%.3fs)\n" "$overall_avg" "$overall_median" "$overall_p90" "$overall_p95" "$overall_p99"
+    printf "Fastest test avg: %.3fs\n" "$overall_min"
+    printf "Slowest test avg: %.3fs\n" "$overall_max"
 fi
 
 echo ""

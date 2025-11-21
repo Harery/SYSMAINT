@@ -24,6 +24,26 @@ jobs:
           bash tests/test_suite_performance.sh
           ls -1 /tmp/sysmaint-benchmarks
 
+      - name: Download EMA baseline (if exists)
+        uses: actions/download-artifact@v4
+        with:
+          name: phase-ema-baseline
+          path: ema_baseline
+        continue-on-error: true
+
+      - name: Check phase EMA drift
+        run: |
+          mkdir -p ema_baseline
+          bash scripts/check_phase_ema_drift.sh ema_baseline/phase_ema_baseline.json || echo "EMA drift check failed" > ema_baseline/drift_status.txt
+
+      - name: Upload EMA baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-ema-baseline
+          path: |
+            ema_baseline/phase_ema_baseline.json
+            ema_baseline/drift_status.txt
+
       - name: Locate current report
         id: report
         run: |
