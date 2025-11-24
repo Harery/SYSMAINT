@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # lib/utils.sh — Core utility functions for sysmaint
+# Version: 2.1.2
+# License: MIT (see LICENSE file in repository root)
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# Copyright (c) 2025 Mohamed Elharery
+#
 # Provides: logging, progress UI, state management, timing functions
 
 # ===== Utility helper functions =====
@@ -430,7 +435,7 @@ show_progress() {
       steps=$duration
     fi
     if (( steps > 0 )); then
-      step_duration=$(awk -v d=$duration -v s=$steps 'BEGIN {printf "%.3f", d/s}')
+      step_duration=$(awk -v d="$duration" -v s="$steps" 'BEGIN {printf "%.3f", d/s}')
     else
       step_duration=0
     fi
@@ -444,7 +449,8 @@ show_progress() {
       local bar
       bar=$(printf '%*s' 20 '' | tr ' ' '#')
       local filled_part=${bar:0:bar_fill}
-      local empty_part=$(printf '%*s' $((20-bar_fill)) '' | tr ' ' ' ')
+      local empty_part
+      empty_part=$(printf '%*s' $((20-bar_fill)) '' | tr ' ' ' ')
       printf '\r[%s%s] %3d%% %s' "$filled_part" "$empty_part" "$pct" "$msg" >&2
       sleep "$step_duration"
     done

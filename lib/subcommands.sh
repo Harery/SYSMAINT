@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # lib/subcommands.sh — Embedded subcommands for sysmaint
+# Version: 2.1.2
+# License: MIT (see LICENSE file in repository root)
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# Copyright (c) 2025 Mohamed Elharery
+#
 # Provides: scanners_main, profiles_main
 # These are standalone entry points for external security scanners and preset profiles
 

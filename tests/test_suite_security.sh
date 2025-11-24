@@ -200,10 +200,11 @@ set +e
 DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit >/dev/null 2>&1
 rc=$?
 set -e
-if [[ $rc -eq 0 ]]; then
-  pass "Exit code 0"
+# Accept exit codes: 0 (success) or 100 (reboot required)
+if [[ $rc -eq 0 || $rc -eq 100 ]]; then
+  pass "Exit code 0 or 100 (acceptable)"
 else
-  fail "Non-zero exit code: $rc"
+  fail "Unexpected exit code: $rc"
 fi
 
 # ==============================================================================

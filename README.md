@@ -53,6 +53,22 @@ LYNIS_MIN_SCORE=80 RKHUNTER_MAX_WARNINGS=5 ./sysmaint scanners
 
 Disable defaults with `--no-*` (e.g. `--no-snap`, `--no-clear-tmp`, `--no-journal-vacuum`).
 
+## Exit Codes
+
+sysmaint uses specific exit codes to indicate different outcomes:
+
+| Code | Meaning | Description |
+|------|---------|-------------|
+| `0` | Success | Maintenance completed successfully, no issues |
+| `1` | General Error | OS check failure, log directory creation failure, or other errors |
+| `10` | Repository Issues | Repository validation failures detected |
+| `20` | Missing Keys | APT public keys are missing |
+| `30` | Failed Services | Systemd services in failed state detected |
+| `75` | Lock Timeout | Could not acquire lock (another instance running) |
+| `100` | Reboot Required | Maintenance completed but system reboot is required |
+
+**Note**: Exit code `100` indicates successful completion when a reboot is needed. In scripts, treat both `0` and `100` as success states.
+
 ## JSON Summary
 
 Enable via `JSON_SUMMARY=true` or `--json-summary`. Writes to `/tmp/system-maintenance/sysmaint_<RUN_ID>.json` including:

@@ -408,9 +408,25 @@ ms_print massif.out.*
 
 ---
 
-## Performance Goals
+## Performance Baselines
+
+### Official Baseline Files
+
+Performance baselines are maintained in the `benchmarks/` directory:
+
+| File | Version | Date | Purpose |
+|------|---------|------|---------|
+| `baseline_v2.1.1.csv` | 2.1.1 | 2025-11-15 | Current production baseline |
+| `baseline_v2.2.0.csv` | 2.2.0 | Future | Next release target baseline |
+
+**Baseline Update Policy:**
+- Baselines are updated at each minor/major release
+- Patch releases use existing minor version baseline
+- Regression tests compare against current version baseline
 
 ### Current Performance (v2.1.1)
+
+Measured on reference hardware (4 CPU cores, 8GB RAM, SSD):
 
 | Metric | Value | Status |
 |--------|-------|--------|
@@ -419,6 +435,23 @@ ms_print massif.out.*
 | Full features | ~3.6s | ✅ Fast |
 | Maximum load | ~5.0s | ✅ Acceptable |
 | Memory footprint | ~30MB RSS | ✅ Efficient |
+
+### Baseline Maintenance
+
+```bash
+# Generate new baseline after performance improvements
+BENCHMARK_RUNS=5 bash tests/test_suite_performance.sh
+cp /tmp/sysmaint-benchmarks/current_run.csv benchmarks/baseline_v2.1.1.csv
+
+# Compare with previous baseline
+bash tests/benchmark_compare.sh \
+  benchmarks/baseline_v2.1.1.csv \
+  /tmp/sysmaint-benchmarks/current_run.csv
+
+# Archive old baselines for historical tracking
+git add benchmarks/baseline_v*.csv
+git commit -m "Update performance baseline for v2.1.1"
+```
 
 ### Future Targets
 

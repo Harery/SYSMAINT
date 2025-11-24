@@ -14,11 +14,16 @@ test_ok() {
     local name="$1"
     shift
     echo -n "[TEST] $name: "
-    if bash "$SCRIPT" "$@" >/dev/null 2>&1; then
+    set +e
+    bash "$SCRIPT" "$@" >/dev/null 2>&1
+    local exit_code=$?
+    set -e
+    # Accept exit codes: 0 (success) or 100 (reboot required)
+    if [[ $exit_code -eq 0 || $exit_code -eq 100 ]]; then
         echo "✅ PASS"
         PASSED=$((PASSED + 1))
     else
-        echo "❌ FAIL (exit: $?)"
+        echo "❌ FAIL (exit: $exit_code)"
         FAILED=$((FAILED + 1))
     fi
 }

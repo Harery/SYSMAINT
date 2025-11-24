@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # sysmaint — Ubuntu/Debian maintenance: APT + Snap update/upgrade + cleanup
-# Version: 2.1.1
+# Version: 2.1.2
 # License: MIT (see LICENSE file in repository root)
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
@@ -22,7 +22,7 @@
 set -Eeuo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-SCRIPT_VERSION="2.1.1"
+SCRIPT_VERSION="2.1.2"
 
 # Script directory (for artifacts used by subcommands)
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -369,7 +369,7 @@ show_progress() {
       steps=$duration
     fi
     if (( steps > 0 )); then
-      step_duration=$(awk -v d=$duration -v s=$steps 'BEGIN {printf "%.3f", d/s}')
+      step_duration=$(awk -v d="$duration" -v s="$steps" 'BEGIN {printf "%.3f", d/s}')
     else
       step_duration=0
     fi
@@ -383,7 +383,8 @@ show_progress() {
       local bar
       bar=$(printf '%*s' 20 '' | tr ' ' '#')
       local filled_part=${bar:0:bar_fill}
-      local empty_part=$(printf '%*s' $((20-bar_fill)) '' | tr ' ' ' ')
+      local empty_part
+      empty_part=$(printf '%*s' $((20-bar_fill)) '' | tr ' ' ' ')
       printf '\r[%s%s] %3d%% %s' "$filled_part" "$empty_part" "$pct" "$msg" >&2
       sleep "$step_duration"
     done
@@ -1069,6 +1070,12 @@ THUMBNAIL_FREED_BYTES=0
 FLATPAK_SCOPE_APPLIED="auto"
 
 # Helper: record phase timing and disk delta
+# Records the start timestamp and initial disk usage for a maintenance phase.
+# This data is used for performance telemetry and JSON summary generation.
+# Args:
+#   $1 - phase_name: Name of the phase being started
+# Globals:
+#   PHASE_TIMINGS: Associative array storing timing data
 record_phase_start() {
   local phase_name="$1"
   PHASE_TIMINGS["${phase_name}_start"]=$(date +%s)
@@ -1078,6 +1085,13 @@ record_phase_start() {
   PHASE_TIMINGS["${phase_name}_disk_start"]=$disk_kb
 }
 
+# Records the end timestamp and computes phase duration and disk delta.
+# Updates the EMA (Exponentially Moving Average) timing database for adaptive progress.
+# Args:
+#   $1 - phase_name: Name of the phase being completed
+# Globals:
+#   PHASE_TIMINGS: Associative array storing timing data
+#   PHASE_DISK_DELTAS: Disk space changes per phase (KB)
 record_phase_end() {
   local phase_name="$1"
   local start_key="${phase_name}_start"
@@ -1789,6 +1803,15 @@ snap_clear_cache() {
 }
 
 # Purge old kernels keeping current + N newest (KEEP_KERNELS). Dry-run lists candidates.
+# Removes old kernel packages (image, headers, modules, modules-extra) while preserving:
+#   - The currently running kernel (always kept)
+#   - The N newest kernel versions (configurable via --keep-kernels=N)
+# Safety: Uses dpkg version comparison for proper sorting and never removes running kernel.
+# Args: None (uses global PURGE_OLD_KERNELS, KEEP_KERNELS)
+# Globals:
+#   PURGE_OLD_KERNELS: Enable/disable kernel purge
+#   KEEP_KERNELS: Number of newest kernels to retain (default: 2)
+#   KERNELS_REMOVED_COUNT: Count of removed kernel packages
 kernel_purge_phase() {
   if [[ "${PURGE_OLD_KERNELS:-false}" != "true" ]]; then
     log "kernel_purge_phase: disabled (enable with --purge-kernels or PURGE_OLD_KERNELS=true)."
@@ -1796,7 +1819,7 @@ kernel_purge_phase() {
   fi
   log "=== Kernel purge phase start (keep ${KEEP_KERNELS}) ==="
   # Determine running kernel image pattern
-  local running_kernel running_img keep_n
+  local running_kernel keep_n
   running_kernel=$(uname -r)
   keep_n=${KEEP_KERNELS:-2}
   if ! [[ "$keep_n" =~ ^[0-9]+$ ]]; then keep_n=2; fi
@@ -1832,8 +1855,8 @@ kernel_purge_phase() {
   # Sort versions descending using dpkg --compare-versions
   for ((i=0; i<${#all_versions[@]}; i++)); do
     for ((j=i+1; j<${#all_versions[@]}; j++)); do
-      if dpkg --compare-versions "${all_versions[$j]}" gt "${all_versions[$i]}"; then
-        tmp=${all_versions[$i]}; all_versions[$i]=${all_versions[$j]}; all_versions[$j]=$tmp
+      if dpkg --compare-versions "${all_versions[j]}" gt "${all_versions[i]}"; then
+        tmp=${all_versions[i]}; all_versions[i]=${all_versions[j]}; all_versions[j]=$tmp
       fi
     done
   done
@@ -2346,6 +2369,18 @@ thumbnail_maintenance() {
 }
 
 # Optional browser cache reporting/purge
+# Browser cache scanning and optional purge.
+# Measures cache sizes for Firefox, Chromium, and Chrome browsers.
+# Optionally purges cache contents to reclaim disk space.
+# Safety: Only removes cache files, preserves browser profiles and user data.
+# Args: None (uses global BROWSER_CACHE_REPORT, BROWSER_CACHE_PURGE)
+# Globals:
+#   BROWSER_CACHE_REPORT: Enable cache size reporting
+#   BROWSER_CACHE_PURGE: Enable cache deletion
+#   FIREFOX_CACHE_BYTES: Firefox cache size in bytes
+#   CHROMIUM_CACHE_BYTES: Chromium cache size in bytes
+#   CHROME_CACHE_BYTES: Chrome cache size in bytes
+#   BROWSER_CACHE_PURGED_FLAG: Set to true if purge executed
 browser_cache_phase() {
   if [[ "${BROWSER_CACHE_REPORT:-false}" != "true" && "${BROWSER_CACHE_PURGE:-false}" != "true" ]]; then
     return 0
@@ -2369,7 +2404,7 @@ browser_cache_phase() {
   fi
 
   if command -v numfmt >/dev/null 2>&1; then
-    log "Browser cache sizes: firefox=$(numfmt --to=iec-i --suffix=B ${FIREFOX_CACHE_BYTES} 2>/dev/null) chromium=$(numfmt --to=iec-i --suffix=B ${CHROMIUM_CACHE_BYTES} 2>/dev/null) chrome=$(numfmt --to=iec-i --suffix=B ${CHROME_CACHE_BYTES} 2>/dev/null)"
+    log "Browser cache sizes: firefox=$(numfmt --to=iec-i --suffix=B "${FIREFOX_CACHE_BYTES}" 2>/dev/null) chromium=$(numfmt --to=iec-i --suffix=B "${CHROMIUM_CACHE_BYTES}" 2>/dev/null) chrome=$(numfmt --to=iec-i --suffix=B "${CHROME_CACHE_BYTES}" 2>/dev/null)"
   else
     log "Browser cache sizes: firefox=${FIREFOX_CACHE_BYTES}B chromium=${CHROMIUM_CACHE_BYTES}B chrome=${CHROME_CACHE_BYTES}B"
   fi
@@ -2389,7 +2424,13 @@ browser_cache_phase() {
   log "=== Browser cache phase complete ==="
 }
 
-# Purge crash dumps and coredumps to reclaim space
+# Purge crash dumps and coredumps to reclaim space.
+# Removes crash reports from /var/crash and systemd coredumps.
+# Crash dumps can accumulate and consume significant disk space over time.
+# Args: None (uses global CLEAR_CRASH_DUMPS)
+# Globals:
+#   CLEAR_CRASH_DUMPS: Enable/disable crash dump cleanup (default: true)
+#   CRASH_FREED_BYTES: Total bytes freed from crash dump cleanup
 crash_dump_purge() {
   if [[ "${CLEAR_CRASH_DUMPS:-true}" != "true" ]]; then
     log "--no-clear-crash requested: skipping crash dump purge."
@@ -2621,7 +2662,7 @@ security_audit() {
   SUDOERS_D_ISSUES=()
   # Helper to check perms user:group:mode
   _check_perm() {
-    local path="$1" owner_exp="$2" mode_allowed="$3"
+    local path="$1" mode_allowed="$3"
     if [[ ! -e "$path" ]]; then
       echo "missing"
       return 0
@@ -3240,7 +3281,7 @@ print_summary() {
       if command -v sha256sum >/dev/null 2>&1 && [[ -f "$LOG_FILE" ]]; then
         lf_hash=$(sha256sum "$LOG_FILE" 2>/dev/null | awk '{print $1}' || echo "unavailable")
       fi
-      printf '  "log_file_sha256": "%s",\n' "$lf_hash"
+      printf '  "log_file_sha256": "%s",\n' "${lf_hash}"
       printf '  "run_id": "%s",\n' "$(escape_json "$RUN_ID")"
       printf '  "timestamp": "%s",\n' "$timestamp"
   printf '  "dry_run_mode": %s,\n' "${DRY_RUN}"
