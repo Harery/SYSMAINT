@@ -1,8 +1,11 @@
-# sysmaint (v2.1.1)
+# sysmaint (v2.1.2)
+
+[![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A safe, scriptable Ubuntu/Debian maintenance runner: APT + Snap updates, cleanup phases, rich JSON telemetry, unattended/autopilot mode, and optional security + scanner integrations.
 
-**License:** MIT  •  **Status:** Production Ready  •  **Test Suites:** See `docs/TEST_COVERAGE.md`
+**License:** MIT  •  **Status:** Production Ready  •  **Repository:** [Harery/SYSMAINT](https://github.com/Harery/SYSMAINT)
 
 ## Quick Start
 
