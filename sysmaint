@@ -1186,9 +1186,14 @@ health_checks() {
   local available_gb
   available_gb=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
   if [[ "$available_gb" -lt 5 ]]; then
-    log "ERROR: Insufficient disk space. Available: ${available_gb}GB, Required: 5GB minimum"
-    log "Free up disk space before running maintenance"
-    return 1
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      # In DRY_RUN, do not fail CI or preview runs due to space; just warn
+      log "DRY_RUN: Low disk space (${available_gb}GB < 5GB) — continuing"
+    else
+      log "ERROR: Insufficient disk space. Available: ${available_gb}GB, Required: 5GB minimum"
+      log "Free up disk space before running maintenance"
+      return 1
+    fi
   else
     log "Disk space check: ${available_gb}GB available (OK)"
   fi
