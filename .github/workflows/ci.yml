@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck jq
+          python -m pip install --upgrade pip
+          pip install jsonschema
+
+      - name: ShellCheck (sysmaint and libs)
+        run: |
+          shellcheck -x sysmaint
+          shellcheck -x lib/*.sh
+          shellcheck -x scripts/*.sh || true
+          # Completions and packaging are not strictly POSIX; ignore failures
+
+      - name: Run test suites
+        env:
+          DRY_RUN: "true"
+        run: |
+          bash -e tests/test_suite_smoke.sh
+          bash -e tests/test_suite_edge.sh
+          bash -e tests/test_suite_security.sh
+          bash -e tests/test_suite_compliance.sh
+          bash -e tests/test_suite_governance.sh
+          bash -e tests/test_suite_performance.sh
+          bash -e tests/test_json_validation.sh
