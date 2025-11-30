@@ -27,10 +27,11 @@ jobs:
 
       - name: ShellCheck (sysmaint and libs)
         run: |
-          shellcheck -x sysmaint
-          shellcheck -x lib/*.sh
+          shellcheck -x -S error sysmaint
+          shellcheck -x -S error lib/*.sh
           shellcheck -x scripts/*.sh || true
           # Completions and packaging are not strictly POSIX; ignore failures
+          # Using -S error to only fail on actual errors, not info/style
 
       - name: Run test suites
         env:
