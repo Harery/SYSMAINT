@@ -38,6 +38,20 @@ jobs:
           chmod +x sysmaint
           chmod +x tests/*.sh
           chmod +x scripts/*.sh
+      - name: Debug environment
+        run: |
+          echo "=== Disk Space ==="
+          df -h
+          echo ""
+          echo "=== OS Info ==="
+          cat /etc/os-release
+          echo ""
+          echo "=== Test single script run ==="
+          DRY_RUN=true JSON_SUMMARY=true bash ./sysmaint 2>&1 | tail -20 || echo "Exit code: $?"
+          echo ""
+          echo "=== Check JSON files ==="
+          ls -lah /tmp/system-maintenance/ 2>/dev/null || echo "No JSON files found"
+
 
       - name: Run test suites
         env:
