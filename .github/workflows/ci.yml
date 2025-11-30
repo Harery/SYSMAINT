@@ -33,14 +33,21 @@ jobs:
           # Completions and packaging are not strictly POSIX; ignore failures
           # Using -S error to only fail on actual errors, not info/style
 
+      - name: Make scripts executable
+        run: |
+          chmod +x sysmaint
+          chmod +x tests/*.sh
+          chmod +x scripts/*.sh
+
       - name: Run test suites
         env:
           DRY_RUN: "true"
+          JSON_SUMMARY: "true"
         run: |
-          bash -e tests/test_suite_smoke.sh
-          bash -e tests/test_suite_edge.sh
-          bash -e tests/test_suite_security.sh
-          bash -e tests/test_suite_compliance.sh
-          bash -e tests/test_suite_governance.sh
-          bash -e tests/test_suite_performance.sh
-          bash -e tests/test_json_validation.sh
+          bash tests/test_suite_smoke.sh
+          bash tests/test_suite_edge.sh
+          bash tests/test_suite_security.sh
+          bash tests/test_suite_compliance.sh
+          bash tests/test_suite_governance.sh
+          bash tests/test_suite_performance.sh
+          bash tests/test_json_validation.sh
