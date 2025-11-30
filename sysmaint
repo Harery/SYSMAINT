@@ -4408,7 +4408,7 @@ detect_capabilities_and_mode() {
       *) log "WARNING: unknown mode override '$MODE_OVERRIDE' (expected desktop|server|auto); falling back to auto" ;;
     esac
   fi
-  if [[ "$guessed" == "server" && ( -n "$DISPLAY" || -n "${XDG_CURRENT_DESKTOP:-}" ) ]]; then
+  if [[ "$guessed" == "server" && ( -n "${DISPLAY:-}" || -n "${XDG_CURRENT_DESKTOP:-}" ) ]]; then
     guessed="desktop"
   fi
   # Heuristic: presence of ubuntu-desktop or gnome-shell packages
