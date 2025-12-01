@@ -350,8 +350,18 @@ sudo ./sysmaint --auto --auto-reboot-delay 60 --json-summary
 
 <div align="center">
 
-**Made with ❤️ by [Mohamed Elharery](mailto:Mohamed@Harery.com)**
+## 👨‍💻 Author
 
-MIT Licensed • [Report Issues](https://github.com/Harery/SYSMAINT/issues) • [Contribute](https://github.com/Harery/SYSMAINT)
+**Mohamed Elharery**
+
+[![Website](https://img.shields.io/badge/Website-www.harery.com-blue?style=flat-square)](https://www.harery.com)
+[![Email](https://img.shields.io/badge/Email-Mohamed%40Harery.com-red?style=flat-square)](mailto:Mohamed@Harery.com)
+[![GitHub](https://img.shields.io/badge/GitHub-Harery-black?style=flat-square&logo=github)](https://github.com/Harery)
+
+---
+
+**MIT Licensed** • **Production Ready** • **Safe to Run Dry-First**
+
+[⬆️ Back to Top](#-sysmaint-feature-matrix)
 
 </div>
