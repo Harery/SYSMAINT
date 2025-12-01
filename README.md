@@ -3,6 +3,7 @@
 <div align="center">
 
 ![Version](https://img.shields.io/badge/version-2.1.2-blue.svg)
+[![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
@@ -28,6 +29,32 @@
 | 📊 **JSON Telemetry** | Detailed reports for monitoring integration |
 | 🤖 **Automation Ready** | Systemd timers, unattended mode |
 | ✅ **Production Tested** | 246 tests, 100% coverage |
+
+---
+
+## 📥 Installation
+
+### Option 1: Download .deb Package (Recommended)
+
+```bash
+# Download the latest release
+wget https://github.com/Harery/SYSMAINT/releases/download/v2.1.2/sysmaint_2.1.2_all.deb
+
+# Install
+sudo dpkg -i sysmaint_2.1.2_all.deb
+
+# Run
+sudo sysmaint --help
+```
+
+### Option 2: Clone Repository
+
+```bash
+git clone https://github.com/Harery/SYSMAINT.git
+cd SYSMAINT
+chmod +x sysmaint
+./sysmaint --help
+```
 
 ---
 

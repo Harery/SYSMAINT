@@ -2,6 +2,7 @@
 
 > **Your complete guide to automated Ubuntu/Debian system maintenance**
 
+[![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
@@ -16,6 +17,18 @@
 - [Quick Examples](#-quick-examples)
 - [Test Coverage](#-test-coverage-matrix)
 - [Quality Assurance](#-quality-assurance)
+
+---
+
+## 📥 Quick Install
+
+```bash
+# Download and install the .deb package
+wget https://github.com/Harery/SYSMAINT/releases/download/v2.1.2/sysmaint_2.1.2_all.deb
+sudo dpkg -i sysmaint_2.1.2_all.deb
+```
+
+📦 [View all releases](https://github.com/Harery/SYSMAINT/releases)
 
 ---
 
