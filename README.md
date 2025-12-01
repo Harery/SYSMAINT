@@ -35,31 +35,31 @@
 
 ### 👁️ Safe Preview (Recommended First Run)
 
-\`\`\`bash
+```bash
 # See what would happen without making changes
 ./sysmaint --dry-run --json-summary
-\`\`\`
+```
 
 ### ⚡ Standard Maintenance
 
-\`\`\`bash
+```bash
 # Weekly maintenance with JSON report
 sudo ./sysmaint --json-summary
-\`\`\`
+```
 
 ### 🤖 Unattended Mode
 
-\`\`\`bash
+```bash
 # Fully automated with controlled reboot
 sudo ./sysmaint --auto --auto-reboot-delay 45 --json-summary
-\`\`\`
+```
 
 ### 🚀 Full Upgrade
 
-\`\`\`bash
+```bash
 # Include distribution upgrade phase
 sudo ./sysmaint --upgrade --json-summary
-\`\`\`
+```
 
 ---
 
@@ -69,21 +69,21 @@ sudo ./sysmaint --upgrade --json-summary
 
 | Profile | Use Case | Risk | Time |
 |:--------|:---------|:----:|:----:|
-| 🟢 \`minimal\` | Safe telemetry preview | None | ~2m |
-| 🔵 \`standard\` | Weekly unattended maintenance | Low | ~5m |
-| 🟡 \`desktop\` | Desktop cleanup with visuals | Medium | ~6m |
-| 🟠 \`server\` | Hardened server maintenance | Medium | ~8m |
-| 🔴 \`aggressive\` | Maximum space reclamation | High | ~10m |
+| 🟢 `minimal` | Safe telemetry preview | None | ~2m |
+| 🔵 `standard` | Weekly unattended maintenance | Low | ~5m |
+| 🟡 `desktop` | Desktop cleanup with visuals | Medium | ~6m |
+| 🟠 `server` | Hardened server maintenance | Medium | ~8m |
+| 🔴 `aggressive` | Maximum space reclamation | High | ~10m |
 
 **Usage:**
 
-\`\`\`bash
+```bash
 # Preview what a profile will do
 ./sysmaint profiles --profile desktop --print-command
 
 # Run a profile directly
 ./sysmaint profiles --profile standard --yes
-\`\`\`
+```
 
 ---
 
@@ -93,55 +93,55 @@ sudo ./sysmaint --upgrade --json-summary
 
 | Flag | Description |
 |:-----|:------------|
-| \`--upgrade\` | Perform full distribution upgrade |
-| \`--no-snap\` | Skip Snap operations |
-| \`--no-flatpak\` | Skip Flatpak operations |
-| \`--no-firmware\` | Skip firmware updates |
+| `--upgrade` | Perform full distribution upgrade |
+| `--no-snap` | Skip Snap operations |
+| `--no-flatpak` | Skip Flatpak operations |
+| `--no-firmware` | Skip firmware updates |
 
 ### 🧹 Cleanup Operations
 
 | Flag | Description |
 |:-----|:------------|
-| \`--purge-kernels\` | Remove old kernel packages |
-| \`--keep-kernels=N\` | Keep N old kernels (default: 2) |
-| \`--orphan-purge\` | Remove orphaned packages |
-| \`--fstrim\` | Run SSD TRIM |
-| \`--drop-caches\` | Clear page cache |
-| \`--journal-days=N\` | Keep N days of logs |
+| `--purge-kernels` | Remove old kernel packages |
+| `--keep-kernels=N` | Keep N old kernels (default: 2) |
+| `--orphan-purge` | Remove orphaned packages |
+| `--fstrim` | Run SSD TRIM |
+| `--drop-caches` | Clear page cache |
+| `--journal-days=N` | Keep N days of logs |
 
 ### 🔐 Security
 
 | Flag | Description |
 |:-----|:------------|
-| \`--security-audit\` | Check critical file permissions |
-| \`--check-zombies\` | Detect zombie processes |
+| `--security-audit` | Check critical file permissions |
+| `--check-zombies` | Detect zombie processes |
 
 ### 🌐 Browser Cache
 
 | Flag | Description |
 |:-----|:------------|
-| \`--browser-cache-report\` | Show Firefox/Chrome cache sizes |
-| \`--browser-cache-purge\` | Delete browser caches |
+| `--browser-cache-report` | Show Firefox/Chrome cache sizes |
+| `--browser-cache-purge` | Delete browser caches |
 
 ### ⚡ Automation
 
 | Flag | Description |
 |:-----|:------------|
-| \`--dry-run\` | Preview without changes |
-| \`--auto\` | Unattended mode (no prompts) |
-| \`--auto-reboot\` | Reboot if required |
-| \`--auto-reboot-delay=N\` | Wait N seconds before reboot |
-| \`--yes\` | Auto-approve prompts |
+| `--dry-run` | Preview without changes |
+| `--auto` | Unattended mode (no prompts) |
+| `--auto-reboot` | Reboot if required |
+| `--auto-reboot-delay=N` | Wait N seconds before reboot |
+| `--yes` | Auto-approve prompts |
 
 ### 📊 Output
 
 | Flag | Description |
 |:-----|:------------|
-| \`--json-summary\` | Generate JSON report |
-| \`--color=MODE\` | \`auto\`, \`always\`, or \`never\` |
-| \`--progress=MODE\` | \`spinner\`, \`dots\`, \`bar\`, \`adaptive\` |
+| `--json-summary` | Generate JSON report |
+| `--color=MODE` | `auto`, `always`, or `never` |
+| `--progress=MODE` | `spinner`, `dots`, `bar`, `adaptive` |
 
-> 💡 **Tip:** Disable any default with \`--no-*\` (e.g., \`--no-clear-tmp\`, \`--no-journal-vacuum\`)
+> 💡 **Tip:** Disable any default with `--no-*` (e.g., `--no-clear-tmp`, `--no-journal-vacuum`)
 
 ---
 
@@ -149,24 +149,24 @@ sudo ./sysmaint --upgrade --json-summary
 
 | Code | Status | Meaning |
 |:----:|:------:|:--------|
-| \`0\` | ✅ Success | Completed without issues |
-| \`1\` | ❌ Error | General failure (check logs) |
-| \`2\` | ❌ Invalid Args | Unknown or incorrect flags |
-| \`10\` | ⚠️ Repo Issues | APT repository problems |
-| \`20\` | ⚠️ Missing Keys | GPG keys not found |
-| \`30\` | ⚠️ Failed Services | Systemd units in failed state |
-| \`75\` | 🔒 Lock Timeout | Another instance running |
-| \`100\` | 🔄 Reboot Needed | Success, but restart required |
+| `0` | ✅ Success | Completed without issues |
+| `1` | ❌ Error | General failure (check logs) |
+| `2` | ❌ Invalid Args | Unknown or incorrect flags |
+| `10` | ⚠️ Repo Issues | APT repository problems |
+| `20` | ⚠️ Missing Keys | GPG keys not found |
+| `30` | ⚠️ Failed Services | Systemd units in failed state |
+| `75` | 🔒 Lock Timeout | Another instance running |
+| `100` | 🔄 Reboot Needed | Success, but restart required |
 
-> 💡 Both \`0\` and \`100\` indicate successful completion!
+> 💡 Both `0` and `100` indicate successful completion!
 
 ---
 
 ## 📄 JSON Telemetry
 
-Enable with \`--json-summary\` to get detailed reports in \`/tmp/system-maintenance/\`:
+Enable with `--json-summary` to get detailed reports in `/tmp/system-maintenance/`:
 
-\`\`\`json
+```json
 {
   "script_version": "2.1.2",
   "run_id": "2025-11-30_120000_12345",
@@ -175,15 +175,15 @@ Enable with \`--json-summary\` to get detailed reports in \`/tmp/system-maintena
   "disk_delta": { ... },
   "security_audit": { ... }
 }
-\`\`\`
+```
 
-**Schema:** \`docs/schema/sysmaint-summary.schema.json\`
+**Schema:** `docs/schema/sysmaint-summary.schema.json`
 
 ---
 
 ## ⏰ Systemd Timer (Automated Weekly)
 
-\`\`\`bash
+```bash
 # Install sysmaint
 sudo install -Dm755 sysmaint /usr/local/sbin/sysmaint
 
@@ -194,9 +194,9 @@ sudo install -Dm644 packaging/systemd/sysmaint.timer /etc/systemd/system/
 # Enable and start
 sudo systemctl daemon-reload
 sudo systemctl enable --now sysmaint.timer
-\`\`\`
+```
 
-**Optional:** Create \`/etc/sysmaint/sysmaint.env\` for custom settings.
+**Optional:** Create `/etc/sysmaint/sysmaint.env` for custom settings.
 
 ---
 
@@ -204,17 +204,17 @@ sudo systemctl enable --now sysmaint.timer
 
 ### Built-in Audit
 
-\`\`\`bash
+```bash
 # Check shadow, gshadow, sudoers permissions
 sudo ./sysmaint --security-audit
-\`\`\`
+```
 
 ### External Scanners (Lynis + rkhunter)
 
-\`\`\`bash
+```bash
 # Run with threshold enforcement
 LYNIS_MIN_SCORE=80 RKHUNTER_MAX_WARNINGS=5 ./sysmaint scanners
-\`\`\`
+```
 
 See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
@@ -222,7 +222,7 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
 ## 🧪 Quality Assurance
 
-\`\`\`
+```
 ╔═══════════════════════════════════════════════════════════╗
 ║                    QUALITY DASHBOARD                       ║
 ╠═══════════════════════════════════════════════════════════╣
@@ -232,11 +232,11 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 ║  ✅ ShellCheck           │  0 errors, 0 warnings          ║
 ║  ✅ License              │  MIT (all files)               ║
 ╚═══════════════════════════════════════════════════════════╝
-\`\`\`
+```
 
 **Run tests locally:**
 
-\`\`\`bash
+```bash
 # Quick smoke test
 bash tests/test_suite_smoke.sh
 
@@ -244,7 +244,7 @@ bash tests/test_suite_smoke.sh
 for suite in smoke edge security compliance governance performance; do
   bash tests/test_suite_\${suite}.sh
 done
-\`\`\`
+```
 
 ---
 
@@ -270,7 +270,7 @@ done
 | 🖥️ Desktop Guard | Enabled (protects desktop sessions) |
 | 👻 Zombie Check | Enabled |
 | 🌐 Browser Cache | Disabled (opt-in) |
-| ⬆️ Full Upgrade | Disabled (use \`--upgrade\`) |
+| ⬆️ Full Upgrade | Disabled (use `--upgrade`) |
 
 ---
 
@@ -288,7 +288,7 @@ We welcome contributions! Please:
 
 1. Fork the repository
 2. Create a feature branch
-3. Run tests: \`bash tests/test_suite_smoke.sh\`
+3. Run tests: `bash tests/test_suite_smoke.sh`
 4. Submit a pull request
 
 See our [Issue Templates](.github/ISSUE_TEMPLATE/) for bug reports and feature requests.
