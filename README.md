@@ -90,31 +90,9 @@ sudo ./sysmaint --upgrade --json-summary
 
 ---
 
-## 🎯 Pre-built Profiles
-
-> One command for common scenarios — no configuration needed!
-
-| Profile | Use Case | Risk | Time |
-|:--------|:---------|:----:|:----:|
-| 🟢 `minimal` | Safe telemetry preview | None | ~2m |
-| 🔵 `standard` | Weekly unattended maintenance | Low | ~5m |
-| 🟡 `desktop` | Desktop cleanup with visuals | Medium | ~6m |
-| 🟠 `server` | Hardened server maintenance | Medium | ~8m |
-| 🔴 `aggressive` | Maximum space reclamation | High | ~10m |
-
-**Usage:**
-
-```bash
-# Preview what a profile will do
-./sysmaint profiles --profile desktop --print-command
-
-# Run a profile directly
-./sysmaint profiles --profile standard --yes
-```
-
----
-
 ## 📋 Common Flags
+
+> 📖 **See [FEATURES.md](FEATURES.md) for the complete flag reference and pre-built profiles**
 
 ### ⬆️ Updates & Upgrades
 
@@ -169,23 +147,6 @@ sudo ./sysmaint --upgrade --json-summary
 | `--progress=MODE` | `spinner`, `dots`, `bar`, `adaptive` |
 
 > 💡 **Tip:** Disable any default with `--no-*` (e.g., `--no-clear-tmp`, `--no-journal-vacuum`)
-
----
-
-## 📊 Exit Codes
-
-| Code | Status | Meaning |
-|:----:|:------:|:--------|
-| `0` | ✅ Success | Completed without issues |
-| `1` | ❌ Error | General failure (check logs) |
-| `2` | ❌ Invalid Args | Unknown or incorrect flags |
-| `10` | ⚠️ Repo Issues | APT repository problems |
-| `20` | ⚠️ Missing Keys | GPG keys not found |
-| `30` | ⚠️ Failed Services | Systemd units in failed state |
-| `75` | 🔒 Lock Timeout | Another instance running |
-| `100` | 🔄 Reboot Needed | Success, but restart required |
-
-> 💡 Both `0` and `100` indicate successful completion!
 
 ---
 
@@ -247,34 +208,6 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
 ---
 
-## 🧪 Quality Assurance
-
-```
-╔═══════════════════════════════════════════════════════════╗
-║                    QUALITY DASHBOARD                       ║
-╠═══════════════════════════════════════════════════════════╣
-║  ✅ Total Tests          │  246 passing                   ║
-║  ✅ Test Suites          │  10 comprehensive suites       ║
-║  ✅ Coverage             │  100%                          ║
-║  ✅ ShellCheck           │  0 errors, 0 warnings          ║
-║  ✅ License              │  MIT (all files)               ║
-╚═══════════════════════════════════════════════════════════╝
-```
-
-**Run tests locally:**
-
-```bash
-# Quick smoke test
-bash tests/test_suite_smoke.sh
-
-# Full test suite
-for suite in smoke edge security compliance governance performance; do
-  bash tests/test_suite_\${suite}.sh
-done
-```
-
----
-
 ## 📚 Documentation
 
 | Document | Purpose |
@@ -283,21 +216,6 @@ done
 | 📝 [CHANGELOG.md](CHANGELOG.md) | Version history |
 | 🔐 [docs/SECURITY.md](docs/SECURITY.md) | Security guidelines |
 | ⚡ [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Benchmarks |
-
----
-
-## 🔧 Defaults at a Glance
-
-| Area | Default Behavior |
-|:-----|:-----------------|
-| 📦 APT | Update, upgrade, autoremove, autoclean |
-| 📱 Snap/Flatpak | Refresh if installed |
-| 📜 Journal | Vacuum to 7 days / 500MB |
-| 🗂️ /tmp | Age-based cleanup (1 day+) |
-| 🖥️ Desktop Guard | Enabled (protects desktop sessions) |
-| 👻 Zombie Check | Enabled |
-| 🌐 Browser Cache | Disabled (opt-in) |
-| ⬆️ Full Upgrade | Disabled (use `--upgrade`) |
 
 ---
 
