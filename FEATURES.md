@@ -192,7 +192,7 @@ sudo ./sysmaint --auto --auto-reboot-delay 60 --json-summary
 
 ## 🎯 Pre-built Profiles
 
-> One command for common scenarios
+> One command for common scenarios — no configuration needed!
 
 | Profile | Use Case | Risk Level | Time |
 |:--------|:---------|:----------:|:----:|
@@ -201,6 +201,112 @@ sudo ./sysmaint --auto --auto-reboot-delay 60 --json-summary
 | 🟡 `desktop` | Desktop cleanup with visuals | Medium | ~6 min |
 | 🟠 `server` | Hardened server maintenance | Medium | ~8 min |
 | 🔴 `aggressive` | Maximum space reclamation | High | ~10 min |
+
+### 🟢 Minimal Profile
+
+**Best for:** First-time users, testing, read-only audits
+
+```bash
+./sysmaint profiles --profile minimal --yes
+```
+
+| What It Does | What It Skips |
+|:-------------|:--------------|
+| ✅ Dry-run mode (no changes) | ❌ Package updates |
+| ✅ JSON summary output | ❌ Cleanup operations |
+| ✅ System status report | ❌ Kernel management |
+| ✅ Zombie process check | ❌ Any destructive actions |
+
+---
+
+### 🔵 Standard Profile
+
+**Best for:** Weekly scheduled maintenance, unattended servers
+
+```bash
+sudo ./sysmaint profiles --profile standard --yes
+```
+
+| What It Does | What It Skips |
+|:-------------|:--------------|
+| ✅ APT update & upgrade | ❌ Full distribution upgrade |
+| ✅ Snap & Flatpak refresh | ❌ Kernel purging |
+| ✅ Journal vacuum (7 days) | ❌ Browser cache |
+| ✅ Temp file cleanup | ❌ Orphan purge |
+| ✅ Auto-remove unused packages | ❌ SSD TRIM |
+| ✅ JSON summary | ❌ Drop caches |
+
+---
+
+### 🟡 Desktop Profile
+
+**Best for:** Personal workstations, laptops, daily drivers
+
+```bash
+sudo ./sysmaint profiles --profile desktop --yes
+```
+
+| What It Does | What It Skips |
+|:-------------|:--------------|
+| ✅ Everything in Standard | ❌ Full upgrade |
+| ✅ Thumbnail cache cleanup | ❌ Kernel purging |
+| ✅ Crash dump removal | ❌ Orphan purge |
+| ✅ Browser cache report | ❌ Browser cache purge (opt-in) |
+| ✅ Progress spinner UI | ❌ Auto-reboot |
+| ✅ Color output | |
+| ✅ Desktop session protection | |
+
+---
+
+### 🟠 Server Profile
+
+**Best for:** Production servers, VPS, headless systems
+
+```bash
+sudo ./sysmaint profiles --profile server --yes
+```
+
+| What It Does | What It Skips |
+|:-------------|:--------------|
+| ✅ Everything in Standard | ❌ Desktop-specific cleanup |
+| ✅ Security audit | ❌ Browser operations |
+| ✅ Failed services check | ❌ Thumbnail cache |
+| ✅ Zombie process detection | ❌ GUI progress indicators |
+| ✅ SSD TRIM (fstrim) | |
+| ✅ Firmware update check | |
+| ✅ Auto mode (no prompts) | |
+
+---
+
+### 🔴 Aggressive Profile
+
+**Best for:** Disk space recovery, pre-backup cleanup, spring cleaning
+
+⚠️ **Warning:** This profile makes significant changes. Always run with `--dry-run` first!
+
+```bash
+# Preview first!
+./sysmaint profiles --profile aggressive --print-command
+
+# Then run
+sudo ./sysmaint profiles --profile aggressive --yes
+```
+
+| What It Does | What It Skips |
+|:-------------|:--------------|
+| ✅ Full distribution upgrade | ❌ Nothing — full power! |
+| ✅ Purge old kernels (keep 2) | |
+| ✅ Orphan package removal | |
+| ✅ Browser cache purge | |
+| ✅ Snap old revisions cleanup | |
+| ✅ Snap cache clear | |
+| ✅ Force temp cleanup | |
+| ✅ SSD TRIM | |
+| ✅ Drop page caches | |
+| ✅ Journal vacuum (3 days) | |
+| ✅ Security audit | |
+
+---
 
 **Usage:**
 ```bash
