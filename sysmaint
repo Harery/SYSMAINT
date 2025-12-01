@@ -3678,7 +3678,9 @@ for _arg in "$@"; do
 done
 
 # Robust CLI parsing with getopt. Flags override environment variables for the run.
-if getopt --test >/dev/null 2>&1; then
+# Note: GNU enhanced getopt returns exit code 4 from `getopt --test` to signal availability.
+# A return of 0 means basic (non-GNU) getopt, so we negate the test.
+if ! getopt --test >/dev/null 2>&1; then
   PARSED=$(getopt -o h --long help,dry-run,no-reboot,auto-reboot,auto,auto-reboot-delay:,json-summary,no-json-summary,simulate-upgrade,fix-missing-keys,yes,keyserver:,no-snap,no-flatpak,flatpak-user-only,flatpak-system-only,no-firmware,clear-dns-cache,no-clear-dns-cache,no-clear-thumbnails,no-journal-vacuum,no-check-failed-services,clear-crash,no-clear-crash,fstrim,no-fstrim,drop-caches,no-drop-caches,purge-kernels,no-purge-kernels,keep-kernels:,orphan-purge,no-orphan-purge,progress:,progress-duration:,reset-progress-history,parallel,lock-wait-seconds:,clear-tmp,no-clear-tmp,clear-tmp-force,confirm-clear-tmp-force,clear-tmp-age:,snap-clean-old,snap-clear-cache,no-snap-clean-old,no-snap-clear-cache,mode:,no-desktop-guard,journal-days:,update-grub,upgrade,color:,log-max-size-mb:,log-tail-keep-kb:,check-zombies,no-check-zombies,security-audit,browser-cache-report,browser-cache-purge -- "$@") || {
     usage
     exit 2
@@ -3936,6 +3938,11 @@ if getopt --test >/dev/null 2>&1; then
       shift
       break
       ;;
+    --*)
+      echo "ERROR: Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
     *)
       break
       ;;
@@ -4111,7 +4118,15 @@ else
       shift
       break
       ;;
-    *) break ;;
+    --*)
+      echo "ERROR: Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
+    *)
+      # Non-option argument; stop parsing
+      break
+      ;;
     esac
   done
 fi
