@@ -51,3 +51,5 @@ tests/__pycache__/
 *.tmp
 *~
 scanner_artifacts/
+build_deb/
+*.deb

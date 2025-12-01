@@ -5,7 +5,7 @@ Maintainer: Mohamed Elharery <Mohamed@Harery.com>
 Build-Depends: debhelper-compat (= 13)
 Standards-Version: 4.6.2
 Rules-Requires-Root: no
-Homepage: https://example.com/sysmaint
+Homepage: https://github.com/Harery/SYSMAINT
 
 Package: sysmaint
 Architecture: all
