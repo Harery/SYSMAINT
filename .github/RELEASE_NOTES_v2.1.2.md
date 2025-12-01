@@ -4,6 +4,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > A polished, production-ready release with 100% test coverage, complete code quality compliance, and GitHub CI integration.
@@ -19,15 +20,22 @@
 | 🤖 GitHub CI/CD integration | ✅ |
 | 📚 Complete documentation | ✅ |
 | 📦 .deb package available | ✅ |
+| 🐳 Docker image available | ✅ |
 
 ---
 
 ## 📥 Installation
 
+### .deb Package
 ```bash
-# Download and install
 wget https://github.com/Harery/SYSMAINT/releases/download/v2.1.2/sysmaint_2.1.2_all.deb
 sudo dpkg -i sysmaint_2.1.2_all.deb
+```
+
+### Docker
+```bash
+docker pull ghcr.io/harery/sysmaint:latest
+docker run --rm ghcr.io/harery/sysmaint --help
 ```
 
 ---

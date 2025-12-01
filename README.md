@@ -4,6 +4,7 @@
 
 ![Version](https://img.shields.io/badge/version-2.1.2-blue.svg)
 [![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
@@ -47,7 +48,20 @@ sudo dpkg -i sysmaint_2.1.2_all.deb
 sudo sysmaint --help
 ```
 
-### Option 2: Clone Repository
+### Option 2: Docker
+
+```bash
+# Pull the image
+docker pull ghcr.io/harery/sysmaint:latest
+
+# Run
+docker run --rm ghcr.io/harery/sysmaint --help
+
+# Dry-run with JSON output
+docker run --rm ghcr.io/harery/sysmaint --dry-run --json-summary
+```
+
+### Option 3: Clone Repository
 
 ```bash
 git clone https://github.com/Harery/SYSMAINT.git
