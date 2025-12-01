@@ -5,10 +5,12 @@ Purpose: Benchmark, compare, and gate regressions in CI
 Need: Detect slowdowns and track performance trends across releases
 Function: How to run benchmarks, manage baselines, and interpret results
 
-> © 2025 Mohamed Elharery <Mohamed@Harery.com>
+> © 2025 Mohamed Elharery <Mohamed@Harery.com> • [www.harery.com](https://www.harery.com)
 
-**Version**: 2.1.1  
-**Last Updated**: November 15, 2025
+**Version**: 2.1.2  
+**Last Updated**: November 30, 2025
+
+[![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 
 ---
 
@@ -474,4 +476,12 @@ git commit -m "Update performance baseline for v2.1.1"
 ✅ **Full suite** completes in ~15-20 minutes  
 ✅ **CI-ready** with exit codes for failures  
 
-For detailed test coverage, see [TEST_COVERAGE.md](TEST_COVERAGE.md).
+---
+
+<div align="center">
+
+**[← Back to README](../README.md)** • **[Features →](../FEATURES.md)**
+
+**MIT Licensed** • **[www.harery.com](https://www.harery.com)**
+
+</div>

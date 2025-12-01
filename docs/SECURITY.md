@@ -5,10 +5,12 @@ Purpose: Enable and interpret audit; best practices and integrations
 Need: Operational security posture and compliance readiness
 Function: Explain checks, outputs, remediation, and tool integrations
 
-> Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+> © 2025 Mohamed Elharery <Mohamed@Harery.com> • [www.harery.com](https://www.harery.com)
 
-**Version**: 2.1.1  
-**Last Updated**: November 15, 2025
+**Version**: 2.1.2  
+**Last Updated**: November 30, 2025
+
+[![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 
 ---
 
@@ -359,4 +361,12 @@ logger -t sysmaint -p local0.info -f /tmp/system-maintenance/sysmaint_*.json
 - **Integrate with existing tools** - lynis, rkhunter, monitoring systems
 - **Use JSON output for automation** - parse results for alerting and compliance reporting
 
-For questions or issues, see `README.md` or file an issue at the project repository.
+---
+
+<div align="center">
+
+**[← Back to README](../README.md)** • **[Features →](../FEATURES.md)**
+
+**MIT Licensed** • **[www.harery.com](https://www.harery.com)**
+
+</div>

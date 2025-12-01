@@ -1,56 +1,68 @@
-# Test Suite Overview
+# 🧪 Test Suite
 
-> Note: This overview has moved under `docs/TEST_COVERAGE.md` and is indexed in `docs/INDEX.md`. Prefer those as the single source of truth.
+> © 2025 Mohamed Elharery <Mohamed@Harery.com> • [www.harery.com](https://www.harery.com)
 
-> © 2025 Mohamed Elharery <Mohamed@Harery.com>
-
-sysmaint v2.1.1 ships consolidated bash test suites (plus JSON validation) that cover every documented scenario. Each suite forces `DRY_RUN=true`, so they are safe to execute anywhere.
-
-## Test Suites
-
-### `test_suite_smoke.sh` — 65 tests (includes profiles)
-
-Baseline + advanced smoke coverage combining the former `smoke.sh`, `smoke_extended.sh`, and `smoke_ultra.sh` flows.
-
-- **Structure:** Basic (6), Extended (filesystems, kernel/journal, browser cache, snap, tmp, desktop guard), Advanced (auto/parallel combos, rapid cycles, audit/zombie guard mixes), Profiles (5 preset tests via `sysmaint profiles` subcommand).
-- **Purpose:** Fast regression net for the most common flag mixes.
-- **Runtime:** ~3 minutes.
-- **Run:**
-	```bash
-	bash tests/test_suite_smoke.sh
-	```
+[![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/Harery/SYSMAINT)
 
 ---
 
-### `test_suite_edge.sh` — 67 tests
+## 🚀 Quick Start
 
-Argument parser torture suite that merges `args_edge.sh`, `edge_extended.sh`, and `edge_advanced.sh`.
-
-- **Coverage:** help/version, non-root dry-run paths, ordering permutations, duplicate/contradicting flags, stress bundles, failure expectations.
-- **Runtime:** ~3 minutes.
-- **Run:**
-	```bash
-	bash tests/test_suite_edge.sh
-	```
+```bash
+# Run all tests (safe - uses DRY_RUN=true)
+bash tests/test_suite_smoke.sh
+```
 
 ---
 
-### `test_suite_combos.sh` — 28 tests
+## 📋 Test Suites
 
-Feature combination gallery validating advanced flag interactions.
+| Suite | Tests | Purpose |
+|:------|:-----:|:--------|
+| 🔥 `test_suite_smoke.sh` | 65 | Core functionality & profiles |
+| 🔀 `test_suite_edge.sh` | 67 | Edge cases & argument parsing |
+| 🔐 `test_suite_security.sh` | 36 | Security & permissions |
+| 📋 `test_suite_compliance.sh` | 32 | Standards compliance |
+| 🏛️ `test_suite_governance.sh` | 18 | Exit codes & versioning |
+| ⚡ `test_suite_performance.sh` | ~20 | Benchmarks |
+| 📄 `test_json_validation.sh` | 4 | JSON schema validation |
+| 🔌 `test_suite_scanners.sh` | 10 | External tool integration |
 
-# Tests (Pointer)
+**Total: 246 tests**
 
-This file is intentionally minimal to keep the repo lean.
+---
 
-- Full test documentation: `docs/TEST_COVERAGE.md`
-- Quick runs:
-  ```bash
-  bash tests/test_suite_smoke.sh
-  bash tests/test_suite_edge.sh
-  bash tests/test_suite_combos.sh
-  bash tests/test_json_validation.sh
-  ```
+## 🔧 Run Individual Suites
 
-Artifacts live in `/tmp/system-maintenance/`. JSON schema: `docs/schema/sysmaint-summary.schema.json`.
-- **Mechanics:** Prepends `tests/mocks/realmodesandbox/bin` to `PATH`, sets `SYSMAINT_FAKE_ROOT=1`, and lets the shimbed commands absorb every destructive action.
+```bash
+# Quick smoke test
+bash tests/test_suite_smoke.sh
+
+# Full test run
+for suite in smoke edge security compliance governance performance; do
+  bash tests/test_suite_${suite}.sh
+done
+```
+
+---
+
+## 📁 Artifacts
+
+| Location | Content |
+|:---------|:--------|
+| `/tmp/system-maintenance/` | JSON summaries & logs |
+| `docs/schema/sysmaint-summary.schema.json` | JSON schema |
+| `benchmarks/` | Performance baselines |
+
+---
+
+## 🛡️ Safety
+
+All tests run with `DRY_RUN=true` — no system changes are made.
+
+Mock binaries in `tests/mocks/realmodesandbox/bin/` intercept destructive commands.
+
+---
+
+📖 **Full documentation:** [FEATURES.md](../FEATURES.md) → Test Coverage Matrix

@@ -59,5 +59,6 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - CI YAML references to removed tests.
 - Minor test stability issues (pipefail handling in JSON validation).
 
-[Unreleased]: https://example.com/compare/v2.1.1...HEAD
-[2.1.1]: https://example.com/releases/v2.1.1
+[Unreleased]: https://github.com/Harery/SYSMAINT/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/Harery/SYSMAINT/releases/tag/v2.1.2
+[2.1.1]: https://github.com/Harery/SYSMAINT/releases/tag/v2.1.1
