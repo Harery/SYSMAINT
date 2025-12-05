@@ -227,9 +227,22 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 | Document | Purpose |
 |:---------|:--------|
 | 📋 [FEATURES.md](FEATURES.md) | Complete capability matrix |
+| 🗺️ [RELEASES.md](RELEASES.md) | Release roadmap and future plans |
 | 📝 [CHANGELOG.md](CHANGELOG.md) | Version history |
 | 🔐 [docs/SECURITY.md](docs/SECURITY.md) | Security guidelines |
 | ⚡ [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Benchmarks |
+
+---
+
+## 🗺️ Roadmap
+
+| Version | Target | Focus |
+|---------|:------:|:------|
+| **v2.2.0** | Q1 2026 | 🐧 Multi-distro support (RHEL, Fedora, Arch, Manjaro) |
+| **v2.3.0** | Q2 2026 | ⚡ Performance optimization & enhancements |
+| **v3.0.0** | Q3-Q4 2026 | 🖥️ Dual-mode: CLI + Interactive GUI |
+
+📖 [View detailed roadmap](RELEASES.md) with implementation phases and technical specifications
 
 ---
 
