@@ -66,4 +66,5 @@ Mock binaries in `tests/mocks/realmodesandbox/bin/` intercept destructive comman
 
 ---
 
-📖 **Full documentation:** [FEATURES.md](../FEATURES.md) → Test Coverage Matrix
+📖 **Full documentation:** [FEATURES.md](../FEATURES.md) → Test Coverage Matrix  
+🗺️ **Future releases:** [RELEASES.md](../RELEASES.md) → Release Roadmap

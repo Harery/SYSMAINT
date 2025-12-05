@@ -14,7 +14,7 @@
 
 *APT + Snap updates • Cleanup phases • JSON telemetry • Unattended mode • Security audits*
 
-[Features](FEATURES.md) • [Changelog](CHANGELOG.md) • [Security](docs/SECURITY.md) • [Performance](docs/PERFORMANCE.md)
+[Features](FEATURES.md) • [Releases](RELEASES.md) • [Changelog](CHANGELOG.md) • [Security](docs/SECURITY.md) • [Performance](docs/PERFORMANCE.md)
 
 </div>
 

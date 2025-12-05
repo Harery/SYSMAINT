@@ -21,21 +21,9 @@
 
 ---
 
-## 📥 Quick Install
+## 🔗 Quick Links
 
-### .deb Package
-```bash
-wget https://github.com/Harery/SYSMAINT/releases/download/v2.1.2/sysmaint_2.1.2_all.deb
-sudo dpkg -i sysmaint_2.1.2_all.deb
-```
-
-### Docker
-```bash
-docker pull ghcr.io/harery/sysmaint:latest
-docker run --rm ghcr.io/harery/sysmaint --help
-```
-
-📦 [View all releases](https://github.com/Harery/SYSMAINT/releases) • 🐳 [Docker Package](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
+📥 [Installation Guide](README.md#-installation) • 🗺️ [Release Roadmap](RELEASES.md) • 📦 [Latest Release](https://github.com/Harery/SYSMAINT/releases/latest) • 🐳 [Docker Image](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 
 ---
 

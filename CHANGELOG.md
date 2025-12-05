@@ -5,7 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
-- Planned improvements and minor refinements.
+
+### Planned Releases
+
+See [RELEASES.md](RELEASES.md) for comprehensive release roadmap.
+
+#### v2.2.0 - Multi-Distro Support (Q1 2026)
+- Phase 1: Red Hat family support (RHEL, CentOS, Fedora)
+- Phase 2: Additional distros (Mint, Manjaro, Arch)
+- Phase 3: Auto-detection and intelligent path routing
+- Performance target: baseline <3.0s
+
+#### v2.3.0 - TBD (Q2 2026)
+- Performance optimizations
+- Enhanced telemetry
+- Community-requested features
+- Performance target: maximum <4.5s
+
+#### v3.0.0 - Dual Mode CLI + GUI (Q3-Q4 2026)
+- Interactive matrix selection interface
+- Backward-compatible CLI mode
+- TUI/GUI framework integration
+- Performance target: baseline <2.5s
 
 ## [2.1.2] - 2025-11-24
 
@@ -60,5 +81,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Minor test stability issues (pipefail handling in JSON validation).
 
 [Unreleased]: https://github.com/Harery/SYSMAINT/compare/v2.1.2...HEAD
+[2.2.0]: https://github.com/Harery/SYSMAINT/releases/tag/v2.2.0
+[2.3.0]: https://github.com/Harery/SYSMAINT/releases/tag/v2.3.0
+[3.0.0]: https://github.com/Harery/SYSMAINT/releases/tag/v3.0.0
 [2.1.2]: https://github.com/Harery/SYSMAINT/releases/tag/v2.1.2
 [2.1.1]: https://github.com/Harery/SYSMAINT/releases/tag/v2.1.1

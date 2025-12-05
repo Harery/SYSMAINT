@@ -457,11 +457,13 @@ git commit -m "Update performance baseline for v2.1.1"
 
 ### Future Targets
 
-| Version | Target | Improvement |
-|---------|--------|-------------|
-| v2.2.0 | <3.0s baseline | -3% |
-| v2.3.0 | <4.5s maximum | -10% |
-| v3.0.0 | <2.5s baseline | -20% |
+See [RELEASES.md](../RELEASES.md) for comprehensive roadmap and implementation details.
+
+| Version | Target | Improvement | Status |
+|---------|--------|-------------|--------|
+| v2.2.0 | <3.0s baseline | -3% | 📋 Q1 2026 - Multi-Distro Support |
+| v2.3.0 | <4.5s maximum | -10% | 📋 Q2 2026 - Performance & Optimization |
+| v3.0.0 | <2.5s baseline | -20% | 🔮 Q3-Q4 2026 - Dual Mode (CLI + GUI) |
 
 ---
 
@@ -480,7 +482,7 @@ git commit -m "Update performance baseline for v2.1.1"
 
 <div align="center">
 
-**[← Back to README](../README.md)** • **[Features →](../FEATURES.md)**
+**[← Back to README](../README.md)** • **[Features](../FEATURES.md)** • **[Releases Roadmap](../RELEASES.md)**
 
 **MIT Licensed** • **[www.harery.com](https://www.harery.com)**
 
