@@ -53,3 +53,6 @@ tests/__pycache__/
 scanner_artifacts/
 build_deb/
 *.deb
+
+# Local project tracking (DO NOT SYNC TO GITHUB)
+PROJECT_STATUS.md
