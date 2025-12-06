@@ -64,6 +64,7 @@ pkg_update() {
 
 # Upgrade installed packages
 pkg_upgrade() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       run apt-get -y -o Dpkg::Options::="--force-confold" upgrade
@@ -86,6 +87,7 @@ pkg_upgrade() {
 
 # Full system upgrade (dist-upgrade equivalent)
 pkg_full_upgrade() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       run apt-get -y -o Dpkg::Options::="--force-confold" full-upgrade
@@ -108,6 +110,7 @@ pkg_full_upgrade() {
 
 # Remove unused dependencies
 pkg_autoremove() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       run apt-get -y autoremove --purge
@@ -135,6 +138,7 @@ pkg_autoremove() {
 
 # Clean package cache
 pkg_autoclean() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       run apt-get -y autoclean
@@ -157,6 +161,7 @@ pkg_autoclean() {
 
 # Remove a package
 pkg_remove() {
+  _pkg_ensure_initialized || return 1
   local pkg="$1"
   case "$PKG_MANAGER_TYPE" in
     apt)
@@ -184,6 +189,7 @@ pkg_remove() {
 
 # List all installed packages
 pkg_list_installed() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       dpkg -l 2>/dev/null | awk '/^ii/ {print $2}'
@@ -206,6 +212,7 @@ pkg_list_installed() {
 
 # List upgradable packages
 pkg_list_upgradable() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       apt list --upgradable 2>/dev/null
@@ -228,6 +235,7 @@ pkg_list_upgradable() {
 
 # Query package size (installed size in KB)
 pkg_query_size() {
+  _pkg_ensure_initialized || return 1
   local pkg="$1"
   case "$PKG_MANAGER_TYPE" in
     apt)
@@ -252,6 +260,7 @@ pkg_query_size() {
 
 # Check if package is installed
 pkg_is_installed() {
+  _pkg_ensure_initialized || return 1
   local pkg="$1"
   case "$PKG_MANAGER_TYPE" in
     apt)
@@ -276,6 +285,7 @@ pkg_is_installed() {
 # Compare two version strings
 # Returns 0 if version1 > version2, 1 if version1 < version2, 2 if equal
 pkg_compare_versions() {
+  _pkg_ensure_initialized || return 1
   local ver1="$1"
   local ver2="$2"
   
@@ -316,6 +326,7 @@ pkg_compare_versions() {
 
 # Find orphaned packages (no longer needed)
 pkg_find_orphans() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       # Use deborphan if available, otherwise apt-mark
@@ -351,6 +362,7 @@ pkg_find_orphans() {
 
 # Get lock file paths for the current package manager
 pkg_get_lock_files() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       echo "/var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock /var/cache/apt/archives/lock"
@@ -373,6 +385,7 @@ pkg_get_lock_files() {
 
 # Get process names that might hold locks
 pkg_get_lock_processes() {
+  _pkg_ensure_initialized || return 1
   case "$PKG_MANAGER_TYPE" in
     apt)
       echo "apt apt-get dpkg unattended-upgrade"
@@ -397,11 +410,14 @@ pkg_get_lock_processes() {
 # INITIALIZATION
 # ============================================================================
 
-# Auto-detect package manager on script load
-if [[ -z "$PKG_MANAGER" ]]; then
-  detect_package_manager || {
-    log "WARNING: Package manager auto-detection failed"
-  }
-fi
-
-log "Package manager abstraction layer loaded (manager: $PKG_MANAGER, type: $PKG_MANAGER_TYPE)"
+# Lazy initialization: detect package manager when first pkg_* function is called
+# This avoids calling log() before LOG_FILE is initialized in the main script
+_pkg_ensure_initialized() {
+  if [[ -z "$PKG_MANAGER" ]]; then
+    detect_package_manager || {
+      log "WARNING: Package manager auto-detection failed"
+      return 1
+    }
+    log "Package manager abstraction layer loaded (manager: $PKG_MANAGER, type: $PKG_MANAGER_TYPE)"
+  fi
+}

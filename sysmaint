@@ -1348,18 +1348,20 @@ wait_for_pkg_managers() {
 
   start_ts=$(date +%s)
   retries=0
-  # Candidate lockfiles to inspect (common apt/dpkg locks). Tests may override
+  # Candidate lockfiles to inspect (distro-specific). Tests may override
   # this list via the LOCK_FILES env var (comma-separated) so we can point
   # the check at disposable files during unit tests without requiring root.
-  lock_files=(/var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock /var/cache/apt/archives/lock)
   if [[ -n "${LOCK_FILES:-}" ]]; then
     IFS=',' read -r -a lock_files <<<"$LOCK_FILES"
+  else
+    # Get lock files from abstraction layer
+    lock_files=($(pkg_get_lock_files))
   fi
 
   while :; do
     busy=0
 
-    # 1) Optionally check for active package manager processes (apt, apt-get, dpkg, unattended-upgrade).
+    # 1) Optionally check for active package manager processes (distro-specific).
     # Tests can set ONLY_CHECK_LOCKS=true to skip process scanning and exercise
     # lockfile-only behavior without depending on the host's running processes.
     if [[ "${ONLY_CHECK_LOCKS:-false}" != "true" ]]; then
@@ -1367,7 +1369,10 @@ wait_for_pkg_managers() {
       # unattended-upgrade-shutdown which can be idle and harmless.
       busy_pids=""
       if command -v pgrep >/dev/null 2>&1; then
-        for _name in apt apt-get dpkg unattended-upgrade; do
+        # Get lock processes from abstraction layer (distro-specific)
+        local lock_processes
+        IFS=' ' read -r -a lock_processes <<< "$(pkg_get_lock_processes)"
+        for _name in "${lock_processes[@]}"; do
           this_pids=$(pgrep -x "$_name" 2>/dev/null || true)
           if [[ -n "$this_pids" ]]; then
             busy_pids+=" $this_pids"
@@ -1626,50 +1631,57 @@ fix_broken_if_any() {
   run apt-get -y -f install || true
 }
 
-apt_maintenance() {
-  log "=== APT maintenance start ==="
-  show_progress 3 "$PROGRESS_MODE" "Preparing APT"
+package_maintenance() {
+  log "=== Package maintenance start ==="
+  show_progress 3 "$PROGRESS_MODE" "Preparing package manager"
   wait_for_pkg_managers
   # Robust update/upgrade cycle with conservative config handling
-  # Capture apt-get update output to check GPG signature verification
+  # Capture update output to check signature verification (APT-specific)
   local update_out
   
-  # Use retry logic for apt-get update to handle transient network failures
+  # Use retry logic for package update to handle transient network failures
   if [[ "${DRY_RUN:-false}" == "true" ]]; then
-    log "DRY_RUN: would run: apt-get update with retry logic"
+    log "DRY_RUN: would run: pkg_update with retry logic"
     update_out="DRY_RUN"
   else
     show_progress 5 "$PROGRESS_MODE" "Refreshing package lists"
-    update_out=$(retry_with_backoff "apt-get update" apt-get update -o Acquire::Retries=3 2>&1 | tee -a "$LOG_FILE")
+    update_out=$(retry_with_backoff "pkg_update" pkg_update 2>&1 | tee -a "$LOG_FILE")
   fi
   
-  # Check for GPG signature verification (look for "Signed by" or warnings)
-  if echo "$update_out" | grep -qi "NO_PUBKEY"; then
-    APT_SIG_STATUS="missing_keys"
-  elif echo "$update_out" | grep -qi "signature.*could not be verified\|gpg.*error"; then
-    APT_SIG_STATUS="verification_failed"
-  elif echo "$update_out" | grep -qi "Signed by\|gpgv"; then
-    APT_SIG_STATUS="verified"
-  else
-    APT_SIG_STATUS="unknown"
+  # Check for GPG signature verification (APT-specific, other package managers handle differently)
+  if [[ "$PKG_MANAGER" == "apt" ]]; then
+    if echo "$update_out" | grep -qi "NO_PUBKEY"; then
+      APT_SIG_STATUS="missing_keys"
+    elif echo "$update_out" | grep -qi "signature.*could not be verified\|gpg.*error"; then
+      APT_SIG_STATUS="verification_failed"
+    elif echo "$update_out" | grep -qi "Signed by\|gpgv"; then
+      APT_SIG_STATUS="verified"
+    else
+      APT_SIG_STATUS="unknown"
+    fi
+    log "Package signature verification status: $APT_SIG_STATUS"
   fi
-  log "APT signature verification status: $APT_SIG_STATUS"
   
   # Use retry logic for upgrade commands
   if [[ "${DRY_RUN:-false}" == "true" ]]; then
-    run apt-get -y -o Dpkg::Options::="--force-confold" upgrade
-    run apt-get -y -o Dpkg::Options::="--force-confold" full-upgrade
+    run pkg_upgrade
+    run pkg_full_upgrade
   else
     show_progress 10 "$PROGRESS_MODE" "Applying upgrades"
-    retry_with_backoff "apt-get upgrade" apt-get -y -o Dpkg::Options::="--force-confold" upgrade
+    retry_with_backoff "pkg_upgrade" pkg_upgrade
     show_progress 10 "$PROGRESS_MODE" "Applying full-upgrade"
-    retry_with_backoff "apt-get full-upgrade" apt-get -y -o Dpkg::Options::="--force-confold" full-upgrade
+    retry_with_backoff "pkg_full_upgrade" pkg_full_upgrade
   fi
   
   # Remove obsolete dependencies and cache clutter
-  run apt-get -y autoremove --purge
-  run apt-get -y autoclean
-  log "=== APT maintenance complete ==="
+  run pkg_autoremove
+  run pkg_autoclean
+  log "=== Package maintenance complete ==="
+}
+
+# Backward compatibility alias
+apt_maintenance() {
+  package_maintenance
 }
 
 snap_maintenance() {
