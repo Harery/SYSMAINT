@@ -18,8 +18,9 @@ run_test() {
     DRY_RUN=true JSON_SUMMARY=true bash "$SCRIPT" "$@" >/dev/null 2>&1
     local exit_code=$?
     set -e
-    # Accept exit codes: 0 (success) or 100 (reboot required)
-    if [[ $exit_code -eq 0 || $exit_code -eq 100 ]]; then
+    # Accept exit codes: 0 (success), 30 (failed services), or 100 (reboot required)
+    # Exit 30 is common in CI environments where some systemd services may be in failed state
+    if [[ $exit_code -eq 0 || $exit_code -eq 30 || $exit_code -eq 100 ]]; then
         echo "✅ PASS"
         # Verify JSON summary
         local json_file=$(ls -t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -1)
