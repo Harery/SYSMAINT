@@ -39,6 +39,9 @@ fi
 if [[ -f "$SCRIPT_DIR/lib/subcommands.sh" ]]; then
   source "$SCRIPT_DIR/lib/subcommands.sh"
 fi
+if [[ -f "$SCRIPT_DIR/lib/package_manager.sh" ]]; then
+  source "$SCRIPT_DIR/lib/package_manager.sh"
+fi
 # progress UI functions are now included in lib/utils.sh
 
 LOG_DIR="${LOG_DIR:-/tmp/system-maintenance}"
@@ -62,11 +65,43 @@ check_os() {
   if [[ -r /etc/os-release ]]; then
     # shellcheck disable=SC1091
     . /etc/os-release
-    # Accept Ubuntu, Debian, or any system that lists debian in ID_LIKE
-    if [[ "${ID:-}" != "ubuntu" && "${ID:-}" != "debian" && "${ID_LIKE:-}" != *debian* ]]; then
-      echo "ERROR: This script targets Ubuntu/Debian systems." >&2
+    
+    # v2.2.0: Multi-distro support - detect distro family
+    # Supported: Debian/Ubuntu, RHEL/Rocky/Alma/CentOS/Fedora, Arch/Manjaro, openSUSE
+    local supported=false
+    
+    # Debian family
+    if [[ "${ID:-}" == "ubuntu" || "${ID:-}" == "debian" || "${ID_LIKE:-}" == *debian* ]]; then
+      supported=true
+      log "Detected Debian/Ubuntu family: ${ID:-unknown}"
+    
+    # Red Hat family
+    elif [[ "${ID:-}" == "rhel" || "${ID:-}" == "centos" || "${ID:-}" == "fedora" || \
+            "${ID:-}" == "rocky" || "${ID:-}" == "almalinux" || \
+            "${ID_LIKE:-}" == *rhel* || "${ID_LIKE:-}" == *fedora* ]]; then
+      supported=true
+      log "Detected Red Hat family: ${ID:-unknown}"
+    
+    # Arch family
+    elif [[ "${ID:-}" == "arch" || "${ID:-}" == "manjaro" || "${ID_LIKE:-}" == *arch* ]]; then
+      supported=true
+      log "Detected Arch family: ${ID:-unknown}"
+    
+    # SUSE family
+    elif [[ "${ID:-}" == "opensuse" || "${ID:-}" == "opensuse-leap" || "${ID:-}" == "opensuse-tumbleweed" || \
+            "${ID_LIKE:-}" == *suse* ]]; then
+      supported=true
+      log "Detected SUSE family: ${ID:-unknown}"
+    fi
+    
+    if [[ "$supported" == "false" ]]; then
+      echo "ERROR: Unsupported distribution: ${ID:-unknown}" >&2
+      echo "Supported: Ubuntu, Debian, RHEL, Rocky, Alma, CentOS, Fedora, Arch, Manjaro, openSUSE" >&2
       exit 1
     fi
+  else
+    echo "ERROR: Cannot read /etc/os-release" >&2
+    exit 1
   fi
 }
 
