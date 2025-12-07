@@ -25,12 +25,14 @@
 
 | Feature | Description |
 |:--------|:------------|
-| 📦 **Package Updates** | APT, Snap, Flatpak — all in one run |
-| 🧹 **Smart Cleanup** | Temp files, logs, caches, old kernels |
-| 🔐 **Security Audit** | Permission checks, zombie detection |
-| 📊 **JSON Telemetry** | Detailed reports for monitoring integration |
-| 🤖 **Automation Ready** | Systemd timers, unattended mode |
-| ✅ **Production Tested** | 246 tests, 100% coverage |
+| 🏗️ **Modular Architecture** | 21 specialized modules across 6 categories for maintainability |
+| 🐧 **Multi-Distro Ready** | Foundation for Debian, Red Hat, Arch, and SUSE families |
+| 📦 **Universal Updates** | APT, DNF, Pacman, Snap, Flatpak — unified interface |
+| 🧹 **Smart Cleanup** | Intelligent cleanup across temp files, logs, caches, old kernels |
+| 🔐 **Security Hardening** | Built-in audits, permission checks, vulnerability scanning |
+| 📊 **Rich Telemetry** | Structured JSON output with schema validation |
+| 🤖 **Full Automation** | Systemd timers, unattended mode, CI/CD integration |
+| ✅ **Battle Tested** | 246 tests, 100% coverage, production-proven |
 
 ---
 
@@ -225,13 +227,30 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
 ## 📚 Documentation
 
+### User Documentation
+
 | Document | Purpose |
 |:---------|:--------|
-| 📋 [FEATURES.md](FEATURES.md) | Complete capability matrix |
-| 🗺️ [RELEASES.md](RELEASES.md) | Release roadmap and future plans |
-| 📝 [CHANGELOG.md](CHANGELOG.md) | Version history |
-| 🔐 [docs/SECURITY.md](docs/SECURITY.md) | Security guidelines |
-| ⚡ [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Benchmarks |
+| 📋 [FEATURES.md](FEATURES.md) | Complete feature matrix with 12 pre-built profiles |
+| 🗺️ [RELEASES.md](RELEASES.md) | Release roadmap and version timeline |
+| 📝 [CHANGELOG.md](CHANGELOG.md) | Detailed version history and changes |
+
+### Technical Documentation
+
+| Document | Purpose |
+|:---------|:--------|
+| 🏗️ [lib/core/README.md](lib/core/README.md) | Module architecture and organization |
+| 🔐 [docs/SECURITY.md](docs/SECURITY.md) | Security audits, best practices, scanner integration |
+| ⚡ [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Benchmarks, baselines, performance tracking |
+| 📊 [docs/schema/](docs/schema/) | JSON telemetry schema specifications |
+
+### Developer Resources
+
+| Resource | Purpose |
+|:---------|:--------|
+| 🧪 [tests/README.md](tests/README.md) | Test suite documentation (246 tests) |
+| 🔧 [.github/](.github/) | Issue templates and contribution guidelines |
+| 📦 [packaging/](packaging/) | Distribution packaging (DEB, RPM, systemd units) |
 
 ---
 
@@ -258,23 +277,18 @@ lib/
 
 ---
 
-## 🗺️ Roadmap
-
-| Version | Target | Focus |
-|---------|:------:|:------|
-| **v2.2.0** | ✅ Dec 2025 | 🏗️ Modular architecture + multi-distro foundation |
-| **v2.3.0** | Q1 2026 | 🐧 Full RHEL/Fedora/Arch/SUSE support |
-| **v3.0.0** | Q3-Q4 2026 | 🖥️ Dual-mode: CLI + Interactive GUI |
-
-📖 [View detailed roadmap](RELEASES.md) with implementation phases and technical specifications
-
----
-
 ## 💻 Requirements
 
-- **OS:** Ubuntu 20.04+ or Debian 10+
+- **OS:** Linux (Debian/Ubuntu currently supported, RHEL/Fedora/Arch/SUSE coming in v2.3.0)
 - **Shell:** Bash 4.0+
 - **Privileges:** Root for system changes (dry-run works without)
+
+**Supported Distributions (v2.2.0):**
+- ✅ Ubuntu 20.04+
+- ✅ Debian 10+
+- 🚧 RHEL/CentOS/Fedora (modular foundation ready, full support in v2.3.0)
+- 🚧 Arch/Manjaro (modular foundation ready, full support in v2.3.0)
+- 🚧 openSUSE/SUSE (modular foundation ready, full support in v2.3.0)
 
 ---
 
