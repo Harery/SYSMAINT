@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# sysmaint — Ubuntu/Debian maintenance: APT + Snap update/upgrade + cleanup
-# Version: 2.1.2
+# sysmaint — Multi-distro system maintenance with package manager abstraction
+# Version: 2.2.0
 # License: MIT (see LICENSE file in repository root)
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
@@ -22,7 +22,7 @@
 set -Eeuo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-SCRIPT_VERSION="2.1.2"
+SCRIPT_VERSION="2.2.0"
 
 # Script directory (for artifacts used by subcommands)
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,12 +44,140 @@ if [[ -f "$SCRIPT_DIR/lib/package_manager.sh" ]]; then
 fi
 # progress UI functions are now included in lib/utils.sh
 
+# Note: Family-specific libraries will be loaded after OS detection in check_os()
+
 LOG_DIR="${LOG_DIR:-/tmp/system-maintenance}"
 # Ensure the log directory exists early so subsequent logging can proceed.
 mkdir -p "$LOG_DIR" || {
   echo "ERROR: could not create log dir $LOG_DIR" >&2
   exit 1
 }
+
+# --- Load Core Modules -------------------------------------------------------
+# v2.2.0: Modular architecture - load core functions before main execution
+# Order matters: init first, then logging, then capabilities, then error handling
+
+# Core initialization functions (check_os, require_root, state management)
+if [[ -f "$SCRIPT_DIR/lib/core/init.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/init.sh"
+fi
+
+# Logging infrastructure (log, run, truncate_log_if_needed)
+if [[ -f "$SCRIPT_DIR/lib/core/logging.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/logging.sh"
+fi
+
+# Capability detection (_skip_cap, detect_capabilities_and_mode)
+if [[ -f "$SCRIPT_DIR/lib/core/capabilities.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/capabilities.sh"
+fi
+
+# Error handling and cleanup (on_exit, on_err, phase estimates)
+if [[ -f "$SCRIPT_DIR/lib/core/error_handling.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/error_handling.sh"
+fi
+
+# --- Load Progress Modules ---------------------------------------------------
+# v2.2.0: Progress tracking, ETA calculations, parallel execution
+
+# Progress panel UI (show_progress, start/stop_status_panel, _render_bar)
+if [[ -f "$SCRIPT_DIR/lib/progress/panel.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/panel.sh"
+fi
+
+# Timing estimates and EMA calculations
+if [[ -f "$SCRIPT_DIR/lib/progress/estimates.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/estimates.sh"
+fi
+
+# Host profiling and scaling factors
+if [[ -f "$SCRIPT_DIR/lib/progress/profiling.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/profiling.sh"
+fi
+
+# DAG-based parallel execution engine
+if [[ -f "$SCRIPT_DIR/lib/progress/parallel.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/parallel.sh"
+fi
+
+# --- Load Maintenance Modules ------------------------------------------------
+# v2.2.0: Package management, kernel maintenance, system cleanup
+
+# Package management (apt, wait_for_pkg_managers, retry, orphan purge)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/packages.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/packages.sh"
+fi
+
+# Kernel maintenance (purge old kernels, post-finalize, status)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/kernel.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/kernel.sh"
+fi
+
+# Snap package manager maintenance
+if [[ -f "$SCRIPT_DIR/lib/maintenance/snap.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/snap.sh"
+fi
+
+# Flatpak package manager maintenance
+if [[ -f "$SCRIPT_DIR/lib/maintenance/flatpak.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/flatpak.sh"
+fi
+
+# Firmware updates via fwupd
+if [[ -f "$SCRIPT_DIR/lib/maintenance/firmware.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/firmware.sh"
+fi
+
+# System maintenance (DNS, journal, thumbnails, browser cache, tmp cleanup)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/system.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/system.sh"
+fi
+
+# Storage management (crash dumps, fstrim, drop caches)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/storage.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/storage.sh"
+fi
+
+# --- Load Validation Modules -------------------------------------------------
+# v2.2.0: Repository validation, key management, service health checks
+
+# Repository validation
+if [[ -f "$SCRIPT_DIR/lib/validation/repos.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/repos.sh"
+fi
+
+# GPG/APT public key management
+if [[ -f "$SCRIPT_DIR/lib/validation/keys.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/keys.sh"
+fi
+
+# Service and process health checks
+if [[ -f "$SCRIPT_DIR/lib/validation/services.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/services.sh"
+fi
+
+# Security audits and system health
+if [[ -f "$SCRIPT_DIR/lib/validation/security.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/security.sh"
+fi
+
+# --- Load Reporting Modules --------------------------------------------------
+# v2.2.0: Summary generation, JSON output, reboot handling
+
+# JSON output helpers
+if [[ -f "$SCRIPT_DIR/lib/reporting/json.sh" ]]; then
+  source "$SCRIPT_DIR/lib/reporting/json.sh"
+fi
+
+# Summary report generation
+if [[ -f "$SCRIPT_DIR/lib/reporting/summary.sh" ]]; then
+  source "$SCRIPT_DIR/lib/reporting/summary.sh"
+fi
+
+# Reboot handling
+if [[ -f "$SCRIPT_DIR/lib/reporting/reboot.sh" ]]; then
+  source "$SCRIPT_DIR/lib/reporting/reboot.sh"
+fi
 
 # --- Embedded Subcommands ----------------------------------------------------
 # Subcommands are now loaded from lib/subcommands.sh
@@ -61,7 +189,9 @@ if [[ "${1-}" == "profiles" ]]; then
   shift; profiles_main "$@"; exit $?
 fi
 
-check_os() {
+# --- Legacy function definitions (TO BE REMOVED in Phase 2) -----------------
+# check_os() is now in lib/core/init.sh but kept here temporarily for backward compatibility
+check_os_legacy() {
   if [[ -r /etc/os-release ]]; then
     # shellcheck disable=SC1091
     . /etc/os-release
@@ -74,6 +204,11 @@ check_os() {
     if [[ "${ID:-}" == "ubuntu" || "${ID:-}" == "debian" || "${ID_LIKE:-}" == *debian* ]]; then
       supported=true
       log "Detected Debian/Ubuntu family: ${ID:-unknown}"
+      # Load Debian family-specific library
+      if [[ -f "$SCRIPT_DIR/lib/os_families/debian_family.sh" ]]; then
+        source "$SCRIPT_DIR/lib/os_families/debian_family.sh"
+        debian_family_init
+      fi
     
     # Red Hat family
     elif [[ "${ID:-}" == "rhel" || "${ID:-}" == "centos" || "${ID:-}" == "fedora" || \
@@ -81,17 +216,24 @@ check_os() {
             "${ID_LIKE:-}" == *rhel* || "${ID_LIKE:-}" == *fedora* ]]; then
       supported=true
       log "Detected Red Hat family: ${ID:-unknown}"
+      # Load Red Hat family-specific library
+      if [[ -f "$SCRIPT_DIR/lib/os_families/redhat_family.sh" ]]; then
+        source "$SCRIPT_DIR/lib/os_families/redhat_family.sh"
+        redhat_family_init
+      fi
     
     # Arch family
     elif [[ "${ID:-}" == "arch" || "${ID:-}" == "manjaro" || "${ID_LIKE:-}" == *arch* ]]; then
       supported=true
       log "Detected Arch family: ${ID:-unknown}"
+      # TODO: Load Arch family-specific library when created
     
     # SUSE family
     elif [[ "${ID:-}" == "opensuse" || "${ID:-}" == "opensuse-leap" || "${ID:-}" == "opensuse-tumbleweed" || \
             "${ID_LIKE:-}" == *suse* ]]; then
       supported=true
       log "Detected SUSE family: ${ID:-unknown}"
+      # TODO: Load SUSE family-specific library when created
     fi
     
     if [[ "$supported" == "false" ]]; then
@@ -1627,8 +1769,8 @@ clean_tmp() {
 
 fix_broken_if_any() {
   log "Pre-flight: resolving any interrupted or broken states (safe to run)."
-  run dpkg --configure -a || true
-  run apt-get -y -f install || true
+  # Use package manager abstraction for fixing broken packages
+  pkg_fix_broken || true
 }
 
 package_maintenance() {
@@ -2902,6 +3044,13 @@ validate_repos() {
 # --dry-run to avoid performing network I/O during dry-run tests.
 detect_missing_pubkeys() {
   log "=== Checking for missing APT repository public keys (NO_PUBKEY) ==="
+  
+  # This is APT/Debian-specific - skip on other distros
+  if [[ "$PKG_MANAGER_TYPE" != "apt" ]]; then
+    log "Skipping NO_PUBKEY detection (only applicable to APT-based systems)"
+    return 0
+  fi
+  
   if [[ "${DRY_RUN:-false}" == "true" ]]; then
     log "DRY_RUN: skipping NO_PUBKEY detection. Re-run without --dry-run to perform detection."
     NO_PUBKEY_SKIPPED=true
@@ -4517,7 +4666,8 @@ DISK_BEFORE=$(df -P / | awk 'NR==2 {print $3}')
 # Capture extended system information early for JSON summary
 OS_DESCRIPTION="$( ( [ -r /etc/os-release ] && . /etc/os-release && printf '%s' "${PRETTY_NAME:-${NAME:-Unknown}}" ) 2>/dev/null || uname -sr )"
 UPTIME_SECONDS="$(cut -d. -f1 /proc/uptime 2>/dev/null || echo 0)"
-PACKAGE_COUNT="$(dpkg -l 2>/dev/null | awk '/^ii/ {c++} END{print c+0}')"
+# Count installed packages using package manager abstraction
+PACKAGE_COUNT="$(pkg_list_installed 2>/dev/null | wc -l || echo 0)"
 MEM_TOTAL_KB="$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
 MEM_AVAILABLE_KB_START="$(awk '/MemAvailable/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
 SWAP_TOTAL_KB="$(awk '/SwapTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"

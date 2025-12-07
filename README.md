@@ -2,15 +2,16 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.1.2-blue.svg)
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
 [![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![Architecture](https://img.shields.io/badge/architecture-modular-purple.svg)](https://github.com/Harery/SYSMAINT)
 
-**A safe, scriptable Ubuntu/Debian maintenance automation toolkit**
+**A safe, scriptable multi-distro maintenance automation toolkit with modular architecture**
 
 *APT + Snap updates • Cleanup phases • JSON telemetry • Unattended mode • Security audits*
 
@@ -39,10 +40,10 @@
 
 ```bash
 # Download the latest release
-wget https://github.com/Harery/SYSMAINT/releases/download/v2.1.2/sysmaint_2.1.2_all.deb
+wget https://github.com/Harery/SYSMAINT/releases/download/v2.2.0/sysmaint_2.2.0_all.deb
 
 # Install
-sudo dpkg -i sysmaint_2.1.2_all.deb
+sudo dpkg -i sysmaint_2.2.0_all.deb
 
 # Run
 sudo sysmaint --help
@@ -170,8 +171,8 @@ Enable with `--json-summary` to get detailed reports in `/tmp/system-maintenance
 
 ```json
 {
-  "script_version": "2.1.2",
-  "run_id": "2025-11-30_120000_12345",
+  "script_version": "2.2.0",
+  "run_id": "2025-12-06_120000_12345",
   "exit_code": 0,
   "phases": { ... },
   "disk_delta": { ... },
@@ -234,12 +235,35 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
 ---
 
+## 🏗️ Architecture (v2.2.0)
+
+sysmaint uses a **modern modular architecture** for improved maintainability and extensibility:
+
+```
+lib/
+├── core/          Foundation (init, logging, error handling)
+├── progress/      UI, timing, parallel execution
+├── maintenance/   Package management, system cleanup
+├── validation/    Health checks, security audits
+├── reporting/     Summary generation, output formatting
+└── os_families/   Distribution-specific implementations
+```
+
+**Benefits:**
+- ✅ **21 specialized modules** across 6 categories
+- ✅ **69 functions** organized by purpose
+- ✅ **Per-module testing** for better quality
+- ✅ **Multi-distro support** via OS family abstraction
+- ✅ **Easy collaboration** with clear ownership
+
+---
+
 ## 🗺️ Roadmap
 
 | Version | Target | Focus |
 |---------|:------:|:------|
-| **v2.2.0** | Q1 2026 | 🐧 Multi-distro support (RHEL, Fedora, Arch, Manjaro) |
-| **v2.3.0** | Q2 2026 | ⚡ Performance optimization & enhancements |
+| **v2.2.0** | ✅ Dec 2025 | 🏗️ Modular architecture + multi-distro foundation |
+| **v2.3.0** | Q1 2026 | 🐧 Full RHEL/Fedora/Arch/SUSE support |
 | **v3.0.0** | Q3-Q4 2026 | 🖥️ Dual-mode: CLI + Interactive GUI |
 
 📖 [View detailed roadmap](RELEASES.md) with implementation phases and technical specifications

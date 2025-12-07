@@ -108,6 +108,33 @@ pkg_full_upgrade() {
   esac
 }
 
+# Fix broken packages
+pkg_fix_broken() {
+  _pkg_ensure_initialized || return 1
+  case "$PKG_MANAGER_TYPE" in
+    apt)
+      run dpkg --configure -a || true
+      run apt-get -y -f install || true
+      ;;
+    dnf)
+      # DNF doesn't have the same broken package concept as APT
+      # This is mainly to ensure transaction is complete
+      run "$PKG_MANAGER" -y distro-sync || true
+      ;;
+    pacman)
+      # Pacman rarely has broken packages, but we can try to fix keyring issues
+      run pacman-key --populate archlinux || true
+      ;;
+    zypper)
+      run zypper -n verify || true
+      ;;
+    *)
+      log "ERROR: Unknown package manager type: $PKG_MANAGER_TYPE"
+      return 1
+      ;;
+  esac
+}
+
 # Remove unused dependencies
 pkg_autoremove() {
   _pkg_ensure_initialized || return 1
