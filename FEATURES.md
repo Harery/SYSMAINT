@@ -35,7 +35,7 @@ Sysmaint is your **all-in-one maintenance toolkit** for Linux systems across mul
 
 | Area | What It Does | Why It Matters |
 |:-----|:-------------|:---------------|
-| 📦 **Packages** | Updates APT, Snap, Flatpak | Keep your system secure and up-to-date |
+| 📦 **Packages** | Updates APT, DNF, Snap, Flatpak | Keep your system secure and up-to-date across all distros |
 | 🧹 **Cleanup** | Removes junk files, old logs, caches | Free up disk space automatically |
 | 🔐 **Security** | Audits permissions, detects issues | Protect your system from vulnerabilities |
 | 🖥️ **Kernel** | Manages old kernel versions | Prevent `/boot` from filling up |
