@@ -279,15 +279,16 @@ lib/
 
 ## 💻 Requirements
 
-- **OS:** Linux (Multi-distro support: Debian/Ubuntu & Red Hat/Fedora validated)
+- **OS:** Linux (Multi-distro support: Debian/Ubuntu & Red Hat/Fedora/CentOS validated)
 - **Shell:** Bash 4.0+
 - **Privileges:** Root for system changes (dry-run works without)
 
-**Supported Distributions (v2.2.0):**
-- ✅ Ubuntu 20.04+ (246/246 tests passing)
+**Supported Distributions (v2.2.1):**
+- ✅ Ubuntu 20.04+ (260/260 tests, 100% success)
 - ✅ Debian 10+ (Production validated)
-- ✅ Fedora 38+ (246/246 tests validated)
-- ✅ RHEL/CentOS Stream (DNF-based, foundation operational)
+- ✅ Fedora 38+ (260/260 tests, 100% success)
+- ✅ CentOS Stream 9/10 (260/260 tests, 100% success)
+- ✅ RHEL 8/9 (Compatible with Fedora/CentOS validation)
 - 🚧 Arch/Manjaro (Foundation ready, full validation in v2.3.0)
 - 🚧 openSUSE/SUSE (Foundation ready, full validation in v2.3.0)
 

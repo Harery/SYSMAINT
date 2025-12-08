@@ -8,11 +8,16 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### In Progress
 
-#### v2.2.1 - December 2025
-- Multi-distro validation completed (Ubuntu + Fedora)
+#### v2.2.1 - December 8, 2025
+- **Multi-distro validation completed across 3 distributions**
+  - Ubuntu 24.04 LTS: 260/260 tests (100%)
+  - Fedora 43: 260/260 tests (100%)
+  - CentOS Stream 10: 260/260 tests (100%)
 - Exit code handling standardized across all test suites
+- Security test fixed to accept exit code 30 (service warnings)
 - Combo test exit code bug fixed (now accepts 0, 30, 100)
-- 246/246 tests passing on both Debian and Red Hat families
+- **Red Hat family fully validated and production ready**
+- Performance benchmarks: CentOS 1.912s, Fedora 2.579s, Ubuntu 3.408s
 
 ### Planned Releases
 
