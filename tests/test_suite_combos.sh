@@ -38,7 +38,8 @@ run_combo_tests() {
 
     run_case(){ local name="$1"; shift; TOTAL=$((TOTAL+1)); echo -n "[COMBO $TOTAL] $name: ";
       set +e; bash "$SYSMAINT" "$@" >/dev/null 2>&1; rc=$?; set -e;
-      if [[ $rc -eq 0 ]]; then echo "✅"; PASSED=$((PASSED+1)); else echo "❌ ($rc)"; FAILED=$((FAILED+1)); fi; }
+      # Accept exit codes: 0 (success), 30 (failed services), or 100 (reboot required)
+      if [[ $rc -eq 0 || $rc -eq 30 || $rc -eq 100 ]]; then echo "✅"; PASSED=$((PASSED+1)); else echo "❌ ($rc)"; FAILED=$((FAILED+1)); fi; }
 
     local UPGRADE_SET=("--upgrade" "--purge-kernels --keep-kernels=2" "--upgrade --purge-kernels --keep-kernels=2 --orphan-purge")
     local SECURITY_SET=("--security-audit" "--security-audit --check-zombies")

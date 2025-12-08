@@ -1,6 +1,6 @@
 # 🚀 Sysmaint Features & Capabilities
 
-> **Your complete guide to automated Ubuntu/Debian system maintenance**
+> **Your complete guide to automated multi-distro Linux system maintenance**
 
 [![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
@@ -29,7 +29,7 @@
 
 ## 🎯 What Can Sysmaint Do?
 
-Sysmaint is your **all-in-one maintenance toolkit** for Ubuntu and Debian systems. Think of it as having a professional system administrator available 24/7.
+Sysmaint is your **all-in-one maintenance toolkit** for Linux systems across multiple distributions (Debian/Ubuntu, Red Hat/Fedora families). Think of it as having a professional system administrator available 24/7 with multi-distro expertise.
 
 ### 🔧 At a Glance
 

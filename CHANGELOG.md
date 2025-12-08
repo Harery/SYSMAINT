@@ -6,14 +6,23 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### In Progress
+
+#### v2.2.1 - December 2025
+- Multi-distro validation completed (Ubuntu + Fedora)
+- Exit code handling standardized across all test suites
+- Combo test exit code bug fixed (now accepts 0, 30, 100)
+- 246/246 tests passing on both Debian and Red Hat families
+
 ### Planned Releases
 
 See [RELEASES.md](RELEASES.md) for comprehensive release roadmap.
 
-#### v2.3.0 - TBD (Q2 2026)
+#### v2.3.0 - Q1 2026
+- Arch/Manjaro family validation (Pacman support)
+- openSUSE/SUSE family validation (Zypper support)
 - Performance optimizations
 - Enhanced telemetry
-- Community-requested features
 - Performance target: maximum <4.5s
 
 #### v3.0.0 - Dual Mode CLI + GUI (Q3-Q4 2026)

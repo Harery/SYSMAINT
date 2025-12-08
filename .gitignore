@@ -47,6 +47,12 @@ tests/*.log
 tests/*.pyc
 tests/__pycache__/
 
+# Internal documentation (not for public sharing)
+PROJECT_STATUS.md
+MULTI_OS_TEST_ANALYSIS.md
+SESSION_*.md
+CLEANUP_REPORT_*.md
+
 # Temp files
 *.tmp
 *~
