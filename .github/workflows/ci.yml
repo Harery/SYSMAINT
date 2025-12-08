@@ -7,7 +7,8 @@ on:
     branches: [ master, main ]
 
 jobs:
-  build-and-test:
+  test-ubuntu:
+    name: Test on Ubuntu (Debian Family)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,6 +33,46 @@ jobs:
           shellcheck -x scripts/*.sh || true
           # Completions and packaging are not strictly POSIX; ignore failures
           # Using -S error to only fail on actual errors, not info/style
+
+      - name: Make scripts executable
+        run: |
+          chmod +x sysmaint
+          chmod +x tests/*.sh
+          chmod +x scripts/*.sh
+
+      - name: Run test suites
+        env:
+          DRY_RUN: "true"
+          JSON_SUMMARY: "true"
+        run: |
+          bash tests/test_suite_smoke.sh
+          bash tests/test_suite_edge.sh
+          bash tests/test_suite_security.sh
+          bash tests/test_suite_compliance.sh
+          bash tests/test_suite_governance.sh
+          bash tests/test_suite_performance.sh
+          bash tests/test_json_validation.sh
+
+  test-fedora:
+    name: Test on Fedora (Red Hat Family)
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:43
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf install -y bash ShellCheck jq python3 python3-pip
+          python3 -m pip install --upgrade pip
+          pip3 install jsonschema
+
+      - name: ShellCheck (sysmaint and libs)
+        run: |
+          shellcheck -x -S error sysmaint
+          shellcheck -x -S error lib/*.sh
+          shellcheck -x scripts/*.sh || true
 
       - name: Make scripts executable
         run: |
