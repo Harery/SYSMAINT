@@ -6,8 +6,9 @@
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![Tests](https://img.shields.io/badge/tests-281%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![Enterprise](https://img.shields.io/badge/RHEL-validated-red.svg)](https://github.com/Harery/SYSMAINT)
 
 ---
 
@@ -29,13 +30,13 @@
 
 ## 🎯 What Can Sysmaint Do?
 
-Sysmaint is your **all-in-one maintenance toolkit** for Linux systems across multiple distributions (Debian/Ubuntu, Red Hat/Fedora families). Think of it as having a professional system administrator available 24/7 with multi-distro expertise.
+Sysmaint is your **all-in-one maintenance toolkit** for Linux systems across multiple distributions (Debian/Ubuntu, Red Hat/Fedora/CentOS/RHEL families). Think of it as having a professional system administrator available 24/7 with multi-distro expertise. **Enterprise Linux validated and production ready.**
 
 ### 🔧 At a Glance
 
 | Area | What It Does | Why It Matters |
 |:-----|:-------------|:---------------|
-| 📦 **Packages** | Updates APT, DNF, Snap, Flatpak | Keep your system secure and up-to-date across all distros |
+| 📦 **Packages** | Updates APT, DNF, Snap, Flatpak | Keep your system secure and up-to-date (Ubuntu, Fedora, CentOS, RHEL) |
 | 🧹 **Cleanup** | Removes junk files, old logs, caches | Free up disk space automatically |
 | 🔐 **Security** | Audits permissions, detects issues | Protect your system from vulnerabilities |
 | 🖥️ **Kernel** | Manages old kernel versions | Prevent `/boot` from filling up |

@@ -7,9 +7,10 @@
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![Tests](https://img.shields.io/badge/tests-281%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/Harery/SYSMAINT)
 [![Architecture](https://img.shields.io/badge/architecture-modular-purple.svg)](https://github.com/Harery/SYSMAINT)
+[![Enterprise](https://img.shields.io/badge/RHEL-validated-red.svg)](https://github.com/Harery/SYSMAINT)
 
 **A safe, scriptable multi-distro maintenance automation toolkit with modular architecture**
 
@@ -26,13 +27,13 @@
 | Feature | Description |
 |:--------|:------------|
 | 🏗️ **Modular Architecture** | 21 specialized modules across 6 categories for maintainability |
-| 🐧 **Multi-Distro Ready** | Foundation for Debian, Red Hat, Arch, and SUSE families |
+| 🐧 **Multi-Distro Validated** | Ubuntu, Fedora, CentOS, RHEL — 100% test success on all |
 | 📦 **Universal Updates** | APT, DNF, Pacman, Snap, Flatpak — unified interface |
 | 🧹 **Smart Cleanup** | Intelligent cleanup across temp files, logs, caches, old kernels |
 | 🔐 **Security Hardening** | Built-in audits, permission checks, vulnerability scanning |
 | 📊 **Rich Telemetry** | Structured JSON output with schema validation |
 | 🤖 **Full Automation** | Systemd timers, unattended mode, CI/CD integration |
-| ✅ **Battle Tested** | 246 tests, 100% coverage, production-proven |
+| ✅ **Battle Tested** | 281 tests, 100% coverage, enterprise production-proven |
 
 ---
 
