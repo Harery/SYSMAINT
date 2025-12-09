@@ -14,6 +14,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
   - Fedora 43: 260/260 tests (100%)
   - CentOS Stream 10: 260/260 tests (100%)
   - RHEL 10.1 (Coughlan): 281/281 tests (100%) ✅ **Enterprise validated**
+- **CI/CD Pipeline Enhanced**
+  - Added 4 parallel CI jobs (Ubuntu, Fedora, CentOS, RHEL)
+  - Complete multi-distro testing on every push/PR
+  - Each distribution tested independently in containers
 - Exit code handling standardized across all test suites
 - Security test fixed to accept exit code 30 (service warnings)
 - Combo test exit code bug fixed (now accepts 0, 30, 100)

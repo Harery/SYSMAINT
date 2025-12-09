@@ -8,6 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-281%20passing-brightgreen)](https://github.com/Harery/SYSMAINT)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/Harery/SYSMAINT)
+[![CI Jobs](https://img.shields.io/badge/CI%20jobs-4%20distros-blue)](https://github.com/Harery/SYSMAINT/actions)
 [![Enterprise](https://img.shields.io/badge/RHEL-validated-red.svg)](https://github.com/Harery/SYSMAINT)
 
 ---
