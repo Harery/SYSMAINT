@@ -58,6 +58,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: fedora:43
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -104,6 +107,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/centos/centos:stream10
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -151,6 +157,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: registry.access.redhat.com/ubi10/ubi:latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
