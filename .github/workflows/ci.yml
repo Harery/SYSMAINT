@@ -60,7 +60,7 @@ jobs:
       image: fedora:43
     defaults:
       run:
-        shell: bash
+        shell: bash {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
       image: quay.io/centos/centos:stream10
     defaults:
       run:
-        shell: bash
+        shell: bash {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -153,13 +153,13 @@ jobs:
           bash tests/test_json_validation.sh
 
   test-rhel:
-    name: Test on RHEL 10 (Enterprise Linux)
+    name: Test on RHEL 10 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
       image: registry.access.redhat.com/ubi10/ubi:latest
     defaults:
       run:
-        shell: bash
+        shell: bash {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
