@@ -223,10 +223,20 @@ jobs:
           DRY_RUN: "true"
           JSON_SUMMARY: "true"
         run: |
-          bash tests/test_suite_smoke.sh
-          bash tests/test_suite_edge.sh
-          bash tests/test_suite_security.sh
-          bash tests/test_suite_compliance.sh
-          bash tests/test_suite_governance.sh
-          bash tests/test_suite_performance.sh
-          bash tests/test_json_validation.sh
+          set -x
+          echo "Starting test suite execution..."
+          bash tests/test_suite_smoke.sh || { echo "❌ Smoke tests failed"; exit 1; }
+          echo "✓ Smoke tests passed"
+          bash tests/test_suite_edge.sh || { echo "❌ Edge tests failed"; exit 1; }
+          echo "✓ Edge tests passed"
+          bash tests/test_suite_security.sh || { echo "❌ Security tests failed"; exit 1; }
+          echo "✓ Security tests passed"
+          bash tests/test_suite_compliance.sh || { echo "❌ Compliance tests failed"; exit 1; }
+          echo "✓ Compliance tests passed"
+          bash tests/test_suite_governance.sh || { echo "❌ Governance tests failed"; exit 1; }
+          echo "✓ Governance tests passed"
+          bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
+          echo "✓ Performance tests passed"
+          bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
+          echo "✅ All tests passed!"
+
