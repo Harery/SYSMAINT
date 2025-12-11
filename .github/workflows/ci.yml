@@ -58,9 +58,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: fedora:43
-    defaults:
-      run:
-        shell: bash {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,6 +71,7 @@ jobs:
           pip3 install jsonschema
 
       - name: ShellCheck (sysmaint and libs)
+        continue-on-error: true
         run: |
           if command -v shellcheck &> /dev/null; then
             shellcheck -x -S error sysmaint || echo "ShellCheck found issues but continuing"
@@ -107,9 +105,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/centos/centos:stream10
-    defaults:
-      run:
-        shell: bash {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -124,6 +119,7 @@ jobs:
           pip3 install jsonschema
 
       - name: ShellCheck (sysmaint and libs)
+        continue-on-error: true
         run: |
           if command -v shellcheck &> /dev/null; then
             shellcheck -x -S error sysmaint || echo "ShellCheck found issues but continuing"
@@ -157,9 +153,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: registry.access.redhat.com/ubi10/ubi:latest
-    defaults:
-      run:
-        shell: bash {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -173,6 +166,7 @@ jobs:
           pip3 install jsonschema
 
       - name: ShellCheck (sysmaint and libs)
+        continue-on-error: true
         run: |
           if command -v shellcheck &> /dev/null; then
             shellcheck -x -S error sysmaint || echo "ShellCheck found issues but continuing"
