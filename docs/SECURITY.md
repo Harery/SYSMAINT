@@ -8,7 +8,7 @@ Function: Explain checks, outputs, remediation, and tool integrations
 > © 2025 Mohamed Elharery <Mohamed@Harery.com> • [www.harery.com](https://www.harery.com)
 
 **Version**: 2.2.1  
-**Last Updated**: December 8, 2025
+**Last Updated**: December 11, 2025
 
 [![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 
