@@ -183,7 +183,7 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
-          bash tests/test_suite_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
+          bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
   test-rhel:
