@@ -8,7 +8,6 @@ on:
 
 jobs:
   test-ubuntu:
-    if: false  # Temporarily disabled
     name: Test on Ubuntu (Debian Family)
     runs-on: ubuntu-latest
     steps:
@@ -102,14 +101,6 @@ jobs:
           chmod +x tests/*.sh
           chmod +x scripts/*.sh
 
-      - name: Debug first test
-        env:
-          DRY_RUN: "true"
-          JSON_SUMMARY: "true"
-        run: |
-          echo "=== Running single test - checking for error ==="
-          ./sysmaint --dry-run || { echo "Exit code: $?"; echo "=== Last 30 lines of log ==="; tail -30 /tmp/system-maintenance/*.log 2>/dev/null || echo "No log file found"; }
-
       - name: Run test suites
         env:
           DRY_RUN: "true"
@@ -133,7 +124,6 @@ jobs:
           echo "✅ All tests passed!"
 
   test-centos:
-    if: false  # Temporarily disabled
     name: Test on CentOS Stream 10 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
@@ -147,7 +137,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          dnf install -y bash jq python3 python3-pip
+          dnf install -y bash jq python3 python3-pip \
+            coreutils findutils grep sed gawk util-linux \
+            procps-ng systemd bc which
           # Try to install EPEL for ShellCheck
           dnf install -y epel-release || true
           dnf install -y ShellCheck || echo "ShellCheck not available, skipping"
@@ -194,7 +186,6 @@ jobs:
           echo "✅ All tests passed!"
 
   test-rhel:
-    if: false  # Temporarily disabled
     name: Test on RHEL 10 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
@@ -208,7 +199,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          dnf install -y bash jq python3 python3-pip
+          dnf install -y bash jq python3 python3-pip \
+            coreutils findutils grep sed gawk util-linux \
+            procps-ng systemd bc which
           # ShellCheck not available in UBI repos without subscription
           dnf install -y ShellCheck || echo "ShellCheck not available in UBI, skipping"
           python3 -m pip install --upgrade pip
