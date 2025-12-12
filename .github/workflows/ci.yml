@@ -8,6 +8,7 @@ on:
 
 jobs:
   test-ubuntu:
+    if: false  # Temporarily disabled
     name: Test on Ubuntu (Debian Family)
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +64,6 @@ jobs:
           echo "✅ All tests passed!"
 
   test-fedora:
-    if: false  # Temporarily disabled
     name: Test on Fedora 43 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
