@@ -4384,8 +4384,8 @@ lock_candidates=(
   "/run/lock/sysmaint.lock"
   "/var/lock/sysmaint.lock"
   "$LOG_DIR/sysmaint.lock"
-  "$LOG_DIR/sysmaint_${USER}.lock"
-  "/tmp/sysmaint_${USER}.lock"
+  "$LOG_DIR/sysmaint_${USER:-root}.lock"
+  "/tmp/sysmaint_${USER:-root}.lock"
 )
 
 LOCK_OPENED=0
@@ -4403,7 +4403,7 @@ done
 if [[ $LOCK_OPENED -ne 1 ]]; then
   # As a last resort, create a uniquely named lock file in /tmp and use it.
   # This sacrifices cross-user coordination but avoids hard failure.
-  fallback_tmp=$(mktemp /tmp/sysmaint_lock_XXXXXX) || fallback_tmp="/tmp/sysmaint_fallback_${USER}.lock"
+  fallback_tmp=$(mktemp /tmp/sysmaint_lock_XXXXXX) || fallback_tmp="/tmp/sysmaint_fallback_${USER:-root}.lock"
   if { exec 200>"$fallback_tmp"; } 2>/dev/null; then
     LOCKFILE="$fallback_tmp"
     LOCKFILE_PID="${LOCKFILE}.pid"

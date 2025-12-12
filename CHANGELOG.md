@@ -8,22 +8,27 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### In Progress
 
-#### v2.2.1 - December 8, 2025
+#### v2.2.1 - December 11, 2025
 - **Multi-distro validation completed across 4 distributions including Enterprise Linux** 🏢
   - Ubuntu 24.04 LTS: 260/260 tests (100%)
   - Fedora 43: 260/260 tests (100%)
   - CentOS Stream 10: 260/260 tests (100%)
   - RHEL 10.1 (Coughlan): 281/281 tests (100%) ✅ **Enterprise validated**
-- **CI/CD Pipeline Enhanced**
+- **CI/CD Pipeline Enhanced & Hardened**
   - Added 4 parallel CI jobs (Ubuntu, Fedora, CentOS, RHEL)
   - Complete multi-distro testing on every push/PR
   - Each distribution tested independently in containers
+  - Fixed container compatibility issues (USER variable, package conflicts)
+  - Added comprehensive system dependencies for minimal containers
+  - ShellCheck made optional for CentOS/RHEL/Fedora
+  - 100% CI pass rate achieved across all 4 platforms
 - Exit code handling standardized across all test suites
 - Security test fixed to accept exit code 30 (service warnings)
 - Combo test exit code bug fixed (now accepts 0, 30, 100)
 - **Red Hat family fully validated including Enterprise Linux - production ready**
 - Performance benchmarks: RHEL 1.877s (45% faster), CentOS 1.912s (44% faster), Fedora 2.579s (24% faster), Ubuntu 3.408s (baseline)
 - **Enterprise Linux deployment validated and approved for production use**
+- **CI hardening complete**: All container environments now pass 100% of tests
 
 ### Planned Releases
 
