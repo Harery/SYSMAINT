@@ -107,10 +107,8 @@ jobs:
           DRY_RUN: "true"
           JSON_SUMMARY: "true"
         run: |
-          echo "=== Running single test with full output for debugging ==="
-          bash -x ./sysmaint --dry-run 2>&1 | head -200 || echo "Command failed with exit code $?"
-          echo "==== Checking for actual error ===="
-          bash ./sysmaint --dry-run 2>&1 | tail -50 || echo "Exit code: $?"
+          echo "=== Running single test - checking for error ==="
+          ./sysmaint --dry-run || { echo "Exit code: $?"; echo "=== Last 30 lines of log ==="; tail -30 /tmp/system-maintenance/*.log 2>/dev/null || echo "No log file found"; }
 
       - name: Run test suites
         env:
