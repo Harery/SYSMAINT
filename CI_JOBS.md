@@ -10,7 +10,7 @@
 
 | Category | Workflows | Jobs | Status |
 |----------|-----------|------|--------|
-| **Core Testing** | 2 | 5 | 🟡 Partial |
+| **Core Testing** | 2 | 5 | ✅ 100% Pass |
 | **Quality & Security** | 2 | 2 | ✅ Active |
 | **Performance** | 2 | 2 | ⏸️ On-demand |
 | **Release & Deploy** | 1 | 1 | ⏸️ Tag-based |
@@ -27,11 +27,11 @@
 **Jobs:** 4
 
 | Job | Distribution | Status | Runtime |
-|-----|--------------|--------|---------|
-| `test-ubuntu` | Ubuntu 24.04 (Debian family) | ✅ Passing | ~4-5 min |
-| `test-fedora` | Fedora 43 (Red Hat family) | ❌ Failing | ~36s |
-| `test-centos` | CentOS Stream 10 (Red Hat family) | ❌ Failing | ~43s |
-| `test-rhel` | RHEL 10 (Red Hat family) | ❌ Failing | ~15s |
+|-----|--------------|--------|------|
+| `test-ubuntu` | Ubuntu 24.04 (Debian family) | ✅ Passing | ~8-10 min |
+| `test-fedora` | Fedora 43 (Red Hat family) | ✅ Passing | ~1-2 min |
+| `test-centos` | CentOS Stream 10 (Red Hat family) | ✅ Passing | ~1-2 min |
+| `test-rhel` | RHEL 10 (Red Hat family) | ✅ Passing | ~1-2 min |
 
 **Test Coverage:**
 - Smoke tests (65 tests)
@@ -42,9 +42,13 @@
 - Performance tests (24 benchmarks)
 - JSON validation (4 tests)
 
-**Known Issues:**
-- Red Hat family containers failing at test suite execution
-- Issue under investigation (see PR #1)
+**Recent Fixes (Dec 11, 2025):**
+- ✅ Fixed unbound USER variable in containers (${USER:-root})
+- ✅ Resolved coreutils-single package conflict in CentOS/RHEL (--allowerasing)
+- ✅ Added comprehensive system dependencies for minimal containers
+- ✅ Fixed test filename inconsistency in CentOS job
+- ✅ Made ShellCheck optional for Red Hat family distributions
+- ✅ **100% CI pass rate achieved across all 4 platforms**
 
 ---
 
