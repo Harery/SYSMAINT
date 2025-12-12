@@ -102,6 +102,14 @@ jobs:
           chmod +x tests/*.sh
           chmod +x scripts/*.sh
 
+      - name: Debug first test
+        env:
+          DRY_RUN: "true"
+          JSON_SUMMARY: "true"
+        run: |
+          echo "=== Running single test with full output for debugging ==="
+          bash -x ./sysmaint --dry-run 2>&1 | head -100 || echo "Command failed with exit code $?"
+
       - name: Run test suites
         env:
           DRY_RUN: "true"
