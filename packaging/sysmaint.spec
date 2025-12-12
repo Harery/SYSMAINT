@@ -1,7 +1,7 @@
 Name:           sysmaint
-Version:        2.2.0
+Version:        2.2.1
 Release:        1%{?dist}
-Summary:        Safe system maintenance script with JSON telemetry
+Summary:        Multi-distro Linux maintenance automation with CI/CD hardening
 
 License:        MIT
 URL:            https://github.com/Harery/SYSMAINT
@@ -112,6 +112,17 @@ if [ $1 -ge 1 ]; then
 fi
 
 %changelog
+* Thu Dec 12 2025 Mohamed Elharery <Mohamed@Harery.com> - 2.2.1-1
+- CI/CD pipeline hardening - 100%% pass rate on all platforms
+- Multi-distro validation: Ubuntu 24.04, Fedora 43, CentOS Stream 10, RHEL 10
+- Fixed unbound USER variable in containers (${USER:-root})
+- Resolved coreutils-single package conflict in CentOS/RHEL
+- Added comprehensive system dependencies for minimal containers
+- Made ShellCheck optional for Red Hat family distributions
+- All 281 tests passing (260 standard + 21 RHEL combo tests)
+- Enterprise RHEL validated and production-ready
+- Container compatibility verified on GitHub Actions
+
 * Fri Dec 06 2025 Mohamed Elharery <Mohamed@Harery.com> - 2.2.0-1
 - Multi-distro support (RHEL, Fedora, Rocky, CentOS, Arch, openSUSE)
 - Package manager abstraction layer (APT, DNF, Pacman, Zypper)

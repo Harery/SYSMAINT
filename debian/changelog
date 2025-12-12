@@ -1,3 +1,16 @@
+sysmaint (2.2.1-1) unstable; urgency=medium
+
+  * CI/CD Pipeline Hardening - 100% pass rate on all platforms.
+  * Multi-distro validation: Ubuntu, Fedora, CentOS, RHEL.
+  * Fixed unbound USER variable in containers (${USER:-root}).
+  * Resolved coreutils-single package conflict in CentOS/RHEL.
+  * Added comprehensive system dependencies for minimal containers.
+  * Made ShellCheck optional for Red Hat family distributions.
+  * All 281 tests passing across 4 distributions.
+  * Enterprise RHEL validated and production-ready.
+
+ -- Mohamed Elharery <Mohamed@Harery.com>  Thu, 12 Dec 2025 00:00:00 +0000
+
 sysmaint (2.1.1-1) unstable; urgency=medium
 
   * Added comprehensive full-cycle test suite (40+ cases).
