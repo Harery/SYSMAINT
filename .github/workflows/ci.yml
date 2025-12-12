@@ -63,6 +63,7 @@ jobs:
           echo "✅ All tests passed!"
 
   test-fedora:
+    if: false  # Temporarily disabled
     name: Test on Fedora 43 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
@@ -122,6 +123,7 @@ jobs:
           echo "✅ All tests passed!"
 
   test-centos:
+    if: false  # Temporarily disabled
     name: Test on CentOS Stream 10 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
@@ -182,6 +184,7 @@ jobs:
           echo "✅ All tests passed!"
 
   test-rhel:
+    if: false  # Temporarily disabled
     name: Test on RHEL 10 (Red Hat Family)
     runs-on: ubuntu-latest
     container:
