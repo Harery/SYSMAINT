@@ -248,3 +248,125 @@ jobs:
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
+
+  rocky-linux:
+    name: Rocky Linux 10
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # Rocky Linux uses coreutils-single like CentOS/RHEL
+          dnf install -y --allowerasing bash jq python3 python3-pip \
+            coreutils findutils grep sed gawk util-linux \
+            procps-ng systemd bc which
+          dnf install -y ShellCheck || echo "ShellCheck not available, skipping"
+          python3 -m pip install --upgrade pip
+          pip3 install jsonschema
+
+      - name: ShellCheck (sysmaint and libs)
+        continue-on-error: true
+        run: |
+          if command -v shellcheck &> /dev/null; then
+            shellcheck -x -S error sysmaint || echo "ShellCheck found issues but continuing"
+            shellcheck -x -S error lib/*.sh || echo "ShellCheck found issues in libs but continuing"
+            shellcheck -x scripts/*.sh || true
+          else
+            echo "ShellCheck not available in Rocky Linux, skipping linting"
+          fi
+
+      - name: Make scripts executable
+        run: |
+          chmod +x sysmaint
+          chmod +x tests/*.sh
+          chmod +x scripts/*.sh
+
+      - name: Run test suites
+        env:
+          DRY_RUN: "true"
+          JSON_SUMMARY: "true"
+        run: |
+          set -x
+          echo "Starting test suite execution..."
+          bash tests/test_suite_smoke.sh || { echo "❌ Smoke tests failed"; exit 1; }
+          echo "✓ Smoke tests passed"
+          bash tests/test_suite_edge.sh || { echo "❌ Edge tests failed"; exit 1; }
+          echo "✓ Edge tests passed"
+          bash tests/test_suite_security.sh || { echo "❌ Security tests failed"; exit 1; }
+          echo "✓ Security tests passed"
+          bash tests/test_suite_compliance.sh || { echo "❌ Compliance tests failed"; exit 1; }
+          echo "✓ Compliance tests passed"
+          bash tests/test_suite_governance.sh || { echo "❌ Governance tests failed"; exit 1; }
+          echo "✓ Governance tests passed"
+          bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
+          echo "✓ Performance tests passed"
+          bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
+          echo "✅ All tests passed!"
+
+  almalinux:
+    name: AlmaLinux 10
+    runs-on: ubuntu-latest
+    container:
+      image: almalinux:10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # AlmaLinux uses coreutils-single like CentOS/RHEL
+          dnf install -y --allowerasing bash jq python3 python3-pip \
+            coreutils findutils grep sed gawk util-linux \
+            procps-ng systemd bc which
+          dnf install -y ShellCheck || echo "ShellCheck not available, skipping"
+          python3 -m pip install --upgrade pip
+          pip3 install jsonschema
+
+      - name: ShellCheck (sysmaint and libs)
+        continue-on-error: true
+        run: |
+          if command -v shellcheck &> /dev/null; then
+            shellcheck -x -S error sysmaint || echo "ShellCheck found issues but continuing"
+            shellcheck -x -S error lib/*.sh || echo "ShellCheck found issues in libs but continuing"
+            shellcheck -x scripts/*.sh || true
+          else
+            echo "ShellCheck not available in AlmaLinux, skipping linting"
+          fi
+
+      - name: Make scripts executable
+        run: |
+          chmod +x sysmaint
+          chmod +x tests/*.sh
+          chmod +x scripts/*.sh
+
+      - name: Run test suites
+        env:
+          DRY_RUN: "true"
+          JSON_SUMMARY: "true"
+        run: |
+          set -x
+          echo "Starting test suite execution..."
+          bash tests/test_suite_smoke.sh || { echo "❌ Smoke tests failed"; exit 1; }
+          echo "✓ Smoke tests passed"
+          bash tests/test_suite_edge.sh || { echo "❌ Edge tests failed"; exit 1; }
+          echo "✓ Edge tests passed"
+          bash tests/test_suite_security.sh || { echo "❌ Security tests failed"; exit 1; }
+          echo "✓ Security tests passed"
+          bash tests/test_suite_compliance.sh || { echo "❌ Compliance tests failed"; exit 1; }
+          echo "✓ Compliance tests passed"
+          bash tests/test_suite_governance.sh || { echo "❌ Governance tests failed"; exit 1; }
+          echo "✓ Governance tests passed"
+          bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
+          echo "✓ Performance tests passed"
+          bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
+          echo "✅ All tests passed!"

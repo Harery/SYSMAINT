@@ -1,5 +1,5 @@
 # 🛠️ sysmaint Docker Image
-# Automated Ubuntu/Debian system maintenance toolkit
+# Multi-distro Linux system maintenance automation toolkit
 #
 # Usage:
 #   docker run --rm ghcr.io/harery/sysmaint --help
@@ -13,8 +13,8 @@
 FROM ubuntu:24.04
 
 LABEL org.opencontainers.image.title="sysmaint"
-LABEL org.opencontainers.image.description="Safe, scriptable Ubuntu/Debian maintenance automation toolkit"
-LABEL org.opencontainers.image.version="2.1.2"
+LABEL org.opencontainers.image.description="Safe, scriptable multi-distro Linux maintenance automation toolkit"
+LABEL org.opencontainers.image.version="2.2.1"
 LABEL org.opencontainers.image.authors="Mohamed Elharery <Mohamed@Harery.com>"
 LABEL org.opencontainers.image.url="https://github.com/Harery/SYSMAINT"
 LABEL org.opencontainers.image.source="https://github.com/Harery/SYSMAINT"

@@ -227,6 +227,134 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
 ---
 
+## 💡 Real-World Examples
+
+### Weekly Maintenance Automation
+
+```bash
+# Add to crontab for weekly Sunday 2 AM maintenance
+0 2 * * 0 /usr/local/sbin/sysmaint --auto --json-summary >> /var/log/sysmaint-weekly.log 2>&1
+```
+
+### Server Deployment Pipeline
+
+```bash
+# Post-deployment maintenance (in CI/CD)
+sudo sysmaint --dry-run --json-summary                    # Verify system state
+sudo sysmaint --update-packages --clear-tmp --auto       # Clean and update
+sudo sysmaint --reboot-if-required --auto-reboot-delay 60 # Reboot if needed
+```
+
+### Desktop Workstation (Interactive)
+
+```bash
+# Morning routine - check before updates
+sudo sysmaint --dry-run --json-summary
+
+# Apply updates with review
+sudo sysmaint --update-packages
+
+# Full cleanup on demand
+sudo sysmaint --clear-caches --vacuum-journal --remove-old-kernels
+```
+
+### Container/VM Maintenance
+
+```bash
+# Minimal maintenance for containers
+docker run --rm --privileged -v /:/host \
+  ghcr.io/harery/sysmaint \
+  --update-packages --clear-tmp --no-reboot
+
+# VM snapshot before maintenance
+virsh snapshot-create-as myvm pre-maintenance
+sudo sysmaint --auto --json-summary
+```
+
+### Emergency Recovery
+
+```bash
+# Free up space quickly (when /boot is full)
+sudo sysmaint --remove-old-kernels --clear-tmp --auto
+
+# Fix broken packages
+sudo sysmaint --fix-broken-packages --auto
+
+# Audit after compromise
+sudo sysmaint --security-audit --json-summary
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Issue: "User must be root"**
+```bash
+# Solution: Run with sudo
+sudo sysmaint --dry-run
+```
+
+**Issue: "/boot is full, cannot install kernels"**
+```bash
+# Solution: Remove old kernels first
+sudo sysmaint --remove-old-kernels --auto
+sudo apt-get autoremove  # Or: sudo dnf autoremove
+```
+
+**Issue: "Lock file exists"**
+```bash
+# Solution: Remove stale lock (ensure no other instance running)
+sudo rm -f /tmp/sysmaint.lock /run/sysmaint.lock
+```
+
+**Issue: "JSON validation failed"**
+```bash
+# Solution: Check JSON output manually
+sudo sysmaint --json-summary
+cat /tmp/system-maintenance/summary_*.json | jq .
+```
+
+**Issue: "Package manager locked"**
+```bash
+# Solution: Wait for other package operations or kill if stuck
+# Ubuntu/Debian:
+sudo killall apt apt-get dpkg
+sudo rm /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock
+# Fedora/RHEL/Rocky/Alma:
+sudo killall dnf yum
+sudo rm /var/cache/dnf/*/download_lock.pid
+```
+
+### Performance Tips
+
+```bash
+# Speed up by skipping slow operations
+sysmaint --no-vacuum-journal --no-clear-caches
+
+# Parallel execution (faster on multi-core)
+sysmaint --parallel-jobs 4
+
+# Benchmark specific operations
+time sysmaint --update-packages --dry-run
+```
+
+### Debugging
+
+```bash
+# Enable verbose output
+sudo bash -x sysmaint --dry-run
+
+# Check what would change without modifying
+sudo sysmaint --dry-run --json-summary
+
+# Validate JSON schema
+python3 tests/validate_json.py /tmp/system-maintenance/summary_*.json
+```
+
+---
+
 ## 📚 Documentation
 
 ### User Documentation
