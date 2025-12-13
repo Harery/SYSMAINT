@@ -29,41 +29,49 @@
 
 ## 🎯 Current Stable Release
 
-### v2.1.2 — Production Quality & CI Integration
+### v2.2.1 — CI/CD Hardening & Multi-Distro Production Release
 
 | Detail | Value |
 |:-------|:------|
-| **Released** | November 2025 |
-| **Status** | ✅ Stable Production Release |
-| **Platforms** | Ubuntu 20.04+, Debian 10+ |
-| **Tests** | 246 passing (100% coverage) |
-| **Download** | [v2.1.2 Release](https://github.com/Harery/SYSMAINT/releases/tag/v2.1.2) |
+| **Released** | December 12, 2025 |
+| **Status** | ✅ Stable Production Release - Enterprise Ready |
+| **Platforms** | Ubuntu 24.04, Fedora 43, CentOS Stream 10, RHEL 10 |
+| **Tests** | 1,061 tests passing (100% coverage on all platforms) |
+| **Download** | [v2.2.1 Release](https://github.com/Harery/SYSMAINT/releases/tag/v2.2.1) |
+| **Packages** | DEB (44 KB) + RPM (110 KB) |
 
 ### ✨ Key Features
 
 | Feature | Description |
 |:--------|:------------|
-| 🧪 **Test Coverage** | 246 comprehensive test cases, 100% coverage |
-| 🤖 **CI/CD** | Automated pipelines with GitHub Actions |
-| 🐳 **Docker** | Container images on GitHub Packages |
-| 📦 **Package** | `.deb` distribution for easy installation |
+| 🧪 **Test Coverage** | 281 tests per platform (1,061 total), 100% coverage |
+| 🤖 **CI/CD** | 100% pass rate on 4 distributions, fully hardened |
+| 🐳 **Docker** | Container compatible with minimal base images |
+| 📦 **Packages** | DEB (Debian/Ubuntu) + RPM (Red Hat family) |
 | 📊 **Telemetry** | JSON output with schema validation |
 | 🎯 **Profiles** | 12 pre-built maintenance profiles |
 | ⏰ **Automation** | Systemd timer integration |
+| 🏗️ **Architecture** | 21 specialized modules across 6 categories |
+| 🐧 **Multi-Distro** | Debian, Ubuntu, Fedora, CentOS, RHEL validated |
 
 ### 📥 Installation Methods
 
 ```bash
-# Option 1: APT/DEB Package (recommended)
-wget https://github.com/Harery/SYSMAINT/releases/download/v2.1.2/sysmaint_2.1.2_all.deb
-sudo dpkg -i sysmaint_2.1.2_all.deb
+# Option 1: DEB Package (Debian/Ubuntu)
+wget https://github.com/Harery/SYSMAINT/releases/download/v2.2.1/sysmaint_2.2.1-1_all.deb
+sudo dpkg -i sysmaint_2.2.1-1_all.deb
 
-# Option 2: Docker Container
+# Option 2: RPM Package (Fedora/RHEL/CentOS/Rocky/Alma)
+wget https://github.com/Harery/SYSMAINT/releases/download/v2.2.1/sysmaint-2.2.1-1.noarch.rpm
+sudo dnf install ./sysmaint-2.2.1-1.noarch.rpm
+
+# Option 3: Docker Container
 docker pull ghcr.io/harery/sysmaint:latest
 
-# Option 3: Manual Installation
+# Option 4: Manual Installation
 git clone https://github.com/Harery/SYSMAINT.git
 cd SYSMAINT
+git checkout v2.2.1
 chmod +x sysmaint
 ```
 
@@ -98,10 +106,11 @@ chmod +x sysmaint
 
 | Detail | Value |
 |:-------|:------|
-| **Released** | December 2025 (in progress) |
-| **Status** | ✅ CI/CD Hardened - 100% Pass Rate |
+| **Released** | December 12, 2025 |
+| **Status** | ✅ Released - Production Ready |
 | **Performance** | Ubuntu: 3.408s avg, Fedora: 2.579s avg (24% faster), RHEL: 1.877s avg (45% faster) |
-| **Validation** | 281/281 tests passing on Ubuntu, Fedora, CentOS, RHEL + All CI jobs passing |
+| **Validation** | 1,061/1,061 tests passing (281 per platform on 4 distros) + All CI jobs passing |
+| **Packages** | DEB (44 KB) + RPM (110 KB) available |
 | **Focus** | Container compatibility fixes + CI/CD pipeline reliability + Production readiness |
 
 #### 🎯 Release Highlights
@@ -137,7 +146,7 @@ Expand SYSMAINT compatibility beyond Debian-based distributions to support major
 |:-----|:-------|
 | **Distributions** | ✅ Fedora 43, CentOS Stream 10, RHEL 10.1 validated |
 | **Package Manager** | ✅ DNF/RPM integration operational |
-| **Package Format** | ⏳ `.rpm` package creation pending |
+| **Package Format** | ✅ `.rpm` package available (v2.2.1) |
 
 **Technical Implementation:**
 - ✅ Package manager abstraction layer (`lib/package_manager.sh`, 451 lines)
@@ -146,7 +155,7 @@ Expand SYSMAINT compatibility beyond Debian-based distributions to support major
 - ✅ System update mechanisms adapted
 - ✅ Cleanup logic operational for Red Hat ecosystem
 - ✅ **RHEL 10.1 Enterprise Linux validated**
-- ⏳ RPM package distribution (scheduled for v2.2.1)
+- ✅ RPM package distribution (released in v2.2.1)
 
 **Testing Results:**
 - ✅ **Ubuntu 24.04 LTS**: 260/260 tests (100%) - Baseline: 3.408s avg
