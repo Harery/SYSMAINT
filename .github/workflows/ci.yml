@@ -5,11 +5,26 @@ on:
     branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Select platform to test (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - 'all'
+          - 'fedora'
+          - 'centos'
+          - 'rhel'
+          - 'almalinux'
+          - 'rocky'
+          - 'ubuntu'
 
 jobs:
   test-ubuntu:
     name: Test on Ubuntu (Debian Family)
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ubuntu'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,6 +86,7 @@ jobs:
   test-fedora:
     name: Test on Fedora 43 (Red Hat Family)
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'fedora'
     container:
       image: fedora:43
     defaults:
@@ -138,6 +154,7 @@ jobs:
   test-centos:
     name: Test on CentOS Stream 10 (Red Hat Family)
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'centos'
     container:
       image: quay.io/centos/centos:stream10
     defaults:
@@ -207,6 +224,7 @@ jobs:
   test-rhel:
     name: Test on RHEL 10 (Red Hat Family)
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'rhel'
     container:
       image: registry.access.redhat.com/ubi10/ubi:latest
     defaults:
@@ -276,6 +294,7 @@ jobs:
   rocky-linux:
     name: Rocky Linux 9
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'rocky'
     container:
       image: rockylinux:9
     defaults:
@@ -343,6 +362,7 @@ jobs:
   almalinux:
     name: AlmaLinux 10
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'almalinux'
     container:
       image: almalinux:10
     defaults:
