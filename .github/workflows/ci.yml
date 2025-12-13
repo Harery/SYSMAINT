@@ -250,10 +250,10 @@ jobs:
 
 
   rocky-linux:
-    name: Rocky Linux 10
+    name: Rocky Linux 9
     runs-on: ubuntu-latest
     container:
-      image: rockylinux:10
+      image: rockylinux:9
     defaults:
       run:
         shell: bash
