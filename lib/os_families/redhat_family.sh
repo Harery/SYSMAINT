@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # lib/redhat_family.sh - Red Hat/Fedora/CentOS family-specific operations
 # This file contains functions specific to Red Hat-based distributions
-# Loaded only when running on RHEL/Fedora/Rocky/AlmaLinux/CentOS
+# Loaded for: RHEL, Fedora, CentOS Stream (CI-tested)
+# Also compatible with: Rocky Linux, AlmaLinux (untested but should work)
 
 # ============================================================================
 # RED HAT FAMILY SPECIFIC FUNCTIONS

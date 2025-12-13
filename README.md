@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.2.1-blue.svg)
 [![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?label=release&color=green)](https://github.com/Harery/SYSMAINT/releases/latest)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint)
 [![CI](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml/badge.svg)](https://github.com/Harery/SYSMAINT/actions/workflows/ci.yml)
@@ -44,10 +44,10 @@
 
 ```bash
 # Download the latest release
-wget https://github.com/Harery/SYSMAINT/releases/download/v2.2.0/sysmaint_2.2.0_all.deb
+wget https://github.com/Harery/SYSMAINT/releases/download/v2.2.1/sysmaint_2.2.1-1_all.deb
 
 # Install
-sudo dpkg -i sysmaint_2.2.0_all.deb
+sudo dpkg -i sysmaint_2.2.1-1_all.deb
 
 # Run
 sudo sysmaint --help
@@ -175,8 +175,8 @@ Enable with `--json-summary` to get detailed reports in `/tmp/system-maintenance
 
 ```json
 {
-  "script_version": "2.2.0",
-  "run_id": "2025-12-06_120000_12345",
+  "script_version": "2.2.1",
+  "run_id": "2025-12-12_120000_12345",
   "exit_code": 0,
   "phases": { ... },
   "disk_delta": { ... },
@@ -250,13 +250,13 @@ See [docs/SECURITY.md](docs/SECURITY.md) for details.
 
 | Resource | Purpose |
 |:---------|:--------|
-| 🧪 [tests/README.md](tests/README.md) | Test suite documentation (246 tests) |
+| 🧪 [tests/README.md](tests/README.md) | Test suite documentation (281 tests) |
 | 🔧 [.github/](.github/) | Issue templates and contribution guidelines |
 | 📦 [packaging/](packaging/) | Distribution packaging (DEB, RPM, systemd units) |
 
 ---
 
-## 🏗️ Architecture (v2.2.0)
+## 🏗️ Architecture (v2.2.1)
 
 sysmaint uses a **modern modular architecture** for improved maintainability and extensibility:
 
@@ -286,13 +286,21 @@ lib/
 - **Privileges:** Root for system changes (dry-run works without)
 
 **Supported Distributions (v2.2.1):**
-- ✅ Ubuntu 20.04+ (260/260 tests, 100% success)
-- ✅ Debian 10+ (Production validated)
-- ✅ Fedora 38+ (260/260 tests, 100% success)
-- ✅ CentOS Stream 9/10 (260/260 tests, 100% success)
-- ✅ RHEL 8/9 (Compatible with Fedora/CentOS validation)
-- 🚧 Arch/Manjaro (Foundation ready, full validation in v2.3.0)
-- 🚧 openSUSE/SUSE (Foundation ready, full validation in v2.3.0)
+
+*CI-Tested Platforms (100% test success):*
+- ✅ Ubuntu 24.04 LTS (260/260 tests passing)
+- ✅ Fedora 43 (260/260 tests passing)
+- ✅ CentOS Stream 10 (260/260 tests passing)
+- ✅ RHEL 10 (281/281 tests passing, includes 21 combo tests)
+
+*Compatible (Uses Red Hat Family Code, Untested in CI):*
+- 🟡 Rocky Linux 9/10 (Should work, not validated)
+- 🟡 AlmaLinux 9/10 (Should work, not validated)
+
+*Foundation Ready (Planned for v2.3.0):*
+- 🚧 Arch/Manjaro (OS detection ready, full validation pending)
+- 🚧 openSUSE/SUSE (OS detection ready, full validation pending)
+- 🚧 Debian 12+ (APT family, not yet tested)
 
 ---
 

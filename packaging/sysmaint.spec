@@ -36,7 +36,7 @@ install -d %{buildroot}%{_datadir}/%{name}/lib
 install -d %{buildroot}%{_mandir}/man1
 install -d %{buildroot}%{_datadir}/bash-completion/completions
 install -d %{buildroot}%{_datadir}/zsh/site-functions
-install -d %{buildroot}%{_unitdir}
+install -d %{buildroot}/usr/lib/systemd/system
 
 # Install main script
 install -m 0755 sysmaint %{buildroot}%{_sbindir}/sysmaint
@@ -77,8 +77,8 @@ install -m 0644 packaging/completions/sysmaint.bash %{buildroot}%{_datadir}/bash
 install -m 0644 packaging/completions/_sysmaint %{buildroot}%{_datadir}/zsh/site-functions/_sysmaint
 
 # Install systemd units
-install -m 0644 packaging/systemd/sysmaint.service %{buildroot}%{_unitdir}/
-install -m 0644 packaging/systemd/sysmaint.timer %{buildroot}%{_unitdir}/
+install -m 0644 packaging/systemd/sysmaint.service %{buildroot}/usr/lib/systemd/system/
+install -m 0644 packaging/systemd/sysmaint.timer %{buildroot}/usr/lib/systemd/system/
 
 %files
 %license LICENSE
@@ -88,8 +88,8 @@ install -m 0644 packaging/systemd/sysmaint.timer %{buildroot}%{_unitdir}/
 %{_mandir}/man1/sysmaint.1*
 %{_datadir}/bash-completion/completions/sysmaint
 %{_datadir}/zsh/site-functions/_sysmaint
-%{_unitdir}/sysmaint.service
-%{_unitdir}/sysmaint.timer
+/usr/lib/systemd/system/sysmaint.service
+/usr/lib/systemd/system/sysmaint.timer
 
 %post
 # Enable timer by default
