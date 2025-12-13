@@ -59,6 +59,12 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
+          bash tests/test_suite_scanners.sh || { echo "❌ Scanners tests failed"; exit 1; }
+          echo "✓ Scanners tests passed"
+          bash tests/test_suite_scanner_performance.sh || { echo "❌ Scanner performance tests failed"; exit 1; }
+          echo "✓ Scanner performance tests passed"
+          bash tests/test_suite_combos.sh || { echo "❌ Combos tests failed"; exit 1; }
+          echo "✓ Combos tests passed"
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
@@ -120,6 +126,12 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
+          bash tests/test_suite_scanners.sh || { echo "❌ Scanners tests failed"; exit 1; }
+          echo "✓ Scanners tests passed"
+          bash tests/test_suite_scanner_performance.sh || { echo "❌ Scanner performance tests failed"; exit 1; }
+          echo "✓ Scanner performance tests passed"
+          bash tests/test_suite_combos.sh || { echo "❌ Combos tests failed"; exit 1; }
+          echo "✓ Combos tests passed"
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
@@ -183,6 +195,12 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
+          bash tests/test_suite_scanners.sh || { echo "❌ Scanners tests failed"; exit 1; }
+          echo "✓ Scanners tests passed"
+          bash tests/test_suite_scanner_performance.sh || { echo "❌ Scanner performance tests failed"; exit 1; }
+          echo "✓ Scanner performance tests passed"
+          bash tests/test_suite_combos.sh || { echo "❌ Combos tests failed"; exit 1; }
+          echo "✓ Combos tests passed"
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
@@ -245,6 +263,12 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
+          bash tests/test_suite_scanners.sh || { echo "❌ Scanners tests failed"; exit 1; }
+          echo "✓ Scanners tests passed"
+          bash tests/test_suite_scanner_performance.sh || { echo "❌ Scanner performance tests failed"; exit 1; }
+          echo "✓ Scanner performance tests passed"
+          bash tests/test_suite_combos.sh || { echo "❌ Combos tests failed"; exit 1; }
+          echo "✓ Combos tests passed"
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
@@ -307,6 +331,12 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
+          bash tests/test_suite_scanners.sh || { echo "❌ Scanners tests failed"; exit 1; }
+          echo "✓ Scanners tests passed"
+          bash tests/test_suite_scanner_performance.sh || { echo "❌ Scanner performance tests failed"; exit 1; }
+          echo "✓ Scanner performance tests passed"
+          bash tests/test_suite_combos.sh || { echo "❌ Combos tests failed"; exit 1; }
+          echo "✓ Combos tests passed"
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
 
@@ -368,5 +398,11 @@ jobs:
           echo "✓ Governance tests passed"
           bash tests/test_suite_performance.sh || { echo "❌ Performance tests failed"; exit 1; }
           echo "✓ Performance tests passed"
+          bash tests/test_suite_scanners.sh || { echo "❌ Scanners tests failed"; exit 1; }
+          echo "✓ Scanners tests passed"
+          bash tests/test_suite_scanner_performance.sh || { echo "❌ Scanner performance tests failed"; exit 1; }
+          echo "✓ Scanner performance tests passed"
+          bash tests/test_suite_combos.sh || { echo "❌ Combos tests failed"; exit 1; }
+          echo "✓ Combos tests passed"
           bash tests/test_json_validation.sh || { echo "❌ JSON validation failed"; exit 1; }
           echo "✅ All tests passed!"
