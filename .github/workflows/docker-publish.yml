@@ -1,0 +1,140 @@
+name: Docker Publish
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - name: ubuntu-24.04
+            dockerfile: Dockerfile
+            context: .
+            tags: |
+              ghcr.io/harery/sysmaint:latest
+              ghcr.io/harery/sysmaint:1.0.0
+              ghcr.io/harery/sysmaint:1
+              ghcr.io/harery/sysmaint:ubuntu-24.04
+            platforms: linux/amd64,linux/arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/harery/sysmaint
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=SYSMAINT
+            org.opencontainers.image.description=Automated system maintenance toolkit for Linux
+            org.opencontainers.image.vendor=Harery
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.source=https://github.com/Harery/SYSMAINT
+            org.opencontainers.image.url=https://github.com/Harery/SYSMAINT
+            org.opencontainers.image.documentation=https://github.com/Harery/SYSMAINT/wiki
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ matrix.platforms }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ matrix.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/harery/sysmaint:latest
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.name }}
+          path: sbom.spdx.json
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/harery/sysmaint:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  test:
+    name: Test Container
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Pull image
+        run: docker pull ghcr.io/harery/sysmaint:latest
+
+      - name: Test help command
+        run: |
+          docker run --rm ghcr.io/harery/sysmaint:latest --help
+
+      - name: Test dry-run mode
+        run: |
+          docker run --rm ghcr.io/harery/sysmaint:latest --dry-run || true
+
+      - name: Test JSON output
+        run: |
+          docker run --rm ghcr.io/harery/sysmaint:latest --json | jq .

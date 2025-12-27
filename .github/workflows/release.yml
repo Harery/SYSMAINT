@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          cat > RELEASE_NOTES.md << 'EOF'
+          ## SYSMAINT ${{ steps.version.outputs.VERSION }}
+
+          **Release Date:** $(date -u +"%Y-%m-%d")
+
+          ### Installation
+          ```bash
+          git clone https://github.com/Harery/SYSMAINT.git
+          cd SYSMAINT
+          chmod +x sysmaint
+          sudo ./sysmaint --dry-run
+          ```
+
+          ### Development Tools
+          - VS Code - Development environment
+          - Claude - Code generation
+          - Cline - Debugging
+          - Kilo - Code analysis
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
