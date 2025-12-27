@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/Harery/SYSMAINT/discussions
+    about: Ask questions and discuss with other community members
+  - name: Documentation
+    url: https://github.com/Harery/SYSMAINT/blob/main/docs/TROUBLESHOOTING.md
+    about: Read the troubleshooting guide for common issues

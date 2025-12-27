@@ -1,0 +1,59 @@
+.TH sysmaint 1 "" "sysmaint" "User Commands"
+.SH NAME
+sysmaint \- automated Linux system maintenance
+.SH SYNOPSIS
+.B sysmaint
+.RI [ options ]
+.SH DESCRIPTION
+.B sysmaint
+is a multi-distro maintenance tool for Linux systems.
+It performs package updates, cleanup, security audits,
+and emits JSON telemetry.
+
+Supports: Debian/Ubuntu (APT), Red Hat/Fedora (DNF),
+Arch (Pacman), SUSE (Zypper), plus Snap and Flatpak.
+
+.SH OPTIONS
+.TP
+.B --dry-run
+Preview actions without changes.
+.TP
+.B --gui, --tui
+Interactive menu mode.
+.TP
+.B --json-summary
+Write JSON report to /tmp/system-maintenance/.
+.TP
+.B --upgrade
+Full distribution upgrade.
+.TP
+.B --purge-kernels
+Remove old kernels (use --keep-kernels=N).
+.TP
+.B --security-audit
+Check critical file permissions.
+.TP
+.B --auto
+Unattended mode (no prompts).
+.TP
+.B --detect
+Show system detection report.
+
+Full options: sysmaint --help
+
+.SH FILES
+.TP
+.B /tmp/system-maintenance/
+Logs and JSON output.
+
+.SH EXIT STATUS
+0 success; 10 repo issues; 20 missing keys;
+30 failed services; 75 lock timeout; 100 reboot required.
+
+.SH SEE ALSO
+.BR apt (8),
+.BR dnf (8),
+.BR systemd (1)
+
+.SH AUTHOR
+Mohamed Elharery <Mohamed@Harery.com>

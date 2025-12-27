@@ -1,0 +1,32 @@
+---
+name: Documentation improvement
+about: Help us improve the documentation
+title: '[DOC] '
+labels: documentation
+assignees: ''
+---
+
+## What needs to be documented?
+
+**Please clearly describe what documentation needs to be improved or added:**
+
+## Current State
+
+**What is the current state of the documentation?**
+
+## Desired State
+
+**What should the documentation look like?**
+
+## Relevant Section
+
+**Which file or section does this relate to?**
+- [ ] README.md
+- [ ] docs/TROUBLESHOOTING.md
+- [ ] docs/PLATFORM_FEATURE_MATRIX.md
+- [ ] docs/MODULAR_ARCHITECTURE.md
+- [ ] Other (please specify)
+
+## Additional Context
+
+**Any other information, screenshots, or examples?**

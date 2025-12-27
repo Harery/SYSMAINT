@@ -1,0 +1,5008 @@
+#!/usr/bin/env bash
+# sysmaint — Multi-distro system maintenance with package manager abstraction
+# License: MIT (see LICENSE file in repository root)
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+#
+# Usage:
+#   sudo ./sysmaint
+#   AUTO_REBOOT=true sudo ./sysmaint   # optional auto-reboot if required
+#   LOG_DIR=/var/log sudo ./sysmaint   # override log directory
+#
+# Options:
+#   ./sysmaint --detect                # show detection report and exit
+#   ./sysmaint --distro ubuntu         # override OS detection
+#   ./sysmaint --pkg-manager apt       # override package manager
+#   ./sysmaint --init-system systemd   # override init system
+#   ./sysmaint --force-generic         # use generic fallback mode
+#
+# Exit codes:
+#   0   - Success
+#   1   - General error (OS check failure, log dir creation failure, etc.)
+#   10  - Repository validation failures detected
+#   20  - Missing APT public keys detected
+#   30  - Failed systemd services detected
+#   75  - Lock acquisition timeout
+#   100 - Reboot required after maintenance
+
+set -Eeuo pipefail
+export DEBIAN_FRONTEND=noninteractive
+
+SCRIPT_VERSION="1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔍 CI/CD ENVIRONMENT DETECTION
+# ═══════════════════════════════════════════════════════════════════════════════
+# Detect if running in CI/CD and set non-interactive mode automatically
+# This prevents GUI prompts from hanging in automated environments
+if [[ "${CI:-false}" == "true" ]] || [[ ! -t 0 ]]; then
+  export NONINTERACTIVE=true
+  export AUTO_MODE=true
+  export ASSUME_YES=true  # Auto-confirm all prompts in CI
+fi
+
+# Script directory (for artifacts used by subcommands)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# ===== Load modular library components =====
+# Source lib modules for extracted functionality
+# shellcheck disable=SC1091
+if [[ -f "$SCRIPT_DIR/lib/utils.sh" ]]; then
+  source "$SCRIPT_DIR/lib/utils.sh"
+fi
+if [[ -f "$SCRIPT_DIR/lib/json.sh" ]]; then
+  source "$SCRIPT_DIR/lib/json.sh"
+fi
+if [[ -f "$SCRIPT_DIR/lib/subcommands.sh" ]]; then
+  source "$SCRIPT_DIR/lib/subcommands.sh"
+fi
+if [[ -f "$SCRIPT_DIR/lib/package_manager.sh" ]]; then
+  source "$SCRIPT_DIR/lib/package_manager.sh"
+fi
+# progress UI functions are now included in lib/utils.sh
+
+# Note: Family-specific libraries will be loaded after OS detection in check_os()
+
+LOG_DIR="${LOG_DIR:-/tmp/system-maintenance}"
+# Ensure the log directory exists early so subsequent logging can proceed.
+mkdir -p "$LOG_DIR" || {
+  echo "ERROR: could not create log dir $LOG_DIR" >&2
+  exit 1
+}
+
+# Debug logging for troubleshooting (enable with DEBUG_SYSMAINT=true)
+if [[ "${DEBUG_SYSMAINT:-false}" == "true" ]]; then
+  echo "DEBUG: Line $LINENO: LOG_DIR=$LOG_DIR" >&2
+fi
+
+# --- Load Core Modules -------------------------------------------------------
+# v2.2.0: Modular architecture - load core functions before main execution
+# Order matters: init first, then logging, then capabilities, then error handling
+
+# Core initialization functions (check_os, require_root, state management)
+if [[ -f "$SCRIPT_DIR/lib/core/init.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/init.sh"
+fi
+
+# Phase 3: Auto-detection functions (detect_package_manager, detect_init_system, etc.)
+if [[ -f "$SCRIPT_DIR/lib/core/detection.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/detection.sh"
+fi
+
+# Logging infrastructure (log, run, truncate_log_if_needed)
+if [[ -f "$SCRIPT_DIR/lib/core/logging.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/logging.sh"
+fi
+
+# Capability detection (_skip_cap, detect_capabilities_and_mode)
+if [[ -f "$SCRIPT_DIR/lib/core/capabilities.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/capabilities.sh"
+fi
+
+# Error handling and cleanup (on_exit, on_err, phase estimates)
+if [[ -f "$SCRIPT_DIR/lib/core/error_handling.sh" ]]; then
+  source "$SCRIPT_DIR/lib/core/error_handling.sh"
+fi
+
+# --- Load Progress Modules ---------------------------------------------------
+# v2.2.0: Progress tracking, ETA calculations, parallel execution
+
+# Progress panel UI (show_progress, start/stop_status_panel, _render_bar)
+if [[ -f "$SCRIPT_DIR/lib/progress/panel.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/panel.sh"
+fi
+
+# Timing estimates and EMA calculations
+if [[ -f "$SCRIPT_DIR/lib/progress/estimates.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/estimates.sh"
+fi
+
+# Host profiling and scaling factors
+if [[ -f "$SCRIPT_DIR/lib/progress/profiling.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/profiling.sh"
+fi
+
+# DAG-based parallel execution engine
+if [[ -f "$SCRIPT_DIR/lib/progress/parallel.sh" ]]; then
+  source "$SCRIPT_DIR/lib/progress/parallel.sh"
+fi
+
+# --- Load Maintenance Modules ------------------------------------------------
+# v2.2.0: Package management, kernel maintenance, system cleanup
+
+# Package management (apt, wait_for_pkg_managers, retry, orphan purge)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/packages.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/packages.sh"
+fi
+
+# Kernel maintenance (purge old kernels, post-finalize, status)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/kernel.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/kernel.sh"
+fi
+
+# Snap package manager maintenance
+if [[ -f "$SCRIPT_DIR/lib/maintenance/snap.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/snap.sh"
+fi
+
+# Flatpak package manager maintenance
+if [[ -f "$SCRIPT_DIR/lib/maintenance/flatpak.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/flatpak.sh"
+fi
+
+# Firmware updates via fwupd
+if [[ -f "$SCRIPT_DIR/lib/maintenance/firmware.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/firmware.sh"
+fi
+
+# System maintenance (DNS, journal, thumbnails, browser cache, tmp cleanup)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/system.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/system.sh"
+fi
+
+# Storage management (crash dumps, fstrim, drop caches)
+if [[ -f "$SCRIPT_DIR/lib/maintenance/storage.sh" ]]; then
+  source "$SCRIPT_DIR/lib/maintenance/storage.sh"
+fi
+
+# --- Load Validation Modules -------------------------------------------------
+# v2.2.0: Repository validation, key management, service health checks
+
+# Repository validation
+if [[ -f "$SCRIPT_DIR/lib/validation/repos.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/repos.sh"
+fi
+
+# GPG/APT public key management
+if [[ -f "$SCRIPT_DIR/lib/validation/keys.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/keys.sh"
+fi
+
+# Service and process health checks
+if [[ -f "$SCRIPT_DIR/lib/validation/services.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/services.sh"
+fi
+
+# Security audits and system health
+if [[ -f "$SCRIPT_DIR/lib/validation/security.sh" ]]; then
+  source "$SCRIPT_DIR/lib/validation/security.sh"
+fi
+
+# --- Load Reporting Modules --------------------------------------------------
+# v2.2.0: Summary generation, JSON output, reboot handling
+
+# JSON output helpers
+if [[ -f "$SCRIPT_DIR/lib/reporting/json.sh" ]]; then
+  source "$SCRIPT_DIR/lib/reporting/json.sh"
+fi
+
+# Summary report generation
+if [[ -f "$SCRIPT_DIR/lib/reporting/summary.sh" ]]; then
+  source "$SCRIPT_DIR/lib/reporting/summary.sh"
+fi
+
+# Reboot handling
+if [[ -f "$SCRIPT_DIR/lib/reporting/reboot.sh" ]]; then
+  source "$SCRIPT_DIR/lib/reporting/reboot.sh"
+fi
+
+# --- Load GUI Module ---------------------------------------------------------
+# v2.5.0: GUI/TUI interface for interactive operation selection
+
+# GUI interface (dialog/whiptail-based TUI)
+if [[ -f "$SCRIPT_DIR/lib/gui/interface.sh" ]]; then
+  source "$SCRIPT_DIR/lib/gui/interface.sh"
+fi
+
+# --- Embedded Subcommands ----------------------------------------------------
+# Subcommands are now loaded from lib/subcommands.sh
+# Early subcommand dispatch
+if [[ "${1-}" == "scanners" ]]; then
+  shift; scanners_main "$@"; exit $?
+fi
+if [[ "${1-}" == "profiles" ]]; then
+  shift; profiles_main "$@"; exit $?
+fi
+
+# --- GUI Mode Dispatcher -----------------------------------------------------
+# v2.5.0: Early GUI mode detection - launch interactive TUI if --gui flag is provided
+for arg in "$@"; do
+  if [[ "$arg" == "--gui" || "$arg" == "--tui" ]]; then
+    # Check if running in non-interactive mode (CI/CD)
+    if [[ "${NONINTERACTIVE:-false}" == "true" ]] || [[ "${CI:-false}" == "true" ]] || [[ ! -t 0 ]]; then
+      echo "ERROR: GUI mode requires an interactive terminal" >&2
+      echo "Use --dry-run for non-interactive mode" >&2
+      exit 1
+    fi
+
+    # Clear screen for clean TUI display
+    clear
+
+    # Launch GUI mode and get selected arguments
+    GUI_ARGS=$(launch_gui_mode)
+    GUI_EXIT_CODE=$?
+
+    if [[ $GUI_EXIT_CODE -ne 0 || -z "$GUI_ARGS" ]]; then
+      echo ""
+      echo "Interactive mode cancelled or no operations selected"
+      exit 0
+    fi
+    
+    # Clear screen and show execution header
+    clear
+    echo "╔══════════════════════════════════════════════════════════════════╗"
+    echo "║              SYSMAINT - Executing Selected Operations           ║"
+    echo "╚══════════════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "Command: sudo $0 $GUI_ARGS"
+    echo ""
+    sleep 1
+    
+    # Re-exec with GUI-selected arguments
+    # Remove --gui from current args and add GUI selections
+    NEW_ARGS=()
+    for current_arg in "$@"; do
+      [[ "$current_arg" != "--gui" && "$current_arg" != "--tui" ]] && NEW_ARGS+=("$current_arg")
+    done
+    
+    # shellcheck disable=SC2086
+    exec "$0" $GUI_ARGS "${NEW_ARGS[@]}"
+  fi
+done
+
+# Phase 3: Early detection if --detect flag is provided (no root required)
+for arg in "$@"; do
+  if [[ "$arg" == "--detect" ]]; then
+    # Parse /etc/os-release and run detection
+    if [[ -r /etc/os-release ]]; then
+      # shellcheck disable=SC1091
+      . /etc/os-release
+      DETECTED_OS_ID="${ID:-unknown}"
+      DETECTED_OS_NAME="${NAME:-unknown}"
+      DETECTED_OS_VERSION="${VERSION_ID:-unknown}"
+      DETECTED_PKG_MANAGER=$(detect_package_manager)
+      DETECTED_INIT_SYSTEM=$(detect_init_system)
+      
+      # Determine OS family
+      if [[ "${ID:-}" == "ubuntu" || "${ID:-}" == "debian" || "${ID_LIKE:-}" == *debian* || "${ID:-}" == "zorin" ]]; then
+        DETECTED_OS_FAMILY="debian"
+      elif [[ "${ID:-}" == "rhel" || "${ID:-}" == "centos" || "${ID:-}" == "fedora" || \
+              "${ID:-}" == "rocky" || "${ID:-}" == "almalinux" || \
+              "${ID_LIKE:-}" == *rhel* || "${ID_LIKE:-}" == *fedora* ]]; then
+        DETECTED_OS_FAMILY="redhat"
+      elif [[ "${ID:-}" == "arch" || "${ID:-}" == "manjaro" || "${ID_LIKE:-}" == *arch* ]]; then
+        DETECTED_OS_FAMILY="arch"
+      elif [[ "${ID:-}" == "opensuse" || "${ID:-}" == "opensuse-leap" || "${ID:-}" == "opensuse-tumbleweed" || \
+              "${ID_LIKE:-}" == *suse* ]]; then
+        DETECTED_OS_FAMILY="suse"
+      else
+        DETECTED_OS_FAMILY="unknown"
+      fi
+      
+      DETECTION_METHOD="auto"
+      
+      # Apply manual overrides if provided (must parse other args first)
+      for override_arg in "$@"; do
+        case "$override_arg" in
+          --distro)
+            # Will be parsed by getopt later, but we need to extract value now
+            shift
+            OVERRIDE_DISTRO="$1"
+            ;;
+          --distro=*)
+            OVERRIDE_DISTRO="${override_arg#--distro=}"
+            ;;
+          --pkg-manager)
+            shift
+            OVERRIDE_PKG_MANAGER="$1"
+            ;;
+          --pkg-manager=*)
+            OVERRIDE_PKG_MANAGER="${override_arg#--pkg-manager=}"
+            ;;
+          --init-system)
+            shift
+            OVERRIDE_INIT_SYSTEM="$1"
+            ;;
+          --init-system=*)
+            OVERRIDE_INIT_SYSTEM="${override_arg#--init-system=}"
+            ;;
+        esac
+      done
+      
+      # Apply overrides
+      if [[ -n "${OVERRIDE_DISTRO:-}" ]]; then
+        DETECTED_OS_ID="$OVERRIDE_DISTRO"
+        DETECTION_METHOD="manual-override"
+      fi
+      if [[ -n "${OVERRIDE_PKG_MANAGER:-}" ]]; then
+        DETECTED_PKG_MANAGER="$OVERRIDE_PKG_MANAGER"
+        DETECTION_METHOD="manual-override"
+      fi
+      if [[ -n "${OVERRIDE_INIT_SYSTEM:-}" ]]; then
+        DETECTED_INIT_SYSTEM="$OVERRIDE_INIT_SYSTEM"
+        DETECTION_METHOD="manual-override"
+      fi
+      
+      show_detection_report
+      # Never returns
+    else
+      echo "ERROR: Cannot read /etc/os-release" >&2
+      exit 1
+    fi
+  fi
+done
+
+RUN_ID="${RUN_ID:-$(date +%F_%H%M%S)_$$}"
+LOG_FILE="$LOG_DIR/sysmaint_${RUN_ID}.log"
+
+# Debug logging for troubleshooting (enable with DEBUG_SYSMAINT=true)
+if [[ "${DEBUG_SYSMAINT:-false}" == "true" ]]; then
+  echo "DEBUG: Line $LINENO: LOG_FILE=$LOG_FILE" >&2
+fi
+
+AUTO_REBOOT="${AUTO_REBOOT:-true}"
+DRY_RUN="${DRY_RUN:-false}"
+JSON_SUMMARY="${JSON_SUMMARY:-false}"
+_JSON_WRITTEN=false
+# Output color mode for terminal (auto|always|never)
+COLOR_MODE="${COLOR_MODE:-auto}"
+SIMULATE_UPGRADE="${SIMULATE_UPGRADE:-false}"
+FIX_MISSING_KEYS="${FIX_MISSING_KEYS:-false}"
+ASSUME_YES="${ASSUME_YES:-false}"
+KEYSERVER="${KEYSERVER:-keyserver.ubuntu.com}"
+AUTO_MODE="${AUTO_MODE:-false}"
+AUTO_REBOOT_DELAY="${AUTO_REBOOT_DELAY:-30}"
+NO_SNAP="${NO_SNAP:-false}"
+NO_FLATPAK="${NO_FLATPAK:-false}"
+NO_FIRMWARE="${NO_FIRMWARE:-false}"
+FLATPAK_SCOPE="${FLATPAK_SCOPE:-auto}"
+CLEAR_DNS_CACHE="${CLEAR_DNS_CACHE:-true}"
+CLEAR_JOURNAL="${CLEAR_JOURNAL:-true}"
+JOURNAL_VACUUM_TIME="${JOURNAL_VACUUM_TIME:-7d}"
+JOURNAL_VACUUM_SIZE="${JOURNAL_VACUUM_SIZE:-500M}"
+CHECK_FAILED_SERVICES="${CHECK_FAILED_SERVICES:-true}"
+CLEAR_THUMBNAILS="${CLEAR_THUMBNAILS:-true}"
+WAIT_INTERVAL="${WAIT_INTERVAL:-3}"
+WAIT_MAX_RETRIES="${WAIT_MAX_RETRIES:-8}"
+WAIT_TIMEOUT_SECONDS="${WAIT_TIMEOUT_SECONDS:-40}"
+LOCK_WAIT_SECONDS="${LOCK_WAIT_SECONDS:-3}"
+# Optional explicit grub configuration update after kernel purge
+UPDATE_GRUB_ENABLED="${UPDATE_GRUB_ENABLED:-false}"
+# Track update-grub execution state for JSON
+UPDATE_GRUB_RAN=false
+UPDATE_GRUB_SUCCESS=false
+# How old (seconds) a lockfile must be before we consider it "stale" when
+# fuser/lsof are unavailable. Default 600s (10 minutes). Make configurable
+# via STALE_LOCK_THRESHOLD env var for testing/tuning.
+STALE_LOCK_THRESHOLD="${STALE_LOCK_THRESHOLD:-600}"
+
+# Network retry configuration for transient failures
+NETWORK_RETRY_COUNT="${NETWORK_RETRY_COUNT:-3}"
+NETWORK_RETRY_BASE_DELAY="${NETWORK_RETRY_BASE_DELAY:-2}"
+NETWORK_RETRY_MAX_DELAY="${NETWORK_RETRY_MAX_DELAY:-30}"
+
+# Interactive progress UI: none|dots|countdown|bar|spinner|adaptive
+PROGRESS_MODE="${PROGRESS_MODE:-none}"
+PROGRESS_DURATION="${PROGRESS_DURATION:-3}"
+
+# Parallel execution mode (experimental)
+PARALLEL_EXEC="${PARALLEL_EXEC:-false}"
+
+# Log control (rotation/truncation)
+LOG_MAX_SIZE_MB="${LOG_MAX_SIZE_MB:-0}"      # 0 disables truncation
+LOG_TAIL_PRESERVE_KB="${LOG_TAIL_PRESERVE_KB:-512}"
+LOG_TRUNCATED=false
+LOG_ORIGINAL_SIZE_KB=0
+LOG_FINAL_SIZE_KB=0
+
+# Diagnostics & optional tasks
+CHECK_ZOMBIES="${CHECK_ZOMBIES:-true}"
+SECURITY_AUDIT_ENABLED="${SECURITY_AUDIT_ENABLED:-false}"
+BROWSER_CACHE_REPORT="${BROWSER_CACHE_REPORT:-false}"
+BROWSER_CACHE_PURGE="${BROWSER_CACHE_PURGE:-false}"
+
+# Diagnostics data holders
+declare -a ZOMBIE_PROCESSES
+ZOMBIE_COUNT=0
+
+# Security audit data holders
+SHADOW_PERMS_OK="unknown"
+GSHADOW_PERMS_OK="unknown"
+SUDOERS_PERMS_OK="unknown"
+declare -a SUDOERS_D_ISSUES
+
+# Browser cache metrics
+FIREFOX_CACHE_BYTES=0
+CHROMIUM_CACHE_BYTES=0
+CHROME_CACHE_BYTES=0
+BROWSER_CACHE_PURGED_FLAG=false
+
+# Sandbox helpers: allow controlled "real-mode" tests without sudo by setting
+# SYSMAINT_FAKE_ROOT=1 and providing stubbed binaries via PATH. Never enable
+# this mode on production systems.
+FAKE_ROOT_ACTIVE=false
+FAKE_ROOT_NOTICE_SHOWN=false
+if [[ "${SYSMAINT_FAKE_ROOT:-0}" == "1" && $EUID -ne 0 ]]; then
+  FAKE_ROOT_ACTIVE=true
+fi
+
+is_effective_root() {
+  if [[ $EUID -eq 0 ]]; then
+    return 0
+  fi
+  if [[ "$FAKE_ROOT_ACTIVE" == "true" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+for _arg in "$@"; do
+  # Honor --dry-run as early as possible so root elevation is never attempted
+  # during preview runs, regardless of flag order.
+  if [[ "$_arg" == "--dry-run" ]]; then
+    DRY_RUN=true
+  fi
+  if [[ "$_arg" == "--simulate-upgrade" ]]; then
+    SIMULATE_UPGRADE=true
+    break
+  fi
+  # Pre-scan for keyserver override
+  if [[ "$_arg" =~ ^--keyserver= ]]; then
+    KEYSERVER="${_arg#--keyserver=}"
+  fi
+  if [[ "$_arg" == "--yes" ]]; then
+    ASSUME_YES=true
+  fi
+  if [[ "$_arg" == "--clear-tmp" ]]; then
+    CLEAR_TMP=true
+  fi
+  if [[ "$_arg" == "--no-clear-tmp" ]]; then
+    CLEAR_TMP=false
+  fi
+  if [[ "$_arg" == "--clear-tmp-force" ]]; then
+    CLEAR_TMP_FORCE=true
+  fi
+  if [[ "$_arg" == "--snap-clean-old" ]]; then
+    SNAP_CLEAN_OLD=true
+  fi
+  if [[ "$_arg" == "--snap-clear-cache" ]]; then
+    SNAP_CLEAR_CACHE=true
+  fi
+  if [[ "$_arg" == "--no-snap-clean-old" ]]; then
+    SNAP_CLEAN_OLD=false
+  fi
+  if [[ "$_arg" == "--no-snap-clear-cache" ]]; then
+    SNAP_CLEAR_CACHE=false
+  fi
+  if [[ "$_arg" == "--confirm-clear-tmp-force" ]]; then
+    CLEAR_TMP_FORCE_CONFIRMED=true
+  fi
+  if [[ "$_arg" =~ ^--clear-tmp-age= ]]; then
+    CLEAR_TMP_AGE_DAYS="${_arg#--clear-tmp-age=}"
+  fi
+  if [[ "$_arg" =~ ^--progress= ]]; then
+    PROGRESS_MODE="${_arg#--progress=}"
+  fi
+  if [[ "$_arg" =~ ^--progress-duration= ]]; then
+    PROGRESS_DURATION="${_arg#--progress-duration=}"
+  fi
+  if [[ "$_arg" =~ ^--lock-wait-seconds= ]]; then
+    LOCK_WAIT_SECONDS="${_arg#--lock-wait-seconds=}"
+  fi
+  if [[ "$_arg" == "--clear-dns-cache" ]]; then
+    CLEAR_DNS_CACHE=true
+  fi
+  if [[ "$_arg" == "--no-clear-dns-cache" ]]; then
+    CLEAR_DNS_CACHE=false
+  fi
+  if [[ "$_arg" == "--no-flatpak" ]]; then
+    NO_FLATPAK=true
+  fi
+  if [[ "$_arg" == "--no-firmware" ]]; then
+    NO_FIRMWARE=true
+  fi
+  if [[ "$_arg" == "--no-journal-vacuum" ]]; then
+    CLEAR_JOURNAL=false
+  fi
+  if [[ "$_arg" == "--flatpak-user-only" ]]; then
+    FLATPAK_SCOPE="user"
+  fi
+  if [[ "$_arg" == "--flatpak-system-only" ]]; then
+    FLATPAK_SCOPE="system"
+  fi
+  if [[ "$_arg" == "--no-check-failed-services" ]]; then
+    CHECK_FAILED_SERVICES=false
+  fi
+  if [[ "$_arg" == "--clear-crash" ]]; then
+    CLEAR_CRASH_DUMPS=true
+  fi
+  if [[ "$_arg" == "--no-clear-crash" ]]; then
+    CLEAR_CRASH_DUMPS=false
+  fi
+  if [[ "$_arg" == "--fstrim" ]]; then
+    FSTRIM_ENABLED=true
+  fi
+  if [[ "$_arg" == "--no-fstrim" ]]; then
+    FSTRIM_ENABLED=false
+  fi
+  if [[ "$_arg" == "--drop-caches" ]]; then
+    DROP_CACHES_ENABLED=true
+  fi
+  if [[ "$_arg" == "--no-drop-caches" ]]; then
+    DROP_CACHES_ENABLED=false
+  fi
+  if [[ "$_arg" == "--purge-kernels" ]]; then
+    PURGE_OLD_KERNELS=true
+  fi
+  if [[ "$_arg" == "--no-purge-kernels" ]]; then
+    PURGE_OLD_KERNELS=false
+  fi
+  if [[ "$_arg" =~ ^--keep-kernels= ]]; then
+    KEEP_KERNELS="${_arg#--keep-kernels=}"
+  fi
+  if [[ "$_arg" == "--update-grub" ]]; then
+    UPDATE_GRUB_ENABLED=true
+  fi
+  if [[ "$_arg" == "--orphan-purge" ]]; then
+    ORPHAN_PURGE_ENABLED=true
+  fi
+  if [[ "$_arg" == "--no-orphan-purge" ]]; then
+    ORPHAN_PURGE_ENABLED=false
+  fi
+  if [[ "$_arg" == "--force-unlock" ]]; then
+    FORCE_UNLOCK=true
+  fi
+  if [[ "$_arg" == "--auto" ]]; then
+    AUTO_MODE=true
+    ASSUME_YES=true
+    AUTO_REBOOT=true
+  fi
+  if [[ "$_arg" =~ ^--color= ]]; then
+    COLOR_MODE="${_arg#--color=}"
+  fi
+  if [[ "$_arg" =~ ^--log-max-size-mb= ]]; then
+    LOG_MAX_SIZE_MB="${_arg#--log-max-size-mb=}"
+  fi
+  if [[ "$_arg" =~ ^--log-tail-keep-kb= ]]; then
+    LOG_TAIL_PRESERVE_KB="${_arg#--log-tail-keep-kb=}"
+  fi
+  if [[ "$_arg" == "--check-zombies" ]]; then
+    CHECK_ZOMBIES=true
+  fi
+  if [[ "$_arg" == "--no-check-zombies" ]]; then
+    CHECK_ZOMBIES=false
+  fi
+  if [[ "$_arg" == "--security-audit" ]]; then
+    SECURITY_AUDIT_ENABLED=true
+  fi
+  if [[ "$_arg" == "--browser-cache-report" ]]; then
+    BROWSER_CACHE_REPORT=true
+  fi
+  if [[ "$_arg" == "--browser-cache-purge" ]]; then
+    BROWSER_CACHE_PURGE=true
+  fi
+  if [[ "$_arg" =~ ^--auto-reboot-delay= ]]; then
+    AUTO_REBOOT_DELAY="${_arg#--auto-reboot-delay=}"
+  fi
+  if [[ "$_arg" == "--no-desktop-guard" ]]; then
+    DESKTOP_GUARD_ENABLED=false
+  fi
+  if [[ "$_arg" =~ ^--mode= ]]; then
+    MODE_OVERRIDE="${_arg#--mode=}"
+  fi
+  if [[ "$_arg" =~ ^--journal-days= ]]; then
+    JOURNAL_VACUUM_TIME="${_arg#--journal-days=}d"
+  fi
+done
+
+# Force unlock flag - removes stale locks
+FORCE_UNLOCK="${FORCE_UNLOCK:-false}"
+
+show_progress() {
+  # args: duration mode message
+  local duration=${1:-$PROGRESS_DURATION}
+  local mode=${2:-$PROGRESS_MODE}
+  local msg=${3:-}
+
+  # Only show if stdout is a TTY and mode is not 'none'
+  if [[ "$mode" == "none" || ! -t 1 ]]; then
+    return 0
+  fi
+
+  if [[ -n "$msg" ]]; then
+    printf '%s ' "$msg" >&2
+  fi
+
+  case "$mode" in
+  dots)
+    for ((i=0; i<duration; i++)); do
+      printf '.' >&2
+      sleep 1
+    done
+    printf '\n' >&2
+    ;;
+  countdown)
+    for ((i=duration; i>0; i--)); do
+      printf '%d.. ' "$i" >&2
+      sleep 1
+    done
+    printf '\n' >&2
+    ;;
+  bar)
+    # Simple textual progress bar: fills over the specified duration in 20 steps
+    local steps=20
+    local step_duration
+    if (( duration < steps )); then
+      steps=$duration
+    fi
+    if (( steps > 0 )); then
+      step_duration=$(awk -v d="$duration" -v s="$steps" 'BEGIN {printf "%.3f", d/s}')
+    else
+      step_duration=0
+    fi
+    local i filled pct
+    printf '\n' >&2
+    for ((i=1; i<=steps; i++)); do
+      filled=$(( (i * 100) / steps ))
+      pct=$filled
+      # Build bar string
+      local bar_fill=$(( (i * 20) / steps ))
+      local bar
+      bar=$(printf '%*s' 20 '' | tr ' ' '#')
+      local filled_part=${bar:0:bar_fill}
+      local empty_part
+      empty_part=$(printf '%*s' $((20-bar_fill)) '' | tr ' ' ' ')
+      printf '\r[%s%s] %3d%% %s' "$filled_part" "$empty_part" "$pct" "$msg" >&2
+      sleep "$step_duration"
+    done
+    printf '\r[%s] 100%% %s\n' "####################" "$msg" >&2
+    ;;
+  spinner)
+    # Animated spinner for the specified duration (seconds)
+    local frames='|/-\\'
+    local end_time=$(( $(date +%s) + duration ))
+    local idx=0 ch now
+    printf '\n' >&2
+    while true; do
+      now=$(date +%s)
+      if (( now >= end_time )); then
+        break
+      fi
+      ch=${frames:idx:1}
+      printf '\r[%c] %s' "$ch" "$msg" >&2
+      sleep 0.1
+      ((idx=(idx+1)%${#frames}))
+    done
+    printf '\r[✔] %s\n' "$msg" >&2
+    ;;
+  adaptive)
+    # No-op here: the adaptive multi-line panel is managed separately as a long-lived background task.
+    ;;
+  *)
+    # unknown mode: no-op
+    ;;
+  esac
+}
+
+# ===== Adaptive multi-line progress panel (ETA) =====
+# This panel renders overall and per-phase progress, with ETA, using historical
+# exponentially-smoothed averages persisted between runs.
+
+# State directory for persisted timing data
+STATE_DIR="${STATE_DIR:-}"
+
+# Progress prediction tuning
+PROGRESS_REFRESH="${PROGRESS_REFRESH:-0.25}"   # seconds between screen updates
+PROGRESS_ALPHA="${PROGRESS_ALPHA:-0.5}"        # EMA smoothing factor [0,1]
+PROGRESS_WIDTH="${PROGRESS_WIDTH:-30}"          # overall bar width
+PROGRESS_PHASE_WIDTH="${PROGRESS_PHASE_WIDTH:-20}" # current phase bar width
+
+# Internal state for panel
+declare -A PHASE_EST_EMA            # seconds (float) per phase
+declare -a PHASE_ORDER
+STATUS_PANEL_PID=""
+STATUS_PANEL_ACTIVE=false
+CURRENT_PHASE=""
+CURRENT_PHASE_START_TS=0
+
+# ---- Host profiling & scaling (defaults) ----
+CPU_SCALE=1.0
+RAM_SCALE=1.0
+NETWORK_SCALE=1.0
+
+# ---- Snap cleanup controls (defaults) ----
+SNAP_CLEAN_OLD="${SNAP_CLEAN_OLD:-false}"
+SNAP_CLEAR_CACHE="${SNAP_CLEAR_CACHE:-false}"
+SNAP_OLD_REMOVED_COUNT=0
+SNAP_CACHE_CLEARED_BYTES=0
+
+# ---- Crash dumps and fstrim controls (defaults) ----
+CLEAR_CRASH_DUMPS="${CLEAR_CRASH_DUMPS:-true}"
+FSTRIM_ENABLED="${FSTRIM_ENABLED:-false}"
+CRASH_FREED_BYTES=0
+FSTRIM_TOTAL_TRIMMED=0
+declare -a TRIMMED_FILESYSTEMS
+DROP_CACHES_ENABLED="${DROP_CACHES_ENABLED:-false}"
+DROP_CACHES_SWAP_RECYCLE="${DROP_CACHES_SWAP_RECYCLE:-false}"
+MEM_BEFORE_KB=0
+MEM_AFTER_KB=0
+SWAP_BEFORE_KB=0
+SWAP_AFTER_KB=0
+OS_DESCRIPTION="${OS_DESCRIPTION:-Unknown}"
+UPTIME_SECONDS="${UPTIME_SECONDS:-0}"
+PACKAGE_COUNT="${PACKAGE_COUNT:-0}"
+MEM_TOTAL_KB="${MEM_TOTAL_KB:-0}"
+MEM_AVAILABLE_KB_START="${MEM_AVAILABLE_KB_START:-0}"
+SWAP_TOTAL_KB="${SWAP_TOTAL_KB:-0}"
+DISK_ROOT_TOTAL_KB="${DISK_ROOT_TOTAL_KB:-0}"
+
+# ---- Kernel/orphan purge controls (defaults) ----
+PURGE_OLD_KERNELS="${PURGE_OLD_KERNELS:-false}"
+KEEP_KERNELS="${KEEP_KERNELS:-2}"
+KERNELS_REMOVED_COUNT=0
+ORPHAN_PURGE_ENABLED="${ORPHAN_PURGE_ENABLED:-false}"
+ORPHAN_PURGED_COUNT=0
+declare -a ORPHAN_PURGED_PACKAGES
+UPGRADE_PHASE_ENABLED="${UPGRADE_PHASE_ENABLED:-false}"  # gate for upgrade_finalize phase
+UPGRADE_CHANGED_COUNT=0
+UPGRADE_REMOVED_COUNT=0
+
+# ---- Capability & mode detection (defaults) ----
+DESKTOP_GUARD_ENABLED="${DESKTOP_GUARD_ENABLED:-true}"
+MODE_OVERRIDE="${MODE_OVERRIDE:-}"          # desktop|server|""
+DESKTOP_MODE="unknown"                        # resolved mode after detection
+declare -a CAPABILITIES_AVAILABLE
+declare -a CAPABILITIES_UNAVAILABLE
+declare -a SKIPPED_CAPABILITIES
+
+# Helper to record a phase skipped due to missing capability (deduplicated)
+_skip_cap() {
+  local phase="$1" cap="$2" entry
+  entry="${phase}:${cap}"
+  local e
+  for e in "${SKIPPED_CAPABILITIES[@]}"; do
+    [[ "$e" == "$entry" ]] && return 0
+  done
+  SKIPPED_CAPABILITIES+=("$entry")
+}
+
+# Known phase order with dependency metadata (DAG)
+# Each phase: name:dep1,dep2,... (empty if no deps)
+# Phases can execute in parallel if dependencies satisfied
+declare -A PHASE_DEPS
+PHASE_DEPS["clean_tmp"]=""
+PHASE_DEPS["fix_broken"]=""
+PHASE_DEPS["validate_repos"]=""
+PHASE_DEPS["detect_missing_pubkeys"]="validate_repos"
+PHASE_DEPS["fix_missing_pubkeys"]="detect_missing_pubkeys"
+PHASE_DEPS["kernel_status"]=""
+PHASE_DEPS["apt_maintenance"]="fix_broken,validate_repos"
+PHASE_DEPS["snap_maintenance"]="apt_maintenance"
+PHASE_DEPS["flatpak_maintenance"]="apt_maintenance"
+PHASE_DEPS["firmware_maintenance"]=""
+PHASE_DEPS["dns_maintenance"]=""
+PHASE_DEPS["journal_maintenance"]=""
+PHASE_DEPS["thumbnail_maintenance"]=""
+PHASE_DEPS["browser_cache_phase"]=""
+PHASE_DEPS["check_failed_services"]=""
+PHASE_DEPS["snap_cleanup_old"]="snap_maintenance"
+PHASE_DEPS["snap_clear_cache"]=""
+PHASE_DEPS["crash_dump_purge"]=""
+PHASE_DEPS["fstrim_phase"]=""
+PHASE_DEPS["drop_caches_phase"]=""
+PHASE_DEPS["kernel_purge_phase"]="apt_maintenance"
+PHASE_DEPS["orphan_purge_phase"]="apt_maintenance"
+PHASE_DEPS["post_kernel_finalize"]="kernel_purge_phase"
+PHASE_DEPS["upgrade_finalize"]="apt_maintenance"
+
+PHASE_ORDER=(
+  clean_tmp
+  fix_broken
+  validate_repos
+  detect_missing_pubkeys
+  fix_missing_pubkeys
+  kernel_status
+  apt_maintenance
+  upgrade_finalize
+  kernel_purge_phase
+  post_kernel_finalize
+  orphan_purge_phase
+  snap_maintenance
+  snap_cleanup_old
+  snap_clear_cache
+  flatpak_maintenance
+  firmware_maintenance
+  dns_maintenance
+  journal_maintenance
+  thumbnail_maintenance
+  browser_cache_phase
+  crash_dump_purge
+  fstrim_phase
+  drop_caches_phase
+  check_failed_services
+)
+
+_is_root_user() {
+  [[ $EUID -eq 0 ]]
+}
+
+_init_state_dir() {
+  if [[ -n "$STATE_DIR" ]]; then
+    :
+  elif _is_root_user; then
+    STATE_DIR="/var/lib/sysmaint"
+  else
+    STATE_DIR="$HOME/.local/state/sysmaint"
+  fi
+  mkdir -p "$STATE_DIR" 2>/dev/null || true
+}
+
+_state_file() {
+  _init_state_dir
+  printf '%s' "$STATE_DIR/timings.json"
+}
+
+load_phase_estimates() {
+  # Load persisted EMA timings if present
+  local sf
+  sf=$(_state_file)
+  if [[ -f "$sf" ]]; then
+    # Expect a simple JSON object: {"phase": seconds, ...}
+    # Use awk/sed to parse conservatively to avoid external deps like jq
+    while IFS= read -r line; do
+      # match "key": value
+      if [[ "$line" =~ \"([a-zA-Z0-9_]+)\"[[:space:]]*:[[:space:]]*([0-9]+(\.[0-9]+)?) ]]; then
+        PHASE_EST_EMA["${BASH_REMATCH[1]}"]="${BASH_REMATCH[2]}"
+      fi
+    done <"$sf" || true
+  fi
+}
+
+save_phase_estimates() {
+  # Persist EMA timings to JSON
+  local sf
+  sf=$(_state_file)
+  local k first=true
+  {
+    printf '{\n'
+    for k in "${!PHASE_EST_EMA[@]}"; do
+      if [[ "$first" == true ]]; then first=false; else printf ',\n'; fi
+      printf '  "%s": %s' "$k" "${PHASE_EST_EMA[$k]}"
+    done
+    printf '\n}\n'
+  } >"$sf" 2>/dev/null || true
+}
+
+_fmt_hms() {
+  # formats seconds -> H:MM:SS or M:SS
+  local s=$1
+  if (( s < 0 )); then s=0; fi
+  local h=$((s/3600)) m=$(((s%3600)/60)) sec=$((s%60))
+  if (( h > 0 )); then
+    printf '%d:%02d:%02d' "$h" "$m" "$sec"
+  else
+    printf '%d:%02d' "$m" "$sec"
+  fi
+}
+
+_float_max() { awk -v a="$1" -v b="$2" 'BEGIN{printf "%.3f", (a>b)?a:b}'; }
+_float_min() { awk -v a="$1" -v b="$2" 'BEGIN{printf "%.3f", (a<b)?a:b}'; }
+
+_ema_update() {
+  # args: key observed_seconds
+  local k="$1" obs="$2"
+  local prev="${PHASE_EST_EMA[$k]:-}"
+  if [[ -z "$prev" ]]; then
+    PHASE_EST_EMA[$k]="$obs"
+  else
+    # ema = alpha*obs + (1-alpha)*prev
+    local alpha="$PROGRESS_ALPHA"
+    local ema
+    ema=$(awk -v a="$alpha" -v o="$obs" -v p="$prev" 'BEGIN{printf "%.3f", a*o + (1-a)*p}')
+    PHASE_EST_EMA[$k]="$ema"
+  fi
+}
+
+_phase_included() {
+  local p="$1"
+  case "$p" in
+    snap_maintenance)
+      [[ "${NO_SNAP:-false}" != "true" ]]
+      ;;
+    upgrade_finalize)
+      [[ "${UPGRADE_PHASE_ENABLED:-false}" == "true" ]]
+      ;;
+    kernel_purge_phase)
+      [[ "${PURGE_OLD_KERNELS:-false}" == "true" ]]
+      ;;
+    post_kernel_finalize)
+      # Only meaningful if kernels were purged in this run
+      [[ "${PURGE_OLD_KERNELS:-false}" == "true" ]]
+      ;;
+    orphan_purge_phase)
+      [[ "${ORPHAN_PURGE_ENABLED:-false}" == "true" ]]
+      ;;
+    snap_cleanup_old)
+      [[ "${NO_SNAP:-false}" != "true" && "${SNAP_CLEAN_OLD:-false}" == "true" ]]
+      ;;
+    snap_clear_cache)
+      [[ "${NO_SNAP:-false}" != "true" && "${SNAP_CLEAR_CACHE:-false}" == "true" ]]
+      ;;
+    flatpak_maintenance)
+      [[ "${NO_FLATPAK:-false}" != "true" ]]
+      ;;
+    firmware_maintenance)
+      [[ "${NO_FIRMWARE:-false}" != "true" ]]
+      ;;
+    fix_missing_pubkeys)
+      [[ "${FIX_MISSING_KEYS:-false}" == "true" ]]
+      ;;
+    crash_dump_purge)
+      [[ "${CLEAR_CRASH_DUMPS:-true}" == "true" ]]
+      ;;
+    fstrim_phase)
+      [[ "${FSTRIM_ENABLED:-false}" == "true" ]]
+      ;;
+    drop_caches_phase)
+      [[ "${DROP_CACHES_ENABLED:-false}" == "true" ]]
+      ;;
+    browser_cache_phase)
+      [[ "${BROWSER_CACHE_REPORT:-false}" == "true" || "${BROWSER_CACHE_PURGE:-false}" == "true" ]]
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+_compute_included_phases() {
+  INCLUDED_PHASES=()
+  local p
+  for p in "${PHASE_ORDER[@]}"; do
+    if _phase_included "$p"; then
+      INCLUDED_PHASES+=("$p")
+    fi
+  done
+}
+
+_est_for_phase() {
+  local p="$1"
+  if [[ -z "$p" ]]; then
+    printf '%.3f' "5.000"
+    return 0
+  fi
+  local est="${PHASE_EST_EMA[$p]:-}"
+  if [[ -z "$est" ]]; then
+    # conservative defaults by phase if unknown
+    case "$p" in
+      clean_tmp) est=2 ;;
+      fix_broken) est=3 ;;
+      validate_repos) est=4 ;;
+      detect_missing_pubkeys) est=2 ;;
+      fix_missing_pubkeys) est=8 ;;
+      kernel_status) est=2 ;;
+      apt_maintenance) est=120 ;;
+  kernel_purge_phase) est=18 ;;
+  post_kernel_finalize) est=12 ;;
+  orphan_purge_phase) est=15 ;;
+      snap_maintenance) est=45 ;;
+      snap_cleanup_old) est=20 ;;
+      snap_clear_cache) est=8 ;;
+  crash_dump_purge) est=10 ;;
+  fstrim_phase) est=12 ;;
+  drop_caches_phase) est=5 ;;
+      flatpak_maintenance) est=40 ;;
+      firmware_maintenance) est=25 ;;
+      dns_maintenance) est=4 ;;
+      journal_maintenance) est=6 ;;
+      thumbnail_maintenance) est=5 ;;
+      check_failed_services) est=3 ;;
+      *) est=5 ;;
+    esac
+  fi
+  # Apply host scaling: CPU for compute-heavy, NETWORK for repo/pubkey, RAM for large caches
+  local scale=1.0
+  case "$p" in
+    validate_repos|detect_missing_pubkeys|apt_maintenance|snap_maintenance|flatpak_maintenance)
+      scale=$(awk -v c="$CPU_SCALE" -v n="$NETWORK_SCALE" 'BEGIN{printf "%.3f", c*n}')
+      ;;
+    journal_maintenance|thumbnail_maintenance|clean_tmp)
+      scale="$RAM_SCALE"
+      ;;
+    firmware_maintenance|kernel_status)
+      scale="$CPU_SCALE"
+      ;;
+    dns_maintenance)
+      scale="$NETWORK_SCALE"
+      ;;
+    check_failed_services)
+      scale="$CPU_SCALE"
+      ;;
+    *) scale=1.0 ;;
+  esac
+  est=$(awk -v e="$est" -v s="$scale" 'BEGIN{printf "%.3f", e*s}')
+  printf '%.3f' "$est"
+}
+
+_sum_est_total() {
+  local total=0 p est
+  for p in "${INCLUDED_PHASES[@]}"; do
+    est=$(_est_for_phase "$p")
+    total=$(awk -v t="$total" -v e="$est" 'BEGIN{printf "%.3f", t+e}')
+  done
+  printf '%.3f' "$total"
+}
+
+_sum_elapsed_so_far() {
+  local total=0 p key
+  for p in "${INCLUDED_PHASES[@]}"; do
+    key="${p}_duration"
+    if [[ -n "${PHASE_TIMINGS[$key]:-}" ]]; then
+      total=$(awk -v t="$total" -v d="${PHASE_TIMINGS[$key]}" 'BEGIN{printf "%.3f", t+d}')
+    else
+      # Not yet completed -> stop summing here
+      break
+    fi
+  done
+  printf '%.3f' "$total"
+}
+
+# Collect host profile (CPU cores, total RAM MB, network RTT ms to archive.ubuntu.com)
+_collect_host_profile() {
+  local cores ram_kb ram_mb rtt host_json rtt_ms ts profile_file
+  cores=$(getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || echo 1)
+  ram_kb=$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)
+  ram_mb=$((ram_kb/1024))
+  # Simple RTT measurement (first successful ping) fallback to 999 if unavailable
+  if command -v ping >/dev/null 2>&1; then
+    rtt=$(ping -c1 -w2 archive.ubuntu.com 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
+  fi
+  rtt_ms=${rtt:-999.0}
+  ts=$(date --iso-8601=seconds)
+  host_json=$(cat <<EOF
+{
+  "timestamp": "${ts}",
+  "cpu_cores": ${cores},
+  "ram_mb": ${ram_mb},
+  "network_rtt_ms": ${rtt_ms}
+}
+EOF
+)
+  profile_file="$STATE_DIR/host_profile.json"
+  printf '%s
+' "$host_json" >"$profile_file" 2>/dev/null || true
+  # Derive scaling factors (heuristic):
+  # CPU: if cores >=8 -> 0.85, >=4 -> 0.9 else 1.0 (faster cores reduce estimate)
+  if (( cores >= 8 )); then CPU_SCALE=0.85; elif (( cores >= 4 )); then CPU_SCALE=0.90; else CPU_SCALE=1.00; fi
+  # RAM: if ram_mb < 2048 -> 1.10 (slower), <4096 -> 1.05 else 1.0
+  if (( ram_mb < 2048 )); then RAM_SCALE=1.10; elif (( ram_mb < 4096 )); then RAM_SCALE=1.05; else RAM_SCALE=1.00; fi
+  # Network: if rtt_ms > 200 -> 1.20, >100 ->1.10, >50 ->1.05 else 1.0
+  rtt_int=$(printf '%.0f' "$rtt_ms" 2>/dev/null || echo 999)
+  if (( rtt_int > 200 )); then NETWORK_SCALE=1.20; elif (( rtt_int > 100 )); then NETWORK_SCALE=1.10; elif (( rtt_int > 50 )); then NETWORK_SCALE=1.05; else NETWORK_SCALE=1.00; fi
+}
+
+
+_progress_snapshot() {
+  # outputs: overall_pct overall_elapsed overall_eta phase_pct phase_elapsed phase_est next1 next2
+  local total_est elapsed_completed phase_est phase_elapsed overall_elapsed overall_pct remaining eta_sec phase_pct next1 next2
+  total_est=$(_sum_est_total)
+  elapsed_completed=$(_sum_elapsed_so_far)
+
+  phase_est=$(_est_for_phase "$CURRENT_PHASE")
+  if (( CURRENT_PHASE_START_TS > 0 )); then
+    phase_elapsed=$(( $(date +%s) - CURRENT_PHASE_START_TS ))
+  else
+    phase_elapsed=0
+  fi
+  # Clamp per-phase progress to < 100% until phase ends
+  phase_pct=$(awk -v e="$phase_elapsed" -v est="$phase_est" 'BEGIN{pct=(est>0? (100*e/est) : 0); if(pct>99) pct=99; if(pct<0) pct=0; printf "%d", pct}')
+
+  overall_elapsed=$(awk -v c="$elapsed_completed" -v pe="$phase_elapsed" 'BEGIN{printf "%.3f", c+pe}')
+  remaining=$(awk -v t="$total_est" -v e="$overall_elapsed" 'BEGIN{r=t-e; if(r<0) r=0; printf "%.3f", r}')
+  eta_sec=$(printf '%.0f' "$remaining")
+  if (( $(printf '%.0f' "$total_est") > 0 )); then
+    overall_pct=$(awk -v e="$overall_elapsed" -v t="$total_est" 'BEGIN{pct=(t>0? (100*e/t) : 0); if(pct>100)pct=100; if(pct<0)pct=0; printf "%d", pct}')
+  else
+    overall_pct=0
+  fi
+
+  # Compute next phases labels
+  next1=""; next2=""
+  local i
+  for ((i=0; i<${#INCLUDED_PHASES[@]}; i++)); do
+    if [[ "${INCLUDED_PHASES[$i]}" == "$CURRENT_PHASE" ]]; then
+      if (( i+1 < ${#INCLUDED_PHASES[@]} )); then
+        next1="${INCLUDED_PHASES[$i+1]}"
+      fi
+      if (( i+2 < ${#INCLUDED_PHASES[@]} )); then
+        next2="${INCLUDED_PHASES[$i+2]}"
+      fi
+      break
+    fi
+  done
+  printf '%d %d %d %d %d %s %s' "$overall_pct" "$(printf '%.0f' "$overall_elapsed")" "$eta_sec" "$phase_pct" "$phase_elapsed" "$next1" "$next2"
+}
+
+_render_bar() {
+  # args: pct width
+  local pct=$1 width=$2 filled empty
+  if (( width <= 0 )); then width=20; fi
+  if (( pct < 0 )); then pct=0; fi
+  if (( pct > 100 )); then pct=100; fi
+  filled=$(( (pct*width)/100 ))
+  empty=$(( width - filled ))
+  printf '['
+  printf '%*s' "$filled" '' | tr ' ' '#'
+  printf '%*s' "$empty" '' | tr ' ' ' '
+  printf '] %3d%%' "$pct"
+}
+
+start_status_panel() {
+  # Only on TTY and when mode=adaptive
+  if [[ "$PROGRESS_MODE" != "adaptive" || ! -t 1 ]]; then
+    return 0
+  fi
+
+  load_phase_estimates
+  _compute_included_phases
+  STATUS_PANEL_ACTIVE=true
+
+  # Background refresher
+  (
+    printf '\n\n\n' >&2 # reserve 3 lines
+    while $STATUS_PANEL_ACTIVE; do
+      read -r opct osec eta ppct psec n1 n2 < <(_progress_snapshot)
+      # Move cursor up 3 lines, carriage return
+  printf '\033[3F\r' >&2
+  # Line 1: overall
+  printf ' Overall ' >&2; _render_bar "$opct" "$PROGRESS_WIDTH" >&2; printf '  Elapsed: %s  ETA: %s          \n' "$(_fmt_hms "$osec")" "$(_fmt_hms "$eta")" >&2
+  # Line 2: phase
+      local pdisp="$CURRENT_PHASE"; [[ -z "$pdisp" ]] && pdisp="starting"
+  printf ' Phase   ' >&2; _render_bar "$ppct" "$PROGRESS_PHASE_WIDTH" >&2; printf '  %-22s %s/%s          \n' "$pdisp" "$(_fmt_hms "$psec")" "$(_fmt_hms "$(printf '%.0f' "$(_est_for_phase "$CURRENT_PHASE")")")" >&2
+      # Line 3: next
+      local nextline="Next: $n1"; [[ -n "$n2" ]] && nextline+=", $n2"
+      printf ' %s\033[K\n' "$nextline" >&2
+      sleep "$PROGRESS_REFRESH"
+    done
+    # Clean up panel area when done
+    printf '\033[3F\r\033[J' >&2
+  ) &
+  STATUS_PANEL_PID=$!
+}
+
+update_status_panel_phase() {
+  # args: phase_name
+  local p="$1"
+  CURRENT_PHASE="$p"
+  CURRENT_PHASE_START_TS=$(date +%s)
+}
+
+stop_status_panel() {
+  if [[ -n "$STATUS_PANEL_PID" ]]; then
+    STATUS_PANEL_ACTIVE=false
+    # Give the loop a moment to exit gracefully
+    sleep "$PROGRESS_REFRESH"
+    kill "$STATUS_PANEL_PID" >/dev/null 2>&1 || true
+    wait "$STATUS_PANEL_PID" 2>/dev/null || true
+    STATUS_PANEL_PID=""
+  fi
+}
+
+# ===== DAG-based parallel execution =====
+# Compute execution groups (batches of phases that can run in parallel)
+# based on dependency metadata
+
+declare -A PHASE_COMPLETED
+declare -a EXECUTION_GROUPS
+
+_deps_satisfied() {
+  local phase="$1"
+  local deps="${PHASE_DEPS[$phase]}"
+  [[ -z "$deps" ]] && return 0
+  local dep
+  IFS=',' read -ra dep_arr <<< "$deps"
+  for dep in "${dep_arr[@]}"; do
+    [[ "${PHASE_COMPLETED[$dep]:-false}" != "true" ]] && return 1
+  done
+  return 0
+}
+
+_compute_execution_groups() {
+  # Build groups: each group = set of phases with satisfied deps that can run concurrently
+  EXECUTION_GROUPS=()
+  PHASE_COMPLETED=()
+  local remaining=()
+  local p
+  for p in "${INCLUDED_PHASES[@]}"; do
+    remaining+=("$p")
+  done
+  
+  while (( ${#remaining[@]} > 0 )); do
+    local ready=()
+    local still_waiting=()
+    for p in "${remaining[@]}"; do
+      if _deps_satisfied "$p"; then
+        ready+=("$p")
+      else
+        still_waiting+=("$p")
+      fi
+    done
+    
+    if (( ${#ready[@]} == 0 )); then
+      log "ERROR: Dependency cycle or unsatisfiable deps in: ${still_waiting[*]}"
+      break
+    fi
+    
+    # Add ready group
+    EXECUTION_GROUPS+=("${ready[*]}")
+    for p in "${ready[@]}"; do
+      PHASE_COMPLETED[$p]=true
+    done
+    remaining=("${still_waiting[@]}")
+  done
+}
+
+_run_phase_parallel() {
+  # Execute a single phase in a subshell for parallel execution
+  local phase="$1"
+  (
+      set +e  # Disable errexit in subshell to handle phase errors gracefully
+      trap - ERR  # Disable ERR trap in subshell
+    record_phase_start "$phase"
+    update_status_panel_phase "$phase"
+    case "$phase" in
+      clean_tmp) clean_tmp || true ;;
+      fix_broken) fix_broken_if_any ;;
+      validate_repos) validate_repos ;;
+      detect_missing_pubkeys) detect_missing_pubkeys ;;
+      fix_missing_pubkeys) fix_missing_pubkeys || true ;;
+      kernel_status) kernel_status ;;
+      apt_maintenance) apt_maintenance ;;
+  post_kernel_finalize) post_kernel_finalize ;;
+      snap_maintenance) snap_maintenance ;;
+      flatpak_maintenance) flatpak_maintenance ;;
+      firmware_maintenance) firmware_maintenance ;;
+      dns_maintenance) dns_maintenance ;;
+      journal_maintenance) journal_maintenance ;;
+      thumbnail_maintenance) thumbnail_maintenance ;;
+      check_failed_services) check_failed_services ;;
+      snap_cleanup_old) snap_cleanup_old ;;
+      snap_clear_cache) snap_clear_cache ;;
+        crash_dump_purge) crash_dump_purge ;;
+        fstrim_phase) fstrim_phase ;;
+      drop_caches_phase) drop_caches_phase ;;
+      kernel_purge_phase) kernel_purge_phase ;;
+      orphan_purge_phase) orphan_purge_phase ;;
+      *) log "Unknown phase: $phase" ;;
+    esac
+    record_phase_end "$phase"
+  )
+}
+
+execute_parallel() {
+  log "=== Parallel execution mode enabled ==="
+  _compute_included_phases
+    for p in "${!PHASE_COMPLETED[@]}"; do
+      unset "PHASE_COMPLETED[$p]"
+    done
+  _compute_execution_groups
+  
+  log "Execution plan: ${#EXECUTION_GROUPS[@]} groups"
+  local gidx=0
+  for group in "${EXECUTION_GROUPS[@]}"; do
+      gidx=$((gidx + 1))
+    log "Group $gidx: $group"
+    local pids=()
+    for phase in $group; do
+      _run_phase_parallel "$phase" &
+      pids+=($!)
+    done
+    # Wait for all phases in group to complete
+      if (( ${#pids[@]} > 0 )); then
+        for pid in "${pids[@]}"; do
+          wait "$pid" || log "WARNING: Phase in group $gidx failed (PID $pid)"
+        done
+      fi
+    log "Group $gidx completed"
+  done
+  log "=== Parallel execution complete ==="
+}
+
+# Temp-clean options: control automatic cleaning of temporary directory before run
+# By default we will clear files older than 1 day in /tmp. To force removal of all
+# files set CLEAR_TMP_FORCE=true (dangerous) or adjust CLEAR_TMP_AGE_DAYS=0.
+CLEAR_TMP="${CLEAR_TMP:-true}"
+CLEAR_TMP_DIR="${CLEAR_TMP_DIR:-/tmp}"
+CLEAR_TMP_AGE_DAYS="${CLEAR_TMP_AGE_DAYS:-1}"
+CLEAR_TMP_FORCE="${CLEAR_TMP_FORCE:-false}"
+CLEAR_TMP_FORCE_CONFIRMED="${CLEAR_TMP_FORCE_CONFIRMED:-false}"
+
+# Summary containers
+REPO_OK=()
+REPO_MISMATCH=()
+REPO_FAIL=()
+MISSING_PUBKEYS=()
+KERNEL_UPGRADE_LIST=()
+FAILED_SERVICES=()
+SUMMARY_REBOOT_REQUIRED=false
+APT_SIG_STATUS="unknown"
+
+# Timing and metrics
+declare -A PHASE_TIMINGS
+declare -A PHASE_DISK_DELTAS
+DISK_BEFORE=""
+DISK_AFTER=""
+DISK_SAVED_KB=0
+THUMBNAIL_FREED_BYTES=0
+FLATPAK_SCOPE_APPLIED="auto"
+
+# Helper: record phase timing and disk delta
+# Records the start timestamp and initial disk usage for a maintenance phase.
+# This data is used for performance telemetry and JSON summary generation.
+# Args:
+#   $1 - phase_name: Name of the phase being started
+# Globals:
+#   PHASE_TIMINGS: Associative array storing timing data
+record_phase_start() {
+  local phase_name="$1"
+  PHASE_TIMINGS["${phase_name}_start"]=$(date +%s)
+  # Capture disk usage at phase start
+  local disk_kb
+  disk_kb=$(df -P / | awk 'NR==2 {print $3}')
+  PHASE_TIMINGS["${phase_name}_disk_start"]=$disk_kb
+}
+
+# Records the end timestamp and computes phase duration and disk delta.
+# Updates the EMA (Exponentially Moving Average) timing database for adaptive progress.
+# Args:
+#   $1 - phase_name: Name of the phase being completed
+# Globals:
+#   PHASE_TIMINGS: Associative array storing timing data
+#   PHASE_DISK_DELTAS: Disk space changes per phase (KB)
+record_phase_end() {
+  local phase_name="$1"
+  local start_key="${phase_name}_start"
+  local end_ts duration
+  end_ts=$(date +%s)
+  PHASE_TIMINGS["${phase_name}_end"]=$end_ts
+  if [[ -n "${PHASE_TIMINGS[$start_key]:-}" ]]; then
+    duration=$((end_ts - PHASE_TIMINGS[$start_key]))
+    PHASE_TIMINGS["${phase_name}_duration"]=$duration
+    # Update EMA timing database for adaptive progress (ignore zero / extremely short sub-second durations)
+    if (( duration > 0 )); then
+      _ema_update "$phase_name" "$duration"
+      save_phase_estimates
+    fi
+  fi
+  # Capture disk usage at phase end and compute delta
+  local disk_start_key="${phase_name}_disk_start"
+  if [[ -n "${PHASE_TIMINGS[$disk_start_key]:-}" ]]; then
+    local disk_kb_end disk_delta
+    disk_kb_end=$(df -P / | awk 'NR==2 {print $3}')
+    disk_delta=$((PHASE_TIMINGS[$disk_start_key] - disk_kb_end))
+    PHASE_DISK_DELTAS["${phase_name}"]=$disk_delta
+  fi
+}
+
+require_root() {
+  # Defensive: if --dry-run is present in args, set DRY_RUN early so we
+  # never attempt elevation during preview runs (regardless of prior parsing).
+  for _ra in "$@"; do
+    if [[ "$_ra" == "--dry-run" ]]; then
+      DRY_RUN=true
+      break
+    fi
+  done
+
+  # Dry-runs and sandboxed fake-root sessions may proceed without elevation.
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    return 0
+  fi
+
+  if is_effective_root; then
+    if [[ "$FAKE_ROOT_ACTIVE" == "true" && "$FAKE_ROOT_NOTICE_SHOWN" != "true" ]]; then
+      log "SYSMAINT_FAKE_ROOT=1 detected: bypassing sudo for sandbox validation. Do not enable this mode on production systems."
+      FAKE_ROOT_NOTICE_SHOWN=true
+    fi
+    return 0
+  fi
+
+  # If not running as root and not in DRY_RUN, attempt to re-exec with sudo
+  # so users can simply run the script without typing sudo themselves.
+  if command -v sudo >/dev/null 2>&1; then
+    log "Attempting non-interactive sudo elevation..."
+    # Preserve a curated set of environment variables across sudo to avoid
+    # losing flags like DRY_RUN, CLEAR_TMP, ASSUME_YES, etc. We will only
+    # attempt non-interactive elevation; do NOT fall back to interactive
+    # sudo because that prompts the user, which we avoid.
+    preserve_env=(
+      DRY_RUN CLEAR_TMP CLEAR_TMP_FORCE CLEAR_TMP_AGE_DAYS ASSUME_YES
+      AUTO_REBOOT LOG_DIR LOCKFILE JSON_SUMMARY SIMULATE_UPGRADE FIX_MISSING_KEYS
+      NO_SNAP PROGRESS_MODE PROGRESS_DURATION LOCK_WAIT_SECONDS
+      WAIT_MAX_RETRIES WAIT_TIMEOUT_SECONDS STALE_LOCK_THRESHOLD ONLY_CHECK_LOCKS FORCE_STAT_LOCK_CHECK
+    )
+
+    env_prefix=(env)
+    for v in "${preserve_env[@]}"; do
+      if [[ -n "${!v:-}" ]]; then
+        val="${!v//\"/\\\"}"
+        env_prefix+=("$v=$val")
+      fi
+    done
+
+    # Attempt non-interactive sudo. If it fails, exit with a clear message
+    # rather than prompting for password to avoid interrupting the user.
+    if sudo -n true >/dev/null 2>&1; then
+      exec sudo -E "${env_prefix[@]}" bash "$0" "$@"
+    else
+      echo "ERROR: This script requires root privileges. Non-interactive sudo failed (password required)." >&2
+      echo "Run with 'sudo' interactively, or configure passwordless sudo for this user if you want unattended runs." >&2
+      exit 1
+    fi
+  else
+    echo "ERROR: run as root (use sudo)." >&2
+    exit 1
+  fi
+}
+
+# Health checks before starting maintenance
+health_checks() {
+  log "=== Pre-flight health checks ==="
+  
+  # Check disk space (root filesystem)
+  local available_gb
+  available_gb=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
+  if [[ "$available_gb" -lt 5 ]]; then
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      # In DRY_RUN, do not fail CI or preview runs due to space; just warn
+      log "DRY_RUN: Low disk space (${available_gb}GB < 5GB) — continuing"
+    else
+      log "ERROR: Insufficient disk space. Available: ${available_gb}GB, Required: 5GB minimum"
+      log "Free up disk space before running maintenance"
+      return 1
+    fi
+  else
+    log "Disk space check: ${available_gb}GB available (OK)"
+  fi
+  
+  # Check /boot space if it exists as separate partition
+  if df /boot >/dev/null 2>&1; then
+    local boot_avail_mb
+    boot_avail_mb=$(df -BM /boot | awk 'NR==2 {print $4}' | sed 's/M//')
+    if [[ "$boot_avail_mb" -lt 100 ]]; then
+      log "WARNING: Low /boot space. Available: ${boot_avail_mb}MB"
+      log "Consider cleaning old kernels: apt autoremove --purge"
+    else
+      log "/boot space check: ${boot_avail_mb}MB available (OK)"
+    fi
+  fi
+  
+  # Check internet connectivity (if not in dry-run)
+  if [[ "${DRY_RUN:-false}" != "true" ]]; then
+    if ! ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+      log "WARNING: No internet connectivity detected"
+      log "Network operations may fail"
+    else
+      log "Network connectivity check: OK"
+    fi
+  fi
+  
+  # Check system load
+  local load_avg
+  load_avg=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
+  local cpu_count
+  cpu_count=$(nproc)
+  local load_threshold=$((cpu_count * 2))
+  
+  if command -v bc >/dev/null 2>&1; then
+    local load_high
+    load_high=$(echo "$load_avg > $load_threshold" | bc)
+    if [[ "$load_high" == "1" ]]; then
+      log "WARNING: High system load: $load_avg (threshold: $load_threshold)"
+      log "Consider running maintenance during off-peak hours"
+    else
+      log "System load check: $load_avg (OK)"
+    fi
+  fi
+  
+  log "=== Health checks complete ==="
+  return 0
+}
+
+log() {
+  local plain
+  plain=$(printf '%s %s' "$(date '+%F %T')" "$*")
+  printf '%s\n' "$plain" >>"$LOG_FILE"
+
+  # Determine color usage based on COLOR_MODE (auto|always|never) and NO_COLOR
+  local use_color
+  case "${COLOR_MODE:-auto}" in
+    always) use_color=true ;;
+    never) use_color=false ;;
+    *) if [[ -t 1 && "${NO_COLOR:-}" != "true" ]]; then use_color=true; else use_color=false; fi ;;
+  esac
+  if [[ "$use_color" != "true" ]]; then
+    printf '%s\n' "$plain"
+    return 0
+  fi
+
+  local COLOR_RESET="\033[0m"
+  local COLOR_INFO="\033[1;34m"
+  local COLOR_OK="\033[1;32m"
+  local COLOR_WARN="\033[1;33m"
+  local COLOR_ERR="\033[1;31m"
+  local COLOR_CMD="\033[1;36m"
+  local COLOR_FINAL_RED="\033[1;31m"
+  local COLOR_FINAL_PURPLE="\033[1;35m"
+  local COLOR_FINAL_ORANGE="\033[1;38;5;214m"
+  local color="$COLOR_INFO"
+  case "$*" in
+    Logging*) color="$COLOR_FINAL_RED" ;;
+    Log\ directory:*) color="$COLOR_FINAL_PURPLE" ;;
+    Log\ file\ name:*) color="$COLOR_FINAL_ORANGE" ;;
+    ERROR* | *ERROR:*) color="$COLOR_ERR" ;;
+    +*) color="$COLOR_CMD" ;;
+    DRY_RUN:*) color="$COLOR_WARN" ;;
+    ===*) color="$COLOR_OK" ;;
+  esac
+  printf '%b\n' "${color}${plain}${COLOR_RESET}"
+}
+
+run() {
+  log "+ $*"
+  # In DRY_RUN mode, don't execute commands — just log them.
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: $*"
+    return 0
+  fi
+
+  # tee in a subshell to capture exit code correctly
+  set +e
+  output=$("$@" 2>&1)
+  rc=$?
+  set -e
+  printf '%s\n' "$output" | tee -a "$LOG_FILE"
+  return $rc
+}
+
+wait_for_pkg_managers() {
+  log "Validating no conflicting package operations are running..."
+  # Wait if apt/apt-get/dpkg/unattended-upgrade is active.
+  # We'll temporarily disable the ERR trap for this block and perform an
+  # explicit busy-check loop so that pgrep's non-zero exit does not trigger
+  # the global ERR handler (which would otherwise log a noisy ERROR line).
+  local start_ts now elapsed sleep_time remaining retries busy
+  # Allow commands that return non-zero during this check without exiting
+  # the script (disable errexit), and also suppress the ERR logging while
+  # we observe package-manager activity.
+  set +e
+  _SM_IGNORED_ERR=1
+
+  start_ts=$(date +%s)
+  retries=0
+  # Candidate lockfiles to inspect (distro-specific). Tests may override
+  # this list via the LOCK_FILES env var (comma-separated) so we can point
+  # the check at disposable files during unit tests without requiring root.
+  if [[ -n "${LOCK_FILES:-}" ]]; then
+    IFS=',' read -r -a lock_files <<<"$LOCK_FILES"
+  else
+    # Get lock files from abstraction layer
+    mapfile -t lock_files < <(pkg_get_lock_files)
+  fi
+
+  while :; do
+    busy=0
+
+    # 1) Optionally check for active package manager processes (distro-specific).
+    # Tests can set ONLY_CHECK_LOCKS=true to skip process scanning and exercise
+    # lockfile-only behavior without depending on the host's running processes.
+    if [[ "${ONLY_CHECK_LOCKS:-false}" != "true" ]]; then
+      # Refined process detection using exact binary names; exclude benign
+      # unattended-upgrade-shutdown which can be idle and harmless.
+      busy_pids=""
+      if command -v pgrep >/dev/null 2>&1; then
+        # Get lock processes from abstraction layer (distro-specific)
+        local lock_processes
+        IFS=' ' read -r -a lock_processes <<< "$(pkg_get_lock_processes)"
+        for _name in "${lock_processes[@]}"; do
+          this_pids=$(pgrep -x "$_name" 2>/dev/null || true)
+          if [[ -n "$this_pids" ]]; then
+            busy_pids+=" $this_pids"
+          fi
+        done
+      fi
+      if [[ -n "$busy_pids" ]]; then
+        filtered_pids=""
+        for pid in $busy_pids; do
+          cmd=$(ps -o comm= -p "$pid" 2>/dev/null || true)
+          if [[ "$cmd" == "unattended-upgrade-shutdown" || -z "$cmd" ]]; then
+            continue
+          fi
+          filtered_pids+=" $pid"
+        done
+        if [[ -n "$filtered_pids" ]]; then
+          busy=1
+          busy_procs=$(ps -o comm= -p "$filtered_pids" 2>/dev/null | tr '\n' ' ')
+          busy_reason="process (pids: ${filtered_pids:-unknown}, procs: ${busy_procs:-unknown})"
+        fi
+      fi
+    fi
+
+    # 2) Inspect well-known lockfiles. Prefer `fuser`/`lsof` to detect holders. If
+    #    those tools are unavailable, treat lockfiles as busy only when they are
+    #    recent (to avoid false positives from stale lock files).
+    for lf in "${lock_files[@]}"; do
+      if [[ -e "$lf" ]]; then
+        if [[ "${FORCE_STAT_LOCK_CHECK:-false}" == "true" ]]; then
+          # Tests can force the stat-based heuristic even when fuser/lsof are present
+          # to simulate lockfile ages without relying on process holders.
+          if stat_out=$(stat -c %Y "$lf" 2>/dev/null); then
+            now_ts=$(date +%s)
+            age=$((now_ts - stat_out))
+            if ((age < STALE_LOCK_THRESHOLD)); then
+              busy=1
+              busy_reason="recent-lockfile:$lf (age ${age}s)"
+              break
+            fi
+          fi
+        elif command -v fuser >/dev/null 2>&1; then
+          if fuser "$lf" >/dev/null 2>&1; then
+            busy=1
+            # capture the PIDs for logging (non-fatal)
+            lf_pids=$(fuser "$lf" 2>/dev/null | tr '\n' ' ')
+            busy_reason="lockfile:$lf (held by pids: ${lf_pids:-unknown})"
+            break
+          fi
+        elif command -v lsof >/dev/null 2>&1; then
+          if lsof "$lf" >/dev/null 2>&1; then
+            busy=1
+            lf_pids=$(lsof -t "$lf" 2>/dev/null | tr '\n' ' ')
+            busy_reason="lockfile:$lf (held by pids: ${lf_pids:-unknown})"
+            break
+          fi
+        else
+          # Heuristic: consider the lockfile busy only if it was modified recently
+          # (e.g., in the last 10 minutes) to avoid false positives from stale files.
+          if stat_out=$(stat -c %Y "$lf" 2>/dev/null); then
+            now_ts=$(date +%s)
+            age=$((now_ts - stat_out))
+            if ((age < 600)); then
+              busy=1
+              busy_reason="recent-lockfile:$lf (age ${age}s)"
+              break
+            fi
+          else
+            # If stat fails for some reason, conservatively treat as busy
+            busy=1
+            busy_reason="lockfile:$lf (exists, unknown owner)"
+            break
+          fi
+        fi
+      fi
+    done
+
+    if [[ $busy -eq 0 ]]; then
+      break
+    fi
+
+    ((retries++))
+    now=$(date +%s)
+    elapsed=$((now - start_ts))
+
+    # Respect a maximum retry count if provided
+    if ((WAIT_MAX_RETRIES > 0 && retries >= WAIT_MAX_RETRIES)); then
+      log "Max retries (${WAIT_MAX_RETRIES}) reached waiting for package managers; proceeding cautiously. Last reason: ${busy_reason:-unknown}"
+      break
+    fi
+
+    # Also guard by an absolute timeout
+    if ((elapsed >= WAIT_TIMEOUT_SECONDS)); then
+      log "Timeout waiting for package managers after ${elapsed}s; proceeding cautiously. Last reason: ${busy_reason:-unknown}"
+      break
+    fi
+
+    remaining=$((WAIT_TIMEOUT_SECONDS - elapsed))
+    # sleep no longer than WAIT_INTERVAL and not more than remaining time
+    if ((remaining < WAIT_INTERVAL)); then
+      sleep_time=$remaining
+    else
+      sleep_time=$WAIT_INTERVAL
+    fi
+    log "Package manager busy; rechecking in ${sleep_time}s... (elapsed ${elapsed}s, retry ${retries})"
+    sleep "${sleep_time}"
+  done
+
+  # Re-enable ERR logging and restore errexit
+  unset _SM_IGNORED_ERR || true
+  set -e
+}
+
+retry_with_backoff() {
+  # Execute a command with exponential backoff retry logic for network failures.
+  # Usage: retry_with_backoff <description> <command...>
+  # Example: retry_with_backoff "apt update" apt-get update -o Acquire::Retries=3
+  
+  local description="$1"
+  shift
+  local cmd=("$@")
+  local attempt=1
+  local max_attempts="${NETWORK_RETRY_COUNT:-3}"
+  local base_delay="${NETWORK_RETRY_BASE_DELAY:-2}"
+  local max_delay="${NETWORK_RETRY_MAX_DELAY:-30}"
+  local delay
+  local exit_code
+  
+  while [[ $attempt -le $max_attempts ]]; do
+    log "Attempting $description (attempt $attempt/$max_attempts)"
+    
+    # Try to execute the command, capture exit code
+    set +e
+    "${cmd[@]}"
+    exit_code=$?
+    set -e
+    
+    # If successful, return
+    if [[ $exit_code -eq 0 ]]; then
+      log "$description succeeded on attempt $attempt"
+      return 0
+    fi
+    
+    # If this was the last attempt, fail
+    if [[ $attempt -ge $max_attempts ]]; then
+      log "ERROR: $description failed after $max_attempts attempts (exit code: $exit_code)"
+      return $exit_code
+    fi
+    
+    # Calculate exponential backoff delay: base_delay * 2^(attempt-1)
+    # Cap at max_delay to prevent excessive waits
+    delay=$((base_delay * (1 << (attempt - 1))))
+    if [[ $delay -gt $max_delay ]]; then
+      delay=$max_delay
+    fi
+    
+    log "WARNING: $description failed (exit code: $exit_code), retrying in ${delay}s..."
+    sleep "$delay"
+    
+    ((attempt++))
+  done
+  
+  return 1
+}
+
+clean_tmp() {
+  # Conservative, configurable cleanup of temporary directory before running.
+  # Defaults: remove files older than $CLEAR_TMP_AGE_DAYS in $CLEAR_TMP_DIR.
+  log "=== Temporary directory cleanup start ==="
+
+  # Safety checks
+  if [[ "${CLEAR_TMP:-false}" != "true" ]]; then
+    log "--clear-tmp disabled: skipping temporary directory cleanup."
+    return 0
+  fi
+
+  # Require explicit approval for destructive full-directory wipes.
+  # For extra safety, the user must both request force-clearing (CLEAR_TMP_FORCE)
+  # and explicitly confirm it (CLEAR_TMP_FORCE_CONFIRMED). In addition, the
+  # run must be non-interactive-approved (ASSUME_YES/--yes). This prevents
+  # accidental destructive clears from a single accidental flag.
+  if [[ "${CLEAR_TMP_FORCE:-false}" == "true" ]]; then
+    if [[ "${CLEAR_TMP_FORCE_CONFIRMED:-false}" != "true" ]]; then
+      log "ERROR: CLEAR_TMP_FORCE requested but not explicitly confirmed. Use --confirm-clear-tmp-force to confirm."
+      return 1
+    fi
+    if [[ "${ASSUME_YES:-false}" != "true" ]]; then
+      log "ERROR: CLEAR_TMP_FORCE requires both --confirm-clear-tmp-force and --yes (ASSUME_YES=true) to proceed."
+      return 1
+    fi
+  fi
+
+  if [[ -z "$CLEAR_TMP_DIR" || "$CLEAR_TMP_DIR" == "/" ]]; then
+    log "ERROR: refusing to clean an empty or root directory: '$CLEAR_TMP_DIR'"
+    return 1
+  fi
+
+  if [[ ! -d "$CLEAR_TMP_DIR" ]]; then
+    log "Temporary directory '$CLEAR_TMP_DIR' does not exist; skipping cleanup."
+    return 0
+  fi
+
+  # If DRY_RUN, only list what would be removed
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    if [[ "${CLEAR_TMP_FORCE:-false}" == "true" ]]; then
+      log "DRY_RUN: would remove all contents of $CLEAR_TMP_DIR"
+      find "${CLEAR_TMP_DIR:?}" -mindepth 1 -maxdepth 2 -print 2>/dev/null | sed 's/^/DRY_RUN: /' | tee -a "$LOG_FILE"
+    else
+      log "DRY_RUN: would remove files in $CLEAR_TMP_DIR based on CLEAR_TMP_AGE_DAYS=${CLEAR_TMP_AGE_DAYS}"
+      if ! [[ "$CLEAR_TMP_AGE_DAYS" =~ ^[0-9]+$ ]]; then
+        log "DRY_RUN: CLEAR_TMP_AGE_DAYS is not a non-negative integer: '$CLEAR_TMP_AGE_DAYS'"
+      elif [[ "$CLEAR_TMP_AGE_DAYS" -eq 0 ]]; then
+        # files older than today
+  find "${CLEAR_TMP_DIR:?}" -mindepth 1 ! -newermt "$(date +%F)" -print 2>/dev/null | sed 's/^/DRY_RUN: /' | tee -a "$LOG_FILE"
+      else
+  find "${CLEAR_TMP_DIR:?}" -mindepth 1 -mtime +$((CLEAR_TMP_AGE_DAYS-1)) -print 2>/dev/null | sed 's/^/DRY_RUN: /' | tee -a "$LOG_FILE"
+      fi
+    fi
+    log "=== Temporary directory cleanup complete (dry-run) ==="
+    return 0
+  fi
+
+  # Perform actual removal. Be careful and defensive.
+  set +e
+  # Validate age param
+  if ! [[ "$CLEAR_TMP_AGE_DAYS" =~ ^[0-9]+$ ]]; then
+    log "ERROR: CLEAR_TMP_AGE_DAYS must be a non-negative integer. Got: '$CLEAR_TMP_AGE_DAYS'"
+    set -e
+    return 1
+  fi
+
+    if [[ "${CLEAR_TMP_FORCE:-false}" == "true" ]]; then
+    log "Removing ALL contents of $CLEAR_TMP_DIR (CLEAR_TMP_FORCE requested)"
+    rm -rf -- "${CLEAR_TMP_DIR:?}"/* >>"$LOG_FILE" 2>&1 || true
+  elif [[ "$CLEAR_TMP_AGE_DAYS" -eq 0 ]]; then
+    log "Removing files in $CLEAR_TMP_DIR older than today (modified before $(date +%F))"
+    find "${CLEAR_TMP_DIR:?}" -mindepth 1 ! -newermt "$(date +%F)" -exec rm -rf -- {} + >>"$LOG_FILE" 2>&1 || true
+  else
+    log "Removing files in $CLEAR_TMP_DIR older than ${CLEAR_TMP_AGE_DAYS} day(s)"
+    find "${CLEAR_TMP_DIR:?}" -mindepth 1 -mtime +$((CLEAR_TMP_AGE_DAYS-1)) -exec rm -rf -- {} + >>"$LOG_FILE" 2>&1 || true
+  fi
+  rc=$?
+  set -e
+
+  if [[ $rc -eq 0 ]]; then
+    log "Temporary directory cleanup finished (see $LOG_FILE)"
+  else
+    log "Temporary directory cleanup finished with some errors (see $LOG_FILE)"
+  fi
+  log "=== Temporary directory cleanup end ==="
+  return $rc
+}
+
+fix_broken_if_any() {
+  log "Pre-flight: resolving any interrupted or broken states (safe to run)."
+  # Use package manager abstraction for fixing broken packages
+  pkg_fix_broken || true
+}
+
+package_maintenance() {
+  log "=== Package maintenance start ==="
+  show_progress 3 "$PROGRESS_MODE" "Preparing package manager"
+  wait_for_pkg_managers
+  # Robust update/upgrade cycle with conservative config handling
+  # Capture update output to check signature verification (APT-specific)
+  local update_out
+  
+  # Use retry logic for package update to handle transient network failures
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: pkg_update with retry logic"
+    update_out="DRY_RUN"
+  else
+    show_progress 5 "$PROGRESS_MODE" "Refreshing package lists"
+    update_out=$(retry_with_backoff "pkg_update" pkg_update 2>&1 | tee -a "$LOG_FILE")
+  fi
+  
+  # Check for GPG signature verification (APT-specific, other package managers handle differently)
+  if [[ "$PKG_MANAGER" == "apt" ]]; then
+    if echo "$update_out" | grep -qi "NO_PUBKEY"; then
+      APT_SIG_STATUS="missing_keys"
+    elif echo "$update_out" | grep -qi "signature.*could not be verified\|gpg.*error"; then
+      APT_SIG_STATUS="verification_failed"
+    elif echo "$update_out" | grep -qi "Signed by\|gpgv"; then
+      APT_SIG_STATUS="verified"
+    else
+      APT_SIG_STATUS="unknown"
+    fi
+    log "Package signature verification status: $APT_SIG_STATUS"
+  fi
+  
+  # Use retry logic for upgrade commands
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    run pkg_upgrade
+    run pkg_full_upgrade
+  else
+    show_progress 10 "$PROGRESS_MODE" "Applying upgrades"
+    retry_with_backoff "pkg_upgrade" pkg_upgrade
+    show_progress 10 "$PROGRESS_MODE" "Applying full-upgrade"
+    retry_with_backoff "pkg_full_upgrade" pkg_full_upgrade
+  fi
+  
+  # Remove obsolete dependencies and cache clutter
+  run pkg_autoremove
+  run pkg_autoclean
+  log "=== Package maintenance complete ==="
+}
+
+# Backward compatibility alias
+apt_maintenance() {
+  package_maintenance
+}
+
+snap_maintenance() {
+  if ! command -v snap >/dev/null 2>&1; then
+    log "Snap not installed; skipping snap tasks."
+    _skip_cap "snap_maintenance" "snap"
+    return 0
+  fi
+  log "=== Snap maintenance start ==="
+  show_progress 3 "$PROGRESS_MODE" "Preparing Snap"
+  # Optionally skip snap refresh/prune
+  if [[ "${NO_SNAP:-false}" == "true" ]]; then
+    log "--no-snap requested: skipping snap refresh and prune steps."
+    return 0
+  fi
+
+  # Refresh all snaps
+
+  # Apply snap refresh (will download and install available snap updates)
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: snap refresh"
+  else
+    log "Running: snap refresh (this will download and apply available snap updates)"
+    show_progress 8 "$PROGRESS_MODE" "Refreshing snaps"
+    run snap refresh || log "snap refresh exited with status $? (see $LOG_FILE)"
+  fi
+
+  # Prune old disabled revisions to free disk space
+  # Format from `snap list --all`: Name Version Rev Tracking Publisher Notes
+  # Be defensive: ensure the revision looks numeric and fall back if --revision
+  # isn't supported by the installed snap tooling.
+  while read -r name rev notes; do
+    if [[ "$notes" == "disabled" ]]; then
+      # guard against unexpected revision values
+      if ! [[ "$rev" =~ ^[0-9]+$ ]]; then
+        log "Skipping snap $name with unexpected revision value: '$rev'"
+        continue
+      fi
+
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        log "DRY_RUN: would remove snap $name revision $rev"
+      else
+        # Try removing the specific revision; if that fails (older snapd),
+        # attempt a fallback removal and log failures.
+        if snap remove "$name" --revision="$rev" >>"$LOG_FILE" 2>&1; then
+          log "Removed snap $name revision $rev"
+        else
+          log "snap remove with --revision failed for $name rev $rev; trying fallback"
+          if snap remove "$name" >>"$LOG_FILE" 2>&1; then
+            log "Removed snap $name (fallback)"
+          else
+            log "Failed to remove snap $name revision $rev (see $LOG_FILE)"
+          fi
+        fi
+      fi
+    fi
+  done < <(snap list --all 2>/dev/null | awk 'NR>1 {print $1, $3, $NF}')
+  log "=== Snap maintenance complete ==="
+}
+
+# Remove disabled old snap revisions (separated from snap_maintenance for flag control)
+snap_cleanup_old() {
+  if ! command -v snap >/dev/null 2>&1; then
+    _skip_cap "snap_cleanup_old" "snap"
+    return 0
+  fi
+  if [[ "${NO_SNAP:-false}" == "true" ]]; then
+    return 0
+  fi
+  if [[ "${SNAP_CLEAN_OLD:-false}" != "true" ]]; then
+    log "snap_cleanup_old: flag disabled (--no-snap-clean-old or env). Skipping."
+    return 0
+  fi
+  log "=== Snap old revision cleanup start ==="
+
+  # Safety: skip if other snap operations are currently 'Doing'
+  local busy_changes
+  busy_changes=$(snap changes 2>/dev/null | awk '/Doing/ {print $1}' || true)
+  if [[ -n "$busy_changes" ]]; then
+    log "Snap changes in progress (IDs: $busy_changes); deferring old revision cleanup"
+    log "=== Snap old revision cleanup deferred ==="
+    return 0
+  fi
+
+  local removed=0 would_remove=0
+  # List disabled revisions
+  # Format: Name Version Rev Tracking Publisher Notes
+  while read -r name rev notes; do
+    if [[ "$notes" == "disabled" ]]; then
+      if ! [[ "$rev" =~ ^[0-9]+$ ]]; then
+        log "Skipping snap $name with unexpected revision value: '$rev'"
+        continue
+      fi
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        log "DRY_RUN: would remove snap $name revision $rev"
+        ((would_remove++))
+      else
+        if snap remove "$name" --revision="$rev" >>"$LOG_FILE" 2>&1; then
+          log "Removed snap $name revision $rev"
+          ((removed++))
+        else
+          log "snap remove --revision failed for $name rev $rev; attempting fallback"
+          if snap remove "$name" >>"$LOG_FILE" 2>&1; then
+            log "Removed snap $name (fallback)"
+            ((removed++))
+          else
+            log "Failed to remove snap $name revision $rev (see $LOG_FILE)"
+          fi
+        fi
+      fi
+    fi
+  done < <(snap list --all 2>/dev/null | awk 'NR>1 {print $1, $3, $NF}')
+
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    SNAP_OLD_REMOVED_COUNT=$would_remove
+    log "Snap old revision cleanup (dry-run) would remove: $would_remove"
+  else
+    SNAP_OLD_REMOVED_COUNT=$removed
+    log "Snap old revision cleanup removed: $removed"
+  fi
+  log "=== Snap old revision cleanup complete ==="
+}
+
+# Clear snapd cache directory to reclaim space
+snap_clear_cache() {
+  if ! command -v snap >/dev/null 2>&1; then
+    _skip_cap "snap_clear_cache" "snap"
+    return 0
+  fi
+  if [[ "${NO_SNAP:-false}" == "true" ]]; then
+    return 0
+  fi
+  if [[ "${SNAP_CLEAR_CACHE:-false}" != "true" ]]; then
+    log "snap_clear_cache: flag disabled (--no-snap-clear-cache or env). Skipping."
+    return 0
+  fi
+  local cache_dir="/var/lib/snapd/cache"
+  if [[ ! -d "$cache_dir" ]]; then
+    log "Snap cache directory not found ($cache_dir); skipping."
+    return 0
+  fi
+  log "=== Snap cache clear start ==="
+  local size_before size_after freed
+  size_before=$(du -sb "$cache_dir" 2>/dev/null | awk '{print $1}')
+  size_before=${size_before:-0}
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would remove contents of $cache_dir"
+    if command -v numfmt >/dev/null 2>&1; then
+      log "Snap cache size: $(numfmt --to=iec-i --suffix=B "$size_before" 2>/dev/null || echo "${size_before}B")"
+    else
+      log "Snap cache size: ${size_before}B"
+    fi
+    SNAP_CACHE_CLEARED_BYTES=$size_before
+    log "=== Snap cache clear complete (dry-run) ==="
+    return 0
+  fi
+  if rm -rf "${cache_dir:?}"/* >>"$LOG_FILE" 2>&1; then
+    size_after=$(du -sb "$cache_dir" 2>/dev/null | awk '{print $1}')
+    size_after=${size_after:-0}
+    freed=$((size_before - size_after))
+    SNAP_CACHE_CLEARED_BYTES=$freed
+    if command -v numfmt >/dev/null 2>&1; then
+      log "Snap cache cleared. Freed: $(numfmt --to=iec-i --suffix=B "$freed" 2>/dev/null || echo "${freed}B")"
+    else
+      log "Snap cache cleared. Freed: ${freed}B"
+    fi
+  else
+    log "Failed to clear snap cache (see $LOG_FILE)"
+  fi
+  log "=== Snap cache clear complete ==="
+}
+
+# Purge old kernels keeping current + N newest (KEEP_KERNELS). Dry-run lists candidates.
+# Removes old kernel packages (image, headers, modules, modules-extra) while preserving:
+#   - The currently running kernel (always kept)
+#   - The N newest kernel versions (configurable via --keep-kernels=N)
+# Safety: Uses dpkg version comparison for proper sorting and never removes running kernel.
+# Args: None (uses global PURGE_OLD_KERNELS, KEEP_KERNELS)
+# Globals:
+#   PURGE_OLD_KERNELS: Enable/disable kernel purge
+#   KEEP_KERNELS: Number of newest kernels to retain (default: 2)
+#   KERNELS_REMOVED_COUNT: Count of removed kernel packages
+kernel_purge_phase() {
+  if [[ "${PURGE_OLD_KERNELS:-false}" != "true" ]]; then
+    log "kernel_purge_phase: disabled (enable with --purge-kernels or PURGE_OLD_KERNELS=true)."
+    return 0
+  fi
+  log "=== Kernel purge phase start (keep ${KEEP_KERNELS}) ==="
+  # Determine running kernel image pattern
+  local running_kernel keep_n
+  running_kernel=$(uname -r)
+  keep_n=${KEEP_KERNELS:-2}
+  if ! [[ "$keep_n" =~ ^[0-9]+$ ]]; then keep_n=2; fi
+  # Build a list of all installed kernel component packages (image, headers, modules, extra),
+  # derive their version suffixes, and decide based on versions rather than only image presence.
+  local all_pkgs
+  all_pkgs=$(dpkg -l 'linux-*' 2>/dev/null | awk '/^ii/ {print $2}' | grep -E '^linux-(image|image-unsigned|headers|modules|modules-extra)-[0-9]') || true
+  if [[ -z "$all_pkgs" ]]; then
+    log "No kernel component packages found; skipping purge."
+    return 0
+  fi
+  declare -A uniq_versions
+  declare -a all_versions=()
+  while IFS= read -r _pkg; do
+    [[ -n "$_pkg" ]] || continue
+    # Extract the kernel version suffix by stripping known prefixes explicitly.
+    # Avoid generic globs like ${var#linux-*-} which can leave stray prefixes like 'extra-'.
+    local v=""
+    case "$_pkg" in
+      linux-image-unsigned-*) v=${_pkg#linux-image-unsigned-} ;;
+      linux-modules-extra-*)  v=${_pkg#linux-modules-extra-}  ;;
+      linux-modules-*)        v=${_pkg#linux-modules-}        ;;
+      linux-image-*)          v=${_pkg#linux-image-}          ;;
+      linux-headers-*)        v=${_pkg#linux-headers-}        ;;
+      *) v="" ;;
+    esac
+    [[ -n "$v" ]] || continue
+    if [[ -z "${uniq_versions[$v]:-}" ]]; then
+      uniq_versions[$v]=1
+      all_versions+=("$v")
+    fi
+  done <<<"$all_pkgs"
+  # Sort versions descending using dpkg --compare-versions
+  for ((i=0; i<${#all_versions[@]}; i++)); do
+    for ((j=i+1; j<${#all_versions[@]}; j++)); do
+      if dpkg --compare-versions "${all_versions[j]}" gt "${all_versions[i]}"; then
+        tmp=${all_versions[i]}; all_versions[i]=${all_versions[j]}; all_versions[j]=$tmp
+      fi
+    done
+  done
+  # Keep top keep_n versions plus the running kernel version explicitly
+  declare -A keep_versions
+  local idx=0
+  for v in "${all_versions[@]}"; do
+    if (( idx < keep_n )); then keep_versions["$v"]=1; fi
+    ((idx++))
+  done
+  keep_versions["$running_kernel"]=1
+  # Determine removable versions
+  local -A rem_versions=()
+  for v in "${all_versions[@]}"; do
+    if [[ -z "${keep_versions[$v]:-}" ]]; then rem_versions["$v"]=1; fi
+  done
+  if (( ${#rem_versions[@]} == 0 )); then
+    log "No old kernels eligible for removal (keep=${keep_n}, running=${running_kernel})."
+    return 0
+  fi
+  # Expand to concrete package names for those versions, only if installed
+  local -a remove_list=()
+  for ver in "${!rem_versions[@]}"; do
+    for cand in \
+      "linux-image-${ver}" \
+      "linux-image-unsigned-${ver}" \
+      "linux-headers-${ver}" \
+      "linux-modules-${ver}" \
+      "linux-modules-extra-${ver}"; do
+      if dpkg -l "$cand" 2>/dev/null | awk '/^ii/ {exit 0} END{exit 1}'; then
+        remove_list+=("$cand")
+      fi
+    done
+  done
+  local would_bytes=0
+  # Estimate space by summing installed size (dpkg-query -W -f '${Installed-Size}') *1024
+  for pkg in "${remove_list[@]}"; do
+    sz=$(dpkg-query -W -f='${Installed-Size}' "$pkg" 2>/dev/null || echo 0)
+    ((would_bytes += sz*1024))
+  done
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would purge kernels: ${remove_list[*]}"
+    if command -v numfmt >/dev/null 2>&1; then
+      log "Estimated space to free: $(numfmt --to=iec-i --suffix=B $would_bytes 2>/dev/null)"
+    else
+      log "Estimated space to free: ${would_bytes}B"
+    fi
+    KERNELS_REMOVED_COUNT=${#remove_list[@]}
+    log "=== Kernel purge phase complete (dry-run) ==="
+    return 0
+  fi
+  local removed=0
+  for pkg in "${remove_list[@]}"; do
+    if apt-get -y purge "$pkg" >>"$LOG_FILE" 2>&1; then
+      ((removed++))
+      log "Purged kernel package: $pkg"
+    else
+      log "Failed to purge $pkg"
+    fi
+  done
+  KERNELS_REMOVED_COUNT=$removed
+  log "Kernel purge removed $removed packages (keep=$keep_n running=$running_kernel)."
+  log "=== Kernel purge phase complete ==="
+}
+
+# Post-kernel finalization: regenerate initramfs & updatedb when kernels changed.
+post_kernel_finalize() {
+  if [[ "${PURGE_OLD_KERNELS:-false}" != "true" ]]; then
+    log "post_kernel_finalize: skipped (kernel purge not enabled)."
+    return 0
+  fi
+  log "=== Post-kernel finalization start ==="
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: update-initramfs -c -k $(uname -r) (or -u for all installed kernels)"
+    log "DRY_RUN: would run: updatedb"
+    if [[ "${UPDATE_GRUB_ENABLED:-false}" == "true" ]]; then
+      log "DRY_RUN: would run: update-grub (explicit grub configuration refresh)"
+    fi
+    log "=== Post-kernel finalization complete (dry-run) ==="
+    return 0
+  fi
+  # Regenerate initramfs for current kernel to ensure consistency
+  if command -v update-initramfs >/dev/null 2>&1; then
+    if update-initramfs -u -k "$(uname -r)" >>"$LOG_FILE" 2>&1; then
+      log "Initramfs updated for kernel $(uname -r)"
+    else
+      log "WARNING: initramfs update failed (see $LOG_FILE)"
+    fi
+  else
+    log "update-initramfs not found; skipping initramfs regeneration"
+  fi
+  # Refresh file location database (locate/updatedb) if available
+  if command -v updatedb >/dev/null 2>&1; then
+    if updatedb >>"$LOG_FILE" 2>&1; then
+      log "updatedb completed"
+    else
+      log "WARNING: updatedb failed (see $LOG_FILE)"
+    fi
+  else
+    log "updatedb not available; skipping locate DB refresh"
+  fi
+  # Reload systemd daemons if present (new units might appear after kernel ops)
+  if command -v systemctl >/dev/null 2>&1; then
+    if systemctl daemon-reload >>"$LOG_FILE" 2>&1; then
+      log "systemd daemon-reload completed"
+    else
+      log "WARNING: systemd daemon-reload failed (see $LOG_FILE)"
+    fi
+  fi
+  if [[ "${UPDATE_GRUB_ENABLED:-false}" == "true" ]]; then
+    UPDATE_GRUB_RAN=true
+    if command -v update-grub >/dev/null 2>&1; then
+      if update-grub >>"$LOG_FILE" 2>&1; then
+        log "update-grub completed (GRUB configuration refreshed)"
+        UPDATE_GRUB_SUCCESS=true
+      else
+        log "WARNING: update-grub failed (see $LOG_FILE)"
+        UPDATE_GRUB_SUCCESS=false
+      fi
+    else
+      log "update-grub not found; skipping explicit grub configuration refresh"
+      UPDATE_GRUB_SUCCESS=false
+    fi
+  fi
+  log "=== Post-kernel finalization complete ==="
+}
+
+# Purge orphan packages using deborphan or apt autoremove simulation
+orphan_purge_phase() {
+  if [[ "${ORPHAN_PURGE_ENABLED:-false}" != "true" ]]; then
+    log "orphan_purge_phase: disabled (enable with --orphan-purge or ORPHAN_PURGE_ENABLED=true)."
+    return 0
+  fi
+  log "=== Orphan package purge start ==="
+  ORPHAN_PURGED_PACKAGES=()
+  # Strategy: if deborphan present use it, else parse apt-get autoremove -s
+  local orphan_list=""
+  if command -v deborphan >/dev/null 2>&1; then
+    orphan_list=$(deborphan 2>/dev/null | tr '\n' ' ' || true)
+  else
+    # Fallback: parse apt-get autoremove -s lines starting with 'Remv'
+    set +e
+    sim_out=$(apt-get -s autoremove 2>&1)
+    set -e
+    orphan_list=$(printf '%s\n' "$sim_out" | awk '/^Remv / {print $2}' | tr '\n' ' ' || true)
+  fi
+  if [[ -z "$orphan_list" ]]; then
+    log "No orphan packages detected."
+    log "=== Orphan package purge complete ==="
+    return 0
+  fi
+  # Build array
+  declare -a orphans
+  while read -r tok; do [[ -n "$tok" ]] && orphans+=("$tok"); done <<<"$orphan_list"
+  if (( ${#orphans[@]} == 0 )); then
+    log "No orphan packages detected after parsing."
+    log "=== Orphan package purge complete ==="
+    return 0
+  fi
+  local would_bytes=0 pkg sz
+  for pkg in "${orphans[@]}"; do
+    sz=$(dpkg-query -W -f='${Installed-Size}' "$pkg" 2>/dev/null || echo 0)
+    ((would_bytes += sz*1024))
+  done
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would purge orphan packages: ${orphans[*]}"
+    if command -v numfmt >/dev/null 2>&1; then
+      log "Estimated space to free: $(numfmt --to=iec-i --suffix=B $would_bytes 2>/dev/null)"
+    else
+      log "Estimated space to free: ${would_bytes}B"
+    fi
+    ORPHAN_PURGED_COUNT=${#orphans[@]}
+    ORPHAN_PURGED_PACKAGES=("${orphans[@]}")
+    log "=== Orphan package purge complete (dry-run) ==="
+    return 0
+  fi
+  local removed=0
+  for pkg in "${orphans[@]}"; do
+    if apt-get -y purge "$pkg" >>"$LOG_FILE" 2>&1; then
+      ((removed++))
+      ORPHAN_PURGED_PACKAGES+=("$pkg")
+      log "Purged orphan: $pkg"
+    else
+      log "Failed to purge orphan: $pkg"
+    fi
+  done
+  ORPHAN_PURGED_COUNT=$removed
+  log "Orphan purge removed $removed packages."
+  log "=== Orphan package purge complete ==="
+}
+
+dns_maintenance() {
+  log "=== DNS cache maintenance start ==="
+  show_progress 2 "$PROGRESS_MODE" "DNS cache"
+
+  if [[ "${CLEAR_DNS_CACHE:-true}" != "true" ]]; then
+    log "--no-clear-dns-cache requested: skipping DNS cache clearing."
+    return 0
+  fi
+
+  local cleared_any=false
+
+  # 1. systemd-resolved (most common on modern Ubuntu/Debian)
+  if command -v resolvectl >/dev/null 2>&1; then
+    if systemctl is-active --quiet systemd-resolved 2>/dev/null; then
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        log "DRY_RUN: would run: resolvectl flush-caches"
+      else
+        log "Flushing systemd-resolved DNS cache..."
+        if resolvectl flush-caches >>"$LOG_FILE" 2>&1; then
+          log "systemd-resolved cache flushed successfully"
+          cleared_any=true
+        else
+          log "Failed to flush systemd-resolved cache (see $LOG_FILE)"
+        fi
+      fi
+    else
+      log "systemd-resolved not active; skipping resolvectl"
+    fi
+  fi
+
+  # 2. nscd (Name Service Cache Daemon)
+  if command -v nscd >/dev/null 2>&1; then
+    if systemctl is-active --quiet nscd 2>/dev/null || pgrep -x nscd >/dev/null 2>&1; then
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        log "DRY_RUN: would run: nscd -i hosts"
+      else
+        log "Invalidating nscd hosts cache..."
+        if nscd -i hosts >>"$LOG_FILE" 2>&1; then
+          log "nscd hosts cache invalidated successfully"
+          cleared_any=true
+        else
+          log "Failed to invalidate nscd cache (see $LOG_FILE)"
+        fi
+      fi
+    else
+      log "nscd not running; skipping"
+    fi
+  fi
+
+  # 3. dnsmasq (local DNS forwarder/cache)
+  if command -v dnsmasq >/dev/null 2>&1; then
+    if systemctl is-active --quiet dnsmasq 2>/dev/null || pgrep -x dnsmasq >/dev/null 2>&1; then
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        log "DRY_RUN: would restart dnsmasq to clear cache"
+      else
+        log "Restarting dnsmasq to clear DNS cache..."
+        if systemctl restart dnsmasq >>"$LOG_FILE" 2>&1; then
+          log "dnsmasq restarted successfully (cache cleared)"
+          cleared_any=true
+        else
+          log "Failed to restart dnsmasq (see $LOG_FILE)"
+        fi
+      fi
+    else
+      log "dnsmasq not running; skipping"
+    fi
+  fi
+
+  # 4. systemd-networkd (less common but some systems use it)
+  if systemctl is-active --quiet systemd-networkd 2>/dev/null; then
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      log "DRY_RUN: systemd-networkd active; cache flush handled by resolvectl"
+    else
+      log "systemd-networkd active; DNS cache already handled by resolvectl"
+    fi
+  fi
+
+  if [[ "$cleared_any" == "false" && "${DRY_RUN:-false}" != "true" ]]; then
+    log "No DNS cache services detected or cleared. If you use a custom DNS setup, clear manually."
+  fi
+
+  log "=== DNS cache maintenance complete ==="
+}
+
+firmware_maintenance() {
+  # fwupd handles firmware updates for many devices (BIOS, Thunderbolt, etc.)
+  if [[ "${NO_FIRMWARE:-false}" == "true" ]]; then
+    log "--no-firmware requested: skipping firmware updates."
+    _skip_cap "firmware_maintenance" "fwupdmgr(flag)"
+    return 0
+  fi
+  if ! command -v fwupdmgr >/dev/null 2>&1; then
+    log "fwupdmgr not installed; skipping firmware maintenance."
+    _skip_cap "firmware_maintenance" "fwupdmgr"
+    return 0
+  fi
+  log "=== Firmware maintenance start ==="
+  # Refresh metadata
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: fwupdmgr refresh --force"
+  else
+    if fwupdmgr refresh --force >>"$LOG_FILE" 2>&1; then
+      log "Firmware metadata refreshed"
+    else
+      log "Firmware metadata refresh failed (see $LOG_FILE)"
+    fi
+  fi
+  # Get list of available updates
+  local updates
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: fwupdmgr get-updates"
+    updates=$(fwupdmgr get-updates 2>/dev/null | grep -E '^ \*' || true)
+  else
+    updates=$(fwupdmgr get-updates 2>&1 | tee -a "$LOG_FILE" | grep -E '^ \*' || true)
+  fi
+  if [[ -z "$updates" ]]; then
+    log "No firmware updates available"
+  else
+    log "Firmware updates available:"
+    printf '%s\n' "$updates" | sed 's/^/  /'
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      log "DRY_RUN: would apply firmware updates"
+    else
+      if fwupdmgr update -y >>"$LOG_FILE" 2>&1; then
+        log "Firmware updates applied (may require reboot)"
+      else
+        log "Firmware update failed or some updates deferred (see $LOG_FILE)"
+      fi
+    fi
+  fi
+  log "=== Firmware maintenance complete ==="
+}
+
+flatpak_maintenance() {
+  if ! command -v flatpak >/dev/null 2>&1; then
+    log "Flatpak not installed; skipping flatpak tasks."
+    _skip_cap "flatpak_maintenance" "flatpak"
+    return 0
+  fi
+  log "=== Flatpak maintenance start ==="
+  
+  if [[ "${NO_FLATPAK:-false}" == "true" ]]; then
+    log "--no-flatpak requested: skipping flatpak update and cleanup."
+    return 0
+  fi
+
+  # Determine scope: auto|user|system|both
+  local scope="${FLATPAK_SCOPE:-auto}" update_cmds=()
+  FLATPAK_SCOPE_APPLIED="$scope"
+  case "$scope" in
+    auto)
+      # If running as root, prefer system; else user
+      if [[ $EUID -eq 0 ]]; then
+        update_cmds+=("flatpak update --system -y")
+      else
+        update_cmds+=("flatpak update --user -y")
+      fi
+      ;;
+    user)
+      update_cmds+=("flatpak update --user -y")
+      ;;
+    system)
+      update_cmds+=("flatpak update --system -y")
+      ;;
+    both)
+      update_cmds+=("flatpak update --user -y" "flatpak update --system -y")
+      ;;
+    *)
+      log "Unknown FLATPAK_SCOPE '$scope' (expected auto|user|system|both); defaulting to auto"
+      if [[ $EUID -eq 0 ]]; then
+        update_cmds+=("flatpak update --system -y")
+      else
+        update_cmds+=("flatpak update --user -y")
+      fi
+      ;;
+  esac
+
+  # Update flatpaks per chosen scope
+  for cmd in "${update_cmds[@]}"; do
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      log "DRY_RUN: would run: $cmd"
+    else
+      log "Running: $cmd"
+      if eval "$cmd" >>"$LOG_FILE" 2>&1; then
+        log "Flatpak update scope succeeded: $cmd"
+      else
+        log "Flatpak update scope had errors: $cmd (see $LOG_FILE)"
+      fi
+    fi
+  done
+
+  # Remove unused runtimes per scope (user/system)
+  local prune_scopes=()
+  case "$scope" in
+    auto)
+      if [[ $EUID -eq 0 ]]; then
+        prune_scopes+=("system")
+      else
+        prune_scopes+=("user")
+      fi
+      ;;
+    user)
+      prune_scopes+=("user")
+      ;;
+    system)
+      prune_scopes+=("system")
+      ;;
+    both)
+      prune_scopes+=("user" "system")
+      ;;
+  esac
+  for ps in "${prune_scopes[@]}"; do
+    local prune_cmd="flatpak uninstall --unused -y --$ps"
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      log "DRY_RUN: would run: $prune_cmd"
+    else
+      log "Removing unused flatpak runtimes ($ps scope)..."
+      if eval "$prune_cmd" >>"$LOG_FILE" 2>&1; then
+        log "Unused flatpak runtimes removed ($ps)"
+      else
+        log "No unused flatpak runtimes to remove or failed ($ps) (see $LOG_FILE)"
+      fi
+    fi
+  done
+
+  log "=== Flatpak maintenance complete ==="
+}
+
+journal_maintenance() {
+  if ! command -v journalctl >/dev/null 2>&1; then
+    log "journalctl not available; skipping journal maintenance."
+    return 0
+  fi
+  
+  log "=== Journal maintenance start ==="
+  show_progress 2 "$PROGRESS_MODE" "Journal cleanup"
+  
+  if [[ "${CLEAR_JOURNAL:-true}" != "true" ]]; then
+    log "--no-journal-vacuum requested: skipping journal cleanup."
+    return 0
+  fi
+
+  local vacuum_time="${JOURNAL_VACUUM_TIME:-7d}"
+  local vacuum_size="${JOURNAL_VACUUM_SIZE:-500M}"
+
+  # Vacuum by time
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: journalctl --vacuum-time=$vacuum_time"
+  else
+    log "Cleaning journal logs older than $vacuum_time..."
+    if journalctl --vacuum-time="$vacuum_time" >>"$LOG_FILE" 2>&1; then
+      log "Journal vacuum by time completed"
+    else
+      log "Journal vacuum by time failed (see $LOG_FILE)"
+    fi
+  fi
+
+  # Vacuum by size
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: journalctl --vacuum-size=$vacuum_size"
+  else
+    log "Limiting journal size to $vacuum_size..."
+    if journalctl --vacuum-size="$vacuum_size" >>"$LOG_FILE" 2>&1; then
+      log "Journal vacuum by size completed"
+    else
+      log "Journal vacuum by size failed (see $LOG_FILE)"
+    fi
+  fi
+
+  log "=== Journal maintenance complete ==="
+}
+
+thumbnail_maintenance() {
+  log "=== Thumbnail cache maintenance start ==="
+  show_progress 2 "$PROGRESS_MODE" "Thumbnails"
+  
+  if [[ "${CLEAR_THUMBNAILS:-true}" != "true" ]]; then
+    log "--no-clear-thumbnails requested: skipping thumbnail cache cleanup."
+    return 0
+  fi
+
+  local thumbnail_dir="$HOME/.cache/thumbnails"
+  
+  if [[ ! -d "$thumbnail_dir" ]]; then
+    log "Thumbnail directory $thumbnail_dir does not exist; skipping."
+    return 0
+  fi
+
+  local size_before
+  size_before=$(du -sb "$thumbnail_dir" 2>/dev/null | awk '{print $1}')
+  size_before=${size_before:-0}
+  
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: rm -rf $thumbnail_dir/*"
+    if command -v numfmt >/dev/null 2>&1; then
+      log "Thumbnail cache size: $(numfmt --to=iec-i --suffix=B "$size_before" 2>/dev/null || echo "${size_before}B")"
+    else
+      log "Thumbnail cache size: ${size_before}B"
+    fi
+  else
+    log "Clearing thumbnail cache: $thumbnail_dir"
+    if rm -rf "${thumbnail_dir:?}"/* 2>>"$LOG_FILE"; then
+      local size_after
+      size_after=$(du -sb "$thumbnail_dir" 2>/dev/null | awk '{print $1}')
+      size_after=${size_after:-0}
+      local freed=$((size_before - size_after))
+      THUMBNAIL_FREED_BYTES=$freed
+      if command -v numfmt >/dev/null 2>&1; then
+        log "Thumbnail cache cleared. Freed: $(numfmt --to=iec-i --suffix=B "$freed" 2>/dev/null || echo "${freed}B")"
+      else
+        log "Thumbnail cache cleared. Freed: ${freed}B"
+      fi
+    else
+      log "Failed to clear thumbnail cache (see $LOG_FILE)"
+    fi
+  fi
+
+  log "=== Thumbnail cache maintenance complete ==="
+}
+
+# Optional browser cache reporting/purge
+# Browser cache scanning and optional purge.
+# Measures cache sizes for Firefox, Chromium, and Chrome browsers.
+# Optionally purges cache contents to reclaim disk space.
+# Safety: Only removes cache files, preserves browser profiles and user data.
+# Args: None (uses global BROWSER_CACHE_REPORT, BROWSER_CACHE_PURGE)
+# Globals:
+#   BROWSER_CACHE_REPORT: Enable cache size reporting
+#   BROWSER_CACHE_PURGE: Enable cache deletion
+#   FIREFOX_CACHE_BYTES: Firefox cache size in bytes
+#   CHROMIUM_CACHE_BYTES: Chromium cache size in bytes
+#   CHROME_CACHE_BYTES: Chrome cache size in bytes
+#   BROWSER_CACHE_PURGED_FLAG: Set to true if purge executed
+browser_cache_phase() {
+  if [[ "${BROWSER_CACHE_REPORT:-false}" != "true" && "${BROWSER_CACHE_PURGE:-false}" != "true" ]]; then
+    return 0
+  fi
+  log "=== Browser cache phase start ==="
+  local ff_dir="$HOME/.cache/mozilla/firefox" chr_dir="$HOME/.cache/chromium" chrome_dir="$HOME/.cache/google-chrome"
+  local sz
+  FIREFOX_CACHE_BYTES=0; CHROMIUM_CACHE_BYTES=0; CHROME_CACHE_BYTES=0; BROWSER_CACHE_PURGED_FLAG=false
+
+  if [[ -d "$ff_dir" ]]; then
+    sz=$(du -sb "$ff_dir" 2>/dev/null | awk '{print $1}')
+    FIREFOX_CACHE_BYTES=${sz:-0}
+  fi
+  if [[ -d "$chr_dir" ]]; then
+    sz=$(du -sb "$chr_dir" 2>/dev/null | awk '{print $1}')
+    CHROMIUM_CACHE_BYTES=${sz:-0}
+  fi
+  if [[ -d "$chrome_dir" ]]; then
+    sz=$(du -sb "$chrome_dir" 2>/dev/null | awk '{print $1}')
+    CHROME_CACHE_BYTES=${sz:-0}
+  fi
+
+  if command -v numfmt >/dev/null 2>&1; then
+    log "Browser cache sizes: firefox=$(numfmt --to=iec-i --suffix=B "${FIREFOX_CACHE_BYTES}" 2>/dev/null) chromium=$(numfmt --to=iec-i --suffix=B "${CHROMIUM_CACHE_BYTES}" 2>/dev/null) chrome=$(numfmt --to=iec-i --suffix=B "${CHROME_CACHE_BYTES}" 2>/dev/null)"
+  else
+    log "Browser cache sizes: firefox=${FIREFOX_CACHE_BYTES}B chromium=${CHROMIUM_CACHE_BYTES}B chrome=${CHROME_CACHE_BYTES}B"
+  fi
+
+  if [[ "${BROWSER_CACHE_PURGE:-false}" == "true" ]]; then
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+      [[ -d "$ff_dir" ]] && log "DRY_RUN: would remove contents of $ff_dir"
+      [[ -d "$chr_dir" ]] && log "DRY_RUN: would remove contents of $chr_dir"
+      [[ -d "$chrome_dir" ]] && log "DRY_RUN: would remove contents of $chrome_dir"
+    else
+      if [[ -d "$ff_dir" ]]; then rm -rf "${ff_dir:?}"/* >>"$LOG_FILE" 2>&1 || true; BROWSER_CACHE_PURGED_FLAG=true; fi
+      if [[ -d "$chr_dir" ]]; then rm -rf "${chr_dir:?}"/* >>"$LOG_FILE" 2>&1 || true; BROWSER_CACHE_PURGED_FLAG=true; fi
+      if [[ -d "$chrome_dir" ]]; then rm -rf "${chrome_dir:?}"/* >>"$LOG_FILE" 2>&1 || true; BROWSER_CACHE_PURGED_FLAG=true; fi
+      log "Browser cache purge completed"
+    fi
+  fi
+  log "=== Browser cache phase complete ==="
+}
+
+# Purge crash dumps and coredumps to reclaim space.
+# Removes crash reports from /var/crash and systemd coredumps.
+# Crash dumps can accumulate and consume significant disk space over time.
+# Args: None (uses global CLEAR_CRASH_DUMPS)
+# Globals:
+#   CLEAR_CRASH_DUMPS: Enable/disable crash dump cleanup (default: true)
+#   CRASH_FREED_BYTES: Total bytes freed from crash dump cleanup
+crash_dump_purge() {
+  if [[ "${CLEAR_CRASH_DUMPS:-true}" != "true" ]]; then
+    log "--no-clear-crash requested: skipping crash dump purge."
+    return 0
+  fi
+  log "=== Crash dump purge start ==="
+  local targets=(/var/crash /var/lib/systemd/coredump)
+  local total_before=0 total_after=0 freed=0 t
+  for t in "${targets[@]}"; do
+    [[ -d "$t" ]] || continue
+    size=$(du -sb "$t" 2>/dev/null | awk '{print $1}')
+    size=${size:-0}
+    total_before=$((total_before + size))
+  done
+
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    if command -v numfmt >/dev/null 2>&1; then
+      log "Crash/coredump total size: $(numfmt --to=iec-i --suffix=B "$total_before" 2>/dev/null || echo "${total_before}B")"
+    else
+      log "Crash/coredump total size: ${total_before}B"
+    fi
+    CRASH_FREED_BYTES=$total_before
+    log "=== Crash dump purge complete (dry-run) ==="
+    return 0
+  fi
+
+  for t in "${targets[@]}"; do
+    [[ -d "$t" ]] || continue
+    if rm -rf "${t:?}"/* >>"$LOG_FILE" 2>&1; then
+      :
+    else
+      log "Failed to purge $t (see $LOG_FILE)"
+    fi
+  done
+
+  for t in "${targets[@]}"; do
+    [[ -d "$t" ]] || continue
+    size=$(du -sb "$t" 2>/dev/null | awk '{print $1}')
+    size=${size:-0}
+    total_after=$((total_after + size))
+  done
+  freed=$((total_before - total_after))
+  CRASH_FREED_BYTES=$freed
+  if command -v numfmt >/dev/null 2>&1; then
+    log "Crash dumps purged. Freed: $(numfmt --to=iec-i --suffix=B "$freed" 2>/dev/null || echo "${freed}B")"
+  else
+    log "Crash dumps purged. Freed: ${freed}B"
+  fi
+  log "=== Crash dump purge complete ==="
+}
+
+# Filesystem TRIM across mounted filesystems (requires fstrim)
+fstrim_phase() {
+  if [[ "${FSTRIM_ENABLED:-false}" != "true" ]]; then
+    log "--fstrim not enabled; skipping filesystem TRIM."
+    return 0
+  fi
+  if ! command -v fstrim >/dev/null 2>&1; then
+    log "fstrim not available on this system; skipping."
+    _skip_cap "fstrim_phase" "fstrim"
+    return 0
+  fi
+  log "=== Filesystem TRIM start ==="
+  TRIMMED_FILESYSTEMS=()
+  FSTRIM_TOTAL_TRIMMED=0
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: fstrim -av"
+    log "=== Filesystem TRIM complete (dry-run) ==="
+    return 0
+  fi
+  # Capture output: lines like '/: 12345 bytes trimmed'
+  set +e
+  trim_out=$(fstrim -av 2>&1)
+  rc=$?
+  set -e
+  printf '%s
+' "$trim_out" | tee -a "$LOG_FILE" >/dev/null
+  while IFS= read -r line; do
+    # Try to parse: mount: N bytes trimmed
+    if [[ "$line" =~ ^([^:]+):[[:space:]]+([0-9]+)[[:space:]]+bytes[[:space:]]+trimmed ]]; then
+      mnt="${BASH_REMATCH[1]}"
+      bytes="${BASH_REMATCH[2]}"
+      TRIMMED_FILESYSTEMS+=("$mnt: $bytes")
+      FSTRIM_TOTAL_TRIMMED=$((FSTRIM_TOTAL_TRIMMED + bytes))
+    fi
+  done <<< "$trim_out"
+  if command -v numfmt >/dev/null 2>&1; then
+    log "fstrim total freed: $(numfmt --to=iec-i --suffix=B "$FSTRIM_TOTAL_TRIMMED" 2>/dev/null || echo "${FSTRIM_TOTAL_TRIMMED}B")"
+  else
+    log "fstrim total freed: ${FSTRIM_TOTAL_TRIMMED}B"
+  fi
+  if (( ${#TRIMMED_FILESYSTEMS[@]} > 0 )); then
+    log "Trimmed filesystems: ${TRIMMED_FILESYSTEMS[*]}"
+  fi
+  log "=== Filesystem TRIM complete ==="
+  return $rc
+}
+
+# Drop pagecache + dentries/inodes (echo 3 > /proc/sys/vm/drop_caches) with optional swap recycle
+drop_caches_phase() {
+  if [[ "${DROP_CACHES_ENABLED:-false}" != "true" ]]; then
+    log "drop_caches_phase: disabled (set DROP_CACHES_ENABLED=true or --drop-caches)."
+    return 0
+  fi
+  log "=== Drop caches phase start ==="
+  # Memory snapshot helpers
+  _mem_snapshot() {
+    awk '/MemAvailable/ {print $2}' /proc/meminfo 2>/dev/null || echo 0
+  }
+  _swap_snapshot() {
+    awk '/SwapFree/ {print $2}' /proc/meminfo 2>/dev/null || echo 0
+  }
+  MEM_BEFORE_KB=$(_mem_snapshot)
+  SWAP_BEFORE_KB=$(_swap_snapshot)
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would sync && echo 3 > /proc/sys/vm/drop_caches"
+    if [[ "${DROP_CACHES_SWAP_RECYCLE:-false}" == "true" ]]; then
+      log "DRY_RUN: would perform swapoff -a && swapon -a"
+    fi
+    MEM_AFTER_KB=$MEM_BEFORE_KB
+    SWAP_AFTER_KB=$SWAP_BEFORE_KB
+    log "=== Drop caches phase complete (dry-run) ==="
+    return 0
+  fi
+  # Require root (already enforced earlier) but double-check safety
+  if [[ $EUID -ne 0 ]]; then
+    log "drop_caches_phase: requires root privileges; skipping."
+    return 0
+  fi
+  sync || true
+  if echo 3 > /proc/sys/vm/drop_caches 2>>"$LOG_FILE"; then
+    log "Kernel caches dropped (pagecache,dentries,inodes)."
+  else
+    log "Failed to drop caches (see $LOG_FILE)"
+  fi
+  if [[ "${DROP_CACHES_SWAP_RECYCLE:-false}" == "true" ]]; then
+    if command -v swapoff >/dev/null 2>&1; then
+      if swapoff -a 2>>"$LOG_FILE" && swapon -a 2>>"$LOG_FILE"; then
+        log "Swap recycled (swapoff -a && swapon -a)."
+      else
+        log "Swap recycle encountered errors (see $LOG_FILE)."
+      fi
+    else
+      log "swapoff/swapon not found; skipping swap recycle."
+    fi
+  fi
+  MEM_AFTER_KB=$(_mem_snapshot)
+  SWAP_AFTER_KB=$(_swap_snapshot)
+  local freed_mem=$((MEM_AFTER_KB - MEM_BEFORE_KB))
+  if command -v numfmt >/dev/null 2>&1; then
+    log "MemAvailable delta: $(numfmt --to=iec-i --suffix=B $((MEM_BEFORE_KB*1024)) 2>/dev/null) -> $(numfmt --to=iec-i --suffix=B $((MEM_AFTER_KB*1024)) 2>/dev/null) (Δ ${freed_mem}kB)"
+  else
+    log "MemAvailable delta: ${MEM_BEFORE_KB}kB -> ${MEM_AFTER_KB}kB (Δ ${freed_mem}kB)"
+  fi
+  log "=== Drop caches phase complete ==="
+}
+
+check_failed_services() {
+  if ! command -v systemctl >/dev/null 2>&1; then
+    log "systemctl not available; skipping failed services check."
+    return 0
+  fi
+
+  log "=== Checking for failed systemd services ==="
+  
+  if [[ "${CHECK_FAILED_SERVICES:-true}" != "true" ]]; then
+    log "--no-check-failed-services requested: skipping."
+    return 0
+  fi
+
+  local failed_services
+  failed_services=$(systemctl --failed --no-legend --no-pager 2>/dev/null | awk '{print $1}' || true)
+
+  if [[ -z "$failed_services" ]]; then
+    log "No failed services detected"
+  else
+    log "WARNING: Failed services detected:"
+    while IFS= read -r service; do
+      log "  - $service"
+      FAILED_SERVICES+=("$service")
+    done <<< "$failed_services"
+    log "Review failed services with: systemctl status <service-name>"
+  fi
+
+  log "=== Failed services check complete ==="
+}
+
+# Scan for zombie processes (State: Z) for diagnostics
+check_zombie_processes() {
+  if [[ "${CHECK_ZOMBIES:-true}" != "true" ]]; then
+    return 0
+  fi
+  ZOMBIE_PROCESSES=()
+  ZOMBIE_COUNT=0
+  # Iterate /proc for processes
+  local pid state ppid name cmd
+  for pid_dir in /proc/[0-9]*; do
+    [[ -r "$pid_dir/status" ]] || continue
+    pid=${pid_dir##*/}
+    state=$(awk -F'\t' '/^State:/ {print $2}' "$pid_dir/status" 2>/dev/null | awk '{print $1}')
+    if [[ "$state" == "Z" ]]; then
+      ppid=$(awk -F'\t' '/^PPid:/ {print $2}' "$pid_dir/status" 2>/dev/null | tr -d ' ')
+      name=$(awk -F'\t' '/^Name:/ {print $2}' "$pid_dir/status" 2>/dev/null | tr -d ' ')
+      if [[ -r "$pid_dir/cmdline" ]]; then
+        cmd=$(tr '\0' ' ' <"$pid_dir/cmdline" 2>/dev/null)
+      else
+        cmd="$name"
+      fi
+      ZOMBIE_PROCESSES+=("${pid}:${ppid}:${cmd}")
+      ((ZOMBIE_COUNT++))
+      if (( ZOMBIE_COUNT <= 50 )); then
+        log "WARNING: zombie process detected pid=$pid ppid=$ppid cmd=$cmd"
+      fi
+    fi
+  done
+  if (( ZOMBIE_COUNT > 0 )); then
+    log "Zombie processes detected: $ZOMBIE_COUNT"
+  else
+    log "No zombie processes detected"
+  fi
+}
+
+# Minimal security audit (permissions/ownership checks)
+security_audit() {
+  if [[ "${SECURITY_AUDIT_ENABLED:-false}" != "true" ]]; then
+    return 0
+  fi
+  log "=== Security audit start ==="
+  SUDOERS_D_ISSUES=()
+  # Helper to check perms user:group:mode
+  _check_perm() {
+    local path="$1" mode_allowed="$3"
+    if [[ ! -e "$path" ]]; then
+      echo "missing"
+      return 0
+    fi
+    local ugm
+    ugm=$(stat -c '%U:%G:%a' "$path" 2>/dev/null || echo "unknown:unknown:0")
+    local u=${ugm%%:*}
+    local g=${ugm#*:}; g=${g%%:*}
+    local m=${ugm##*:}
+    # owner must be root and mode one of allowed (comma-separated)
+    if [[ "$u" != "root" ]]; then echo "bad_owner:$ugm"; return 0; fi
+    local ok=false
+    IFS=',' read -r -a modes <<<"$mode_allowed"
+    for mm in "${modes[@]}"; do [[ "$m" == "$mm" ]] && ok=true; done
+    if [[ "$ok" != true ]]; then echo "bad_mode:$ugm"; else echo "ok:$ugm"; fi
+  }
+
+  local res
+  res=$(_check_perm /etc/shadow root:root 600); [[ "$res" == ok:* ]] && SHADOW_PERMS_OK=true || SHADOW_PERMS_OK=false
+  res=$(_check_perm /etc/gshadow root:root 600); [[ "$res" == ok:* ]] && GSHADOW_PERMS_OK=true || GSHADOW_PERMS_OK=false
+  res=$(_check_perm /etc/sudoers root:root 440,400); [[ "$res" == ok:* ]] && SUDOERS_PERMS_OK=true || SUDOERS_PERMS_OK=false
+
+  if [[ -d /etc/sudoers.d ]]; then
+    while IFS= read -r -d '' f; do
+      res=$(_check_perm "$f" root:root 440,400)
+      if [[ "$res" != ok:* ]]; then
+        SUDOERS_D_ISSUES+=("$f:$res")
+      fi
+    done < <(find /etc/sudoers.d -type f -print0 2>/dev/null)
+  fi
+  log "Security audit results: shadow_ok=$SHADOW_PERMS_OK gshadow_ok=$GSHADOW_PERMS_OK sudoers_ok=$SUDOERS_PERMS_OK sudoers.d_issues=${#SUDOERS_D_ISSUES[@]}"
+  log "=== Security audit complete ==="
+}
+
+# Optional final upgrade phase
+upgrade_finalize() {
+  if [[ "${UPGRADE_PHASE_ENABLED:-false}" != "true" ]]; then
+    log "upgrade_finalize: disabled (enable with --upgrade)."
+    return 0
+  fi
+  log "=== Final upgrade phase start ==="
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: would run: apt-get -y -o Dpkg::Options::=--force-confold full-upgrade"
+    log "=== Final upgrade phase complete (dry-run) ==="
+    return 0
+  fi
+  # Perform a cautious full-upgrade; rely on apt's configured retries earlier
+  set +e
+  up_out=$(apt-get -y -o Dpkg::Options::=--force-confold full-upgrade 2>&1)
+  up_rc=$?
+  set -e
+  printf '%s\n' "$up_out" | tee -a "$LOG_FILE" >/dev/null
+  # Summarize changes
+  UPGRADE_CHANGED_COUNT=$(printf '%s\n' "$up_out" | grep -c '^Inst ' || true)
+  UPGRADE_REMOVED_COUNT=$(printf '%s\n' "$up_out" | grep -c '^Remv ' || true)
+  if [[ $up_rc -eq 0 ]]; then
+    log "Final upgrade completed: upgraded=$UPGRADE_CHANGED_COUNT removed=$UPGRADE_REMOVED_COUNT"
+  else
+    log "WARNING: final upgrade exited with code $up_rc (see $LOG_FILE). Changes: upgraded=$UPGRADE_CHANGED_COUNT removed=$UPGRADE_REMOVED_COUNT"
+  fi
+  log "=== Final upgrade phase complete ==="
+}
+
+validate_repos() {
+  log "=== Repository validation start ==="
+  # Current codename (e.g., focal, jammy)
+  local codename
+  codename=$(lsb_release -cs 2>/dev/null || echo "")
+  
+  # Detect distro for mirror diagnostics
+  local distro_id=""
+  if [[ -r /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    source /etc/os-release
+    distro_id="${ID:-}"
+  fi
+  
+  # Optional mirror diagnostics: check latency for primary mirrors
+  if command -v curl >/dev/null 2>&1; then
+    local primary_mirrors=()
+    
+    case "$distro_id" in
+      ubuntu)
+        primary_mirrors=("http://archive.ubuntu.com/ubuntu" "http://security.ubuntu.com/ubuntu" "http://us.archive.ubuntu.com/ubuntu")
+        ;;
+      debian)
+        primary_mirrors=("http://deb.debian.org/debian" "http://security.debian.org/debian-security" "http://ftp.debian.org/debian")
+        ;;
+      linuxmint)
+        primary_mirrors=("http://packages.linuxmint.com" "http://archive.ubuntu.com/ubuntu")
+        ;;
+      pop)
+        primary_mirrors=("http://apt.pop-os.org/proprietary" "http://archive.ubuntu.com/ubuntu")
+        ;;
+      *)
+        # Fallback: Ubuntu mirrors for debian-like systems
+        primary_mirrors=("http://archive.ubuntu.com/ubuntu" "http://security.ubuntu.com/ubuntu")
+        ;;
+    esac
+    
+    log "Mirror diagnostics for distro: ${distro_id:-unknown}"
+    for mirror in "${primary_mirrors[@]}"; do
+      local latency_ms
+      latency_ms=$(curl -o /dev/null -s -w '%{time_total}\n' --max-time 5 "${mirror}/dists/" 2>/dev/null | awk '{print int($1 * 1000)}' || echo "timeout")
+      if [[ "$latency_ms" == "timeout" ]]; then
+        log "Mirror diagnostic: $mirror - timeout or unreachable"
+      else
+        log "Mirror diagnostic: $mirror - ${latency_ms}ms"
+      fi
+    done
+  fi
+
+  # Collect source files
+  local src_files
+  src_files=(/etc/apt/sources.list /etc/apt/sources.list.d/*.list)
+
+  # Track checked URIs to avoid duplicate checks
+  declare -A checked
+
+  for f in "${src_files[@]}"; do
+    [[ -r "$f" ]] || continue
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      # Strip leading/trailing whitespace
+      line="$(printf '%s' "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+      # Skip blanks and comments
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      # Only handle deb (not deb-src)
+      if [[ "$line" != deb* ]]; then
+        continue
+      fi
+
+      # Tokenize respecting options in []
+      # Examples:
+      # deb http://archive.ubuntu.com/ubuntu jammy main
+      # deb [arch=amd64] http://ppa.launchpad.net/foo/ubuntu jammy main
+      read -r _ tok1 tok2 tok3 <<<"$line"
+      local uri dist
+      if [[ "$tok1" == \[* ]]; then
+        uri="$tok2"
+        dist="$tok3"
+      else
+        uri="$tok1"
+        dist="$tok2"
+      fi
+
+      # Normalize uri (remove trailing /)
+      uri="${uri%/}"
+      # Skip non-http(s) URIs (file: or cdrom: or deb) - still attempt http only
+      if [[ ! "$uri" =~ ^https?:// ]]; then
+        log "Skipping non-HTTP repository: $uri"
+        continue
+      fi
+
+      # Avoid re-checking same uri+dist
+      key="$uri|$dist"
+      if [[ -n "${checked[$key]:-}" ]]; then
+        continue
+      fi
+      checked[$key]=1
+
+      # Try to fetch the Release file for the suite
+      local release_url
+      release_url="$uri/dists/$dist/Release"
+      if curl -sSf --head "$release_url" >/dev/null 2>&1; then
+        if [[ -n "$codename" && "$dist" != "$codename" ]]; then
+          log "Repository mismatch: $uri uses dist '$dist' (system: $codename)"
+          REPO_MISMATCH+=("$uri|$dist")
+        else
+          log "Repository OK: $uri (suite: $dist)"
+          REPO_OK+=("$uri|$dist")
+        fi
+      else
+        log "Repository unreachable or Release missing: $uri (suite: $dist)"
+        REPO_FAIL+=("$uri|$dist")
+      fi
+    done <"$f"
+  done
+
+  log "=== Repository validation complete ==="
+}
+
+# Detect missing APT repository public keys (NO_PUBKEY) by running a safe
+# apt-get update and scanning stderr for the NO_PUBKEY pattern. This is a
+# read-only detection pass. The function is skipped when running with
+# --dry-run to avoid performing network I/O during dry-run tests.
+detect_missing_pubkeys() {
+  log "=== Checking for missing APT repository public keys (NO_PUBKEY) ==="
+  
+  # This is APT/Debian-specific - skip on other distros
+  if [[ "$PKG_MANAGER_TYPE" != "apt" ]]; then
+    log "Skipping NO_PUBKEY detection (only applicable to APT-based systems)"
+    return 0
+  fi
+  
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: skipping NO_PUBKEY detection. Re-run without --dry-run to perform detection."
+    NO_PUBKEY_SKIPPED=true
+    return 0
+  fi
+
+  local sim_file tmp_out update_out rc raw_keys key
+  tmp_out="$LOG_DIR/apt_update_for_keys_${RUN_ID}.txt"
+
+  # Run apt-get update and capture both stdout/stderr for analysis.
+  set +e
+  update_out=$(apt-get update 2>&1)
+  rc=$?
+  set -e
+
+  # Save the update output to the run log and a separate file for later inspection
+  printf '%s\n' "$update_out" | tee -a "$LOG_FILE" >"$tmp_out" || true
+
+  # Extract NO_PUBKEY fingerprints (common apt message: "NO_PUBKEY <HEX>")
+  raw_keys=$(printf '%s\n' "$update_out" | grep -oE 'NO_PUBKEY[[:space:]]+[0-9A-Fa-f]+' || true)
+  if [[ -z "$raw_keys" ]]; then
+    log "No missing public key errors detected in apt-get update output."
+    return $rc
+  fi
+
+  # Normalize into unique hex-only keys
+  while IFS= read -r line; do
+    key=$(printf '%s' "$line" | awk '{print $2}' | tr '[:lower:]' '[:upper:]')
+    if [[ -n "$key" ]]; then
+      MISSING_PUBKEYS+=("$key")
+    fi
+  done < <(printf '%s\n' "$raw_keys")
+
+  # Deduplicate
+  if ((${#MISSING_PUBKEYS[@]})); then
+    IFS=$'\n' read -r -d '' -a MISSING_PUBKEYS < <(printf '%s\n' "${MISSING_PUBKEYS[@]}" | awk '!x[$0]++' && printf '\0')
+    log "Detected missing public keys: ${MISSING_PUBKEYS[*]}"
+    for key in "${MISSING_PUBKEYS[@]}"; do
+      log "Suggested remediation for key $key:"
+      log "  - If using apt-key (deprecated): sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $key"
+      log "  - Recommended alternative (fetch and install to /etc/apt/trusted.gpg.d):"
+  log "    curl -fsSL \"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${key}\" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/${key}.gpg >/dev/null"
+    done
+  fi
+  return $rc
+}
+
+# Interactive, root-only fixer for missing pubkeys discovered earlier.
+fix_missing_pubkeys() {
+  log "=== Fix missing APT public keys (interactive) ==="
+
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log "DRY_RUN: skipping key installation. Re-run without --dry-run and with --fix-missing-keys to apply fixes."
+    return 0
+  fi
+
+  if [[ ${#MISSING_PUBKEYS[@]} -eq 0 ]]; then
+    log "No missing public keys recorded; running detection now."
+    detect_missing_pubkeys || true
+  fi
+
+  if [[ ${#MISSING_PUBKEYS[@]} -eq 0 ]]; then
+    log "No missing public keys found; nothing to fix."
+    return 0
+  fi
+
+  if [[ $EUID -ne 0 ]]; then
+    log "ERROR: --fix-missing-keys is root-only. Please run with sudo." && return 1
+  fi
+
+  for key in "${MISSING_PUBKEYS[@]}"; do
+    # Prompt the user for each key
+    if [[ "${ASSUME_YES:-false}" == "true" ]]; then
+      ans=y
+    else
+      while true; do
+        printf '\nInstall missing APT key %s? [y/N]: ' "$key" >&2
+        read -r ans
+        case "${ans:-}" in
+        y|Y)
+          break
+          ;;
+        n|N|"")
+          ans=n
+          break
+          ;;
+        *) printf 'Please answer y or n.\n'
+          ;;
+        esac
+      done
+    fi
+
+    if [[ "${ans,,}" == "y" ]]; then
+      log "Attempting to fetch and install key $key from $KEYSERVER"
+  if curl -fsSL "https://$KEYSERVER/pks/lookup?op=get&search=0x${key}" | gpg --dearmor -o "/etc/apt/trusted.gpg.d/${key}.gpg" 2>>"$LOG_FILE"; then
+        log "Installed key $key to /etc/apt/trusted.gpg.d/${key}.gpg"
+      else
+        log "Failed to install key $key using $KEYSERVER. Suggest manual remediation:"
+        log "  sudo apt-key adv --keyserver $KEYSERVER --recv-keys $key"
+        log "  or fetch and place into /etc/apt/trusted.gpg.d/ as a .gpg file"
+      fi
+    else
+      log "Skipping key $key"
+    fi
+  done
+
+  # Offer to run apt-get update to refresh after installing keys
+  if [[ "${ASSUME_YES:-false}" == "true" ]]; then
+    ans2=y
+  else
+    while true; do
+      printf '\nRun apt-get update now to refresh package metadata? [y/N]: ' >&2
+      read -r ans2
+      case "${ans2:-}" in
+      y|Y)
+        break
+        ;;
+      n|N|"")
+        break
+        ;;
+      *) printf 'Please answer y or n.\n'
+        ;;
+      esac
+    done
+  fi
+
+  if [[ "${ans2,,}" == "y" ]]; then
+    log "Running apt-get update to refresh metadata"
+    set +e
+    apt-get update 2>&1 | tee -a "$LOG_FILE"
+    set -e
+  else
+    log "Skipping apt-get update as requested"
+  fi
+}
+
+kernel_status() {
+  log "=== Kernel status check ==="
+  local curr
+  curr=$(uname -r)
+  log "Current kernel: $curr"
+
+  # Check for upgradable kernel packages
+  local upgradable
+  upgradable=$(apt list --upgradable 2>/dev/null || true)
+  if [[ -z "$upgradable" ]]; then
+    log "No upgradable packages reported by 'apt list --upgradable' or the command is unavailable."
+  else
+    # Filter for common kernel package names
+    # Use a subshell with command substitution for POSIX-ish compatibility instead of process substitution
+    KERNEL_UPGRADE_LIST=()
+    # Avoid process substitution in environments where it's restricted by using a temp file
+    _sm_tmp_kern="$LOG_DIR/kern_up_${RUN_ID}.txt"
+    printf '%s\n' "$upgradable" | grep -E 'linux-(image|headers)|linux-image|linux-headers' >"$_sm_tmp_kern" 2>/dev/null || true
+    while IFS= read -r _line; do
+      [[ -n "$_line" ]] && KERNEL_UPGRADE_LIST+=("$_line")
+    done <"$_sm_tmp_kern" || true
+    rm -f "$_sm_tmp_kern" 2>/dev/null || true
+    if ((${#KERNEL_UPGRADE_LIST[@]})); then
+      log "Kernel packages available for upgrade:"
+      for l in "${KERNEL_UPGRADE_LIST[@]}"; do
+        log "+ $l"
+      done
+    else
+      log "No kernel packages found among upgradable packages."
+    fi
+  fi
+
+  if [[ -f /var/run/reboot-required ]]; then
+    log "Reboot required (file /var/run/reboot-required present)."
+    SUMMARY_REBOOT_REQUIRED=true
+  else
+    log "No reboot required (no /var/run/reboot-required file)."
+  fi
+  log "=== Kernel status check complete ==="
+}
+
+reboot_if_required() {
+  if [[ -f /var/run/reboot-required ]]; then
+    log "Reboot required. Packages: $(cat /var/run/reboot-required.pkgs 2>/dev/null || echo 'kernel/critical updates')"
+    if [[ "$AUTO_REBOOT" == "true" ]]; then
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        log "DRY_RUN: AUTO_REBOOT requested — would reboot in ${AUTO_REBOOT_DELAY}s"
+      else
+        log "AUTO_REBOOT=true -> Rebooting in ${AUTO_REBOOT_DELAY}s..."
+        sleep "${AUTO_REBOOT_DELAY}"
+        /sbin/reboot
+      fi
+    else
+      log "Auto-reboot disabled. Please reboot when convenient."
+    fi
+  else
+    log "No reboot required."
+  fi
+}
+
+# Enforce log size limit if configured
+truncate_log_if_needed() {
+  if ! [[ "$LOG_MAX_SIZE_MB" =~ ^[0-9]+$ ]]; then
+    return 0
+  fi
+  if (( LOG_MAX_SIZE_MB == 0 )); then
+    return 0
+  fi
+  if [[ ! -f "$LOG_FILE" ]]; then
+    return 0
+  fi
+  local size_kb
+  size_kb=$(du -k "$LOG_FILE" 2>/dev/null | awk '{print $1}')
+  LOG_ORIGINAL_SIZE_KB=${size_kb:-0}
+  local limit_kb=$((LOG_MAX_SIZE_MB * 1024))
+  if (( size_kb <= limit_kb )); then
+    LOG_FINAL_SIZE_KB=$size_kb
+    return 0
+  fi
+  # Preserve tail portion
+  local keep_kb
+  if ! [[ "$LOG_TAIL_PRESERVE_KB" =~ ^[0-9]+$ ]]; then
+    keep_kb=512
+  else
+    keep_kb=$LOG_TAIL_PRESERVE_KB
+  fi
+  local keep_bytes=$((keep_kb * 1024))
+  # Use tail -c to extract last bytes
+  if tail -c "$keep_bytes" "$LOG_FILE" >"${LOG_FILE}.tail" 2>/dev/null; then
+    {
+      printf '%s\n' "$(date '+%F %T') LOG_TRUNCATED: original_size_kb=${size_kb} limit_kb=${limit_kb} preserved_tail_kb=${keep_kb}";
+      cat "${LOG_FILE}.tail"
+    } >"${LOG_FILE}.new" 2>/dev/null || true
+    mv "${LOG_FILE}.new" "$LOG_FILE" 2>/dev/null || true
+    rm -f "${LOG_FILE}.tail" 2>/dev/null || true
+    LOG_TRUNCATED=true
+    size_kb=$(du -k "$LOG_FILE" 2>/dev/null | awk '{print $1}')
+    LOG_FINAL_SIZE_KB=${size_kb:-0}
+    log "WARNING: Log truncated to last ${keep_kb}KB (original ${LOG_ORIGINAL_SIZE_KB}KB)."
+  fi
+}
+
+print_summary() {
+  log "=== Maintenance summary ==="
+
+  # Helper: escape a string for JSON
+  escape_json() {
+    # Escape backslashes and double quotes, preserve newlines as \n
+    printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e ':a;N;$!ba;s/\n/\\n/g'
+  }
+
+  # Helper: convert a bash array (name passed) into a JSON array string
+  array_to_json() {
+    local -n _arr=$1
+    local out='['
+    local sep=''
+    local v esc
+    for v in "${_arr[@]}"; do
+      esc=$(escape_json "$v")
+      out+="$sep\"$esc\""
+      sep=','
+    done
+    out+=']'
+    printf '%s' "$out"
+  }
+
+  # Repositories summary
+  local ok_count mismatch_count fail_count
+  ok_count=${#REPO_OK[@]}
+  mismatch_count=${#REPO_MISMATCH[@]}
+  fail_count=${#REPO_FAIL[@]}
+
+  printf '\n' | tee -a "$LOG_FILE"
+  printf 'Repository summary:\n' | tee -a "$LOG_FILE"
+  printf '  OK: %d\n' "$ok_count" | tee -a "$LOG_FILE"
+  printf '  Mismatch: %d\n' "$mismatch_count" | tee -a "$LOG_FILE"
+  printf '  Unreachable/Missing: %d\n' "$fail_count" | tee -a "$LOG_FILE"
+
+  if ((mismatch_count > 0)); then
+    printf '  Mismatched entries (uri|suite):\n' | tee -a "$LOG_FILE"
+    for e in "${REPO_MISMATCH[@]}"; do printf '    %s\n' "$e" | tee -a "$LOG_FILE"; done
+  fi
+  if ((fail_count > 0)); then
+    printf '  Unreachable entries (uri|suite):\n' | tee -a "$LOG_FILE"
+    for e in "${REPO_FAIL[@]}"; do printf '    %s\n' "$e" | tee -a "$LOG_FILE"; done
+  fi
+
+  # Missing public keys summary (NO_PUBKEY) detected during apt-get update
+  local mpk_count
+  mpk_count=${#MISSING_PUBKEYS[@]}
+  printf '\n' | tee -a "$LOG_FILE"
+  printf 'Missing repository public keys (NO_PUBKEY): %d\n' "$mpk_count" | tee -a "$LOG_FILE"
+  if ((mpk_count > 0)); then
+    for k in "${MISSING_PUBKEYS[@]}"; do
+      printf '    %s\n' "$k" | tee -a "$LOG_FILE"
+    done
+  elif [[ "${DRY_RUN:-false}" == "true" && "${NO_PUBKEY_SKIPPED:-false}" == "true" ]]; then
+    printf '  (Detection skipped under --dry-run)\n' | tee -a "$LOG_FILE"
+  fi
+
+  # Kernel summary
+  local kcount
+  kcount=${#KERNEL_UPGRADE_LIST[@]}
+  printf '\n' | tee -a "$LOG_FILE"
+  printf 'Kernel summary:\n' | tee -a "$LOG_FILE"
+  printf '  Current kernel: %s\n' "$(uname -r)" | tee -a "$LOG_FILE"
+  printf '  Kernel upgradable packages: %d\n' "$kcount" | tee -a "$LOG_FILE"
+  if ((kcount > 0)); then
+    for k in "${KERNEL_UPGRADE_LIST[@]}"; do printf '    %s\n' "$k" | tee -a "$LOG_FILE"; done
+  fi
+  printf '  Reboot required: %s\n' "${SUMMARY_REBOOT_REQUIRED}" | tee -a "$LOG_FILE"
+
+  # APT signature verification summary
+  printf '\n' | tee -a "$LOG_FILE"
+  printf 'APT signature verification: %s\n' "$APT_SIG_STATUS" | tee -a "$LOG_FILE"
+
+  # Failed services summary
+  local fs_count
+  fs_count=${#FAILED_SERVICES[@]}
+  if ((fs_count > 0)); then
+    printf '\n' | tee -a "$LOG_FILE"
+    printf 'Failed systemd services: %d\n' "$fs_count" | tee -a "$LOG_FILE"
+    for s in "${FAILED_SERVICES[@]}"; do
+      printf '    %s\n' "$s" | tee -a "$LOG_FILE"
+    done
+  fi
+
+  # Disk usage summary
+  if [[ -n "$DISK_BEFORE" && -n "$DISK_AFTER" ]]; then
+    printf '\n' | tee -a "$LOG_FILE"
+    printf 'Disk usage (root filesystem):\n' | tee -a "$LOG_FILE"
+    printf '  Before: %s KB\n' "$DISK_BEFORE" | tee -a "$LOG_FILE"
+    printf '  After:  %s KB\n' "$DISK_AFTER" | tee -a "$LOG_FILE"
+    if ((DISK_SAVED_KB > 0)); then
+      printf '  Freed:  %s KB (%.2f MB)\n' "$DISK_SAVED_KB" "$(platform_math_divide "$DISK_SAVED_KB" 1024)" | tee -a "$LOG_FILE"
+    elif ((DISK_SAVED_KB < 0)); then
+      printf '  Used:   %s KB (%.2f MB)\n' "$((0 - DISK_SAVED_KB))" "$(platform_math_divide "$((-DISK_SAVED_KB))" 1024)" | tee -a "$LOG_FILE"
+    else
+      printf '  No change\n' | tee -a "$LOG_FILE"
+    fi
+    
+    # Per-phase disk deltas
+    set +u
+    if declare -p PHASE_DISK_DELTAS >/dev/null 2>&1 && (( ${#PHASE_DISK_DELTAS[@]} > 0 )); then
+      printf '  Per-phase disk deltas (freed=positive, used=negative):\n' | tee -a "$LOG_FILE"
+      for phase in "${!PHASE_DISK_DELTAS[@]}"; do
+        local delta=${PHASE_DISK_DELTAS[$phase]}
+        if ((delta > 0)); then
+          printf '    %s: +%s KB (freed)\n' "$phase" "$delta" | tee -a "$LOG_FILE"
+        elif ((delta < 0)); then
+          printf '    %s: %s KB (used)\n' "$phase" "$delta" | tee -a "$LOG_FILE"
+        else
+          printf '    %s: 0 KB (no change)\n' "$phase" | tee -a "$LOG_FILE"
+        fi
+      done
+    fi
+    set -u
+  fi
+  
+  # Additional metrics summary
+  if ((THUMBNAIL_FREED_BYTES > 0)); then
+    printf '\n' | tee -a "$LOG_FILE"
+    if command -v numfmt >/dev/null 2>&1; then
+      printf 'Thumbnail cache freed: %s\n' "$(numfmt --to=iec-i --suffix=B "$THUMBNAIL_FREED_BYTES" 2>/dev/null || echo "${THUMBNAIL_FREED_BYTES}B")" | tee -a "$LOG_FILE"
+    else
+      printf 'Thumbnail cache freed: %s bytes\n' "$THUMBNAIL_FREED_BYTES" | tee -a "$LOG_FILE"
+    fi
+  fi
+  if ((SNAP_OLD_REMOVED_COUNT > 0)); then
+    printf 'Snap old revisions removed: %d\n' "$SNAP_OLD_REMOVED_COUNT" | tee -a "$LOG_FILE"
+  fi
+  if ((SNAP_CACHE_CLEARED_BYTES > 0)); then
+    if command -v numfmt >/dev/null 2>&1; then
+      printf 'Snap cache freed: %s\n' "$(numfmt --to=iec-i --suffix=B "$SNAP_CACHE_CLEARED_BYTES" 2>/dev/null || echo "${SNAP_CACHE_CLEARED_BYTES}B")" | tee -a "$LOG_FILE"
+    else
+      printf 'Snap cache freed: %s bytes\n' "$SNAP_CACHE_CLEARED_BYTES" | tee -a "$LOG_FILE"
+    fi
+  fi
+  if ((CRASH_FREED_BYTES > 0)); then
+    if command -v numfmt >/dev/null 2>&1; then
+      printf 'Crash dump freed: %s\n' "$(numfmt --to=iec-i --suffix=B "$CRASH_FREED_BYTES" 2>/dev/null || echo "${CRASH_FREED_BYTES}B")" | tee -a "$LOG_FILE"
+    else
+      printf 'Crash dump freed: %s bytes\n' "$CRASH_FREED_BYTES" | tee -a "$LOG_FILE"
+    fi
+  fi
+  if ((FSTRIM_TOTAL_TRIMMED > 0)); then
+    if command -v numfmt >/dev/null 2>&1; then
+      printf 'fstrim total freed: %s\n' "$(numfmt --to=iec-i --suffix=B "$FSTRIM_TOTAL_TRIMMED" 2>/dev/null || echo "${FSTRIM_TOTAL_TRIMMED}B")" | tee -a "$LOG_FILE"
+    else
+      printf 'fstrim total freed: %s bytes\n' "$FSTRIM_TOTAL_TRIMMED" | tee -a "$LOG_FILE"
+    fi
+  fi
+  if [[ "${PURGE_OLD_KERNELS:-false}" == "true" ]]; then
+    printf 'Kernel purge kept newest: %s (removed %s)\n' "$KEEP_KERNELS" "$KERNELS_REMOVED_COUNT" | tee -a "$LOG_FILE"
+  fi
+  if [[ "${ORPHAN_PURGE_ENABLED:-false}" == "true" && ${ORPHAN_PURGED_COUNT} -gt 0 ]]; then
+    printf 'Orphan packages purged: %s\n' "$ORPHAN_PURGED_COUNT" | tee -a "$LOG_FILE"
+  fi
+  
+  if [[ "${NO_FLATPAK:-false}" != "true" && -n "$FLATPAK_SCOPE_APPLIED" ]]; then
+    printf 'Flatpak scope applied: %s\n' "$FLATPAK_SCOPE_APPLIED" | tee -a "$LOG_FILE"
+  fi
+
+  printf '\n' | tee -a "$LOG_FILE"
+  log "=== End summary ==="
+
+  # Emit JSON summary if requested
+  if [[ "${JSON_SUMMARY:-false}" == "true" && "${_JSON_WRITTEN:-false}" != "true" ]]; then
+    _JSON_WRITTEN=true
+    JSON_FILE="$LOG_DIR/sysmaint_${RUN_ID}.json"
+    timestamp=$(date --iso-8601=seconds)
+    # Ensure phase estimates are loaded even if adaptive mode wasn't enabled
+    if declare -f load_phase_estimates >/dev/null 2>&1; then
+      if [[ -z "${PHASE_EST_EMA[clean_tmp]:-}" ]]; then
+        load_phase_estimates || true
+      fi
+    fi
+    repo_ok_json=$(array_to_json REPO_OK)
+    repo_mismatch_json=$(array_to_json REPO_MISMATCH)
+    repo_fail_json=$(array_to_json REPO_FAIL)
+    kernel_up_json=$(array_to_json KERNEL_UPGRADE_LIST)
+    missing_keys_json=$(array_to_json MISSING_PUBKEYS)
+    
+    # Write JSON with error suppression to avoid ERR trap during JSON generation
+    set +e
+    trap - ERR
+    {
+      printf '{\n'
+      printf '  "schema_version": "1.0",\n'
+      printf '  "script_version": "%s",\n' "$SCRIPT_VERSION"
+      # Compute log file checksum if available
+      local lf_hash="unavailable"
+      if command -v sha256sum >/dev/null 2>&1 && [[ -f "$LOG_FILE" ]]; then
+        lf_hash=$(sha256sum "$LOG_FILE" 2>/dev/null | awk '{print $1}' || echo "unavailable")
+      fi
+      printf '  "log_file_sha256": "%s",\n' "${lf_hash}"
+      printf '  "run_id": "%s",\n' "$(escape_json "$RUN_ID")"
+      printf '  "timestamp": "%s",\n' "$timestamp"
+  printf '  "dry_run_mode": %s,\n' "${DRY_RUN}"
+      printf '  "repos": {"ok": %s, "mismatch": %s, "unreachable": %s},\n' "$repo_ok_json" "$repo_mismatch_json" "$repo_fail_json"
+      printf '  "kernel": {"current": "%s", "upgradable": %s},\n' "$(escape_json "$(uname -r)")" "$kernel_up_json"
+      printf '  "missing_pubkeys": %s,\n' "$missing_keys_json"
+      failed_services_json=$(array_to_json FAILED_SERVICES)
+      printf '  "failed_services": %s,\n' "$failed_services_json"
+      # Add phase timings
+      printf '  "phase_timings": {\n'
+      local phase_keys=()
+      for key in "${!PHASE_TIMINGS[@]}"; do
+        [[ "$key" == *_duration ]] && phase_keys+=("$key")
+      done
+      local idx=0 total=${#phase_keys[@]}
+      for key in "${phase_keys[@]}"; do
+        ((idx++))
+        local phase_name="${key%_duration}"
+        local sep=","
+        [[ $idx -eq $total ]] && sep=""
+        printf '    "%s": %s%s\n' "$phase_name" "${PHASE_TIMINGS[$key]}" "$sep"
+      done
+      printf '  },\n'
+      # Disk usage
+      printf '  "disk_usage": {"before_kb": %s, "after_kb": %s, "saved_kb": %s},\n' "${DISK_BEFORE:-0}" "${DISK_AFTER:-0}" "${DISK_SAVED_KB}"
+      # Per-phase disk deltas
+      printf '  "phase_disk_deltas_kb": {\n'
+      set +u
+      if declare -p PHASE_DISK_DELTAS >/dev/null 2>&1 && (( ${#PHASE_DISK_DELTAS[@]} > 0 )); then
+        local delta_keys=()
+        for key in "${!PHASE_DISK_DELTAS[@]}"; do
+          delta_keys+=("$key")
+        done
+        local didx=0 dtotal=${#delta_keys[@]}
+        for key in "${delta_keys[@]}"; do
+          ((didx++))
+          local dsep=","; [[ $didx -eq $dtotal ]] && dsep=""
+          printf '    "%s": %s%s\n' "$key" "${PHASE_DISK_DELTAS[$key]}" "$dsep"
+        done
+      fi
+      set -u
+      printf '  },\n'
+      # EMA phase estimates (seconds)
+      printf '  "phase_estimates_ema": {\n'
+      local ekeys=()
+      for key in "${!PHASE_EST_EMA[@]}"; do
+        ekeys+=("$key")
+      done
+      local eidx=0 etotal=${#ekeys[@]}
+      for key in "${ekeys[@]}"; do
+        ((eidx++))
+        local esep=","; [[ $eidx -eq $etotal ]] && esep=""
+        printf '    "%s": %s%s\n' "$key" "${PHASE_EST_EMA[$key]}" "$esep"
+      done
+      printf '  },\n'
+      # Flatpak and thumbnail metrics
+      printf '  "flatpak_scope_applied": "%s",\n' "$FLATPAK_SCOPE_APPLIED"
+      printf '  "thumbnail_freed_bytes": %s,\n' "${THUMBNAIL_FREED_BYTES}"
+      printf '  "snap_old_revisions_removed": %s,\n' "${SNAP_OLD_REMOVED_COUNT}"
+      printf '  "snap_cache_cleared_bytes": %s,\n' "${SNAP_CACHE_CLEARED_BYTES}"
+  printf '  "crash_freed_bytes": %s,\n' "${CRASH_FREED_BYTES}"
+  trimmed_fs_json=$(array_to_json TRIMMED_FILESYSTEMS)
+  printf '  "fstrim_total_trimmed_bytes": %s,\n' "${FSTRIM_TOTAL_TRIMMED}"
+  printf '  "trimmed_filesystems": %s,\n' "$trimmed_fs_json"
+      printf '  "final_upgrade_enabled": %s,\n' "${UPGRADE_PHASE_ENABLED}"
+      printf '  "final_upgrade_upgraded_count": %s,\n' "${UPGRADE_CHANGED_COUNT}"
+      printf '  "final_upgrade_removed_count": %s,\n' "${UPGRADE_REMOVED_COUNT}"
+  printf '  "drop_caches_enabled": %s,\n' "${DROP_CACHES_ENABLED}"
+  printf '  "mem_available_before_kb": %s,\n' "${MEM_BEFORE_KB}"
+  printf '  "mem_available_after_kb": %s,\n' "${MEM_AFTER_KB}"
+  printf '  "swap_free_before_kb": %s,\n' "${SWAP_BEFORE_KB}"
+  printf '  "swap_free_after_kb": %s,\n' "${SWAP_AFTER_KB}"
+  printf '  "auto_mode": %s,\n' "${AUTO_MODE}"
+  printf '  "auto_reboot_delay_seconds": %s,\n' "${AUTO_REBOOT_DELAY}"
+  printf '  "journal_vacuum_time": "%s",\n' "$(escape_json "${JOURNAL_VACUUM_TIME}")"
+  printf '  "journal_vacuum_size": "%s",\n' "$(escape_json "${JOURNAL_VACUUM_SIZE}")"
+    printf '  "kernel_purge_enabled": %s,\n' "${PURGE_OLD_KERNELS}"
+    printf '  "keep_kernels": %s,\n' "${KEEP_KERNELS}"
+    printf '  "kernels_removed_count": %s,\n' "${KERNELS_REMOVED_COUNT}"
+    printf '  "update_grub_enabled": %s,\n' "${UPDATE_GRUB_ENABLED}"
+    printf '  "update_grub_ran": %s,\n' "${UPDATE_GRUB_RAN}"
+    printf '  "update_grub_success": %s,\n' "${UPDATE_GRUB_SUCCESS}"
+    orphan_json=$(array_to_json ORPHAN_PURGED_PACKAGES)
+    printf '  "orphan_purge_enabled": %s,\n' "${ORPHAN_PURGE_ENABLED}"
+    printf '  "orphan_purged_count": %s,\n' "${ORPHAN_PURGED_COUNT}"
+    printf '  "orphan_purged_packages": %s,\n' "$orphan_json"
+  printf '  "color_mode": "%s",\n' "$(escape_json "$COLOR_MODE")"
+  printf '  "log_truncated": %s,\n' "${LOG_TRUNCATED}"
+  printf '  "log_original_size_kb": %s,\n' "${LOG_ORIGINAL_SIZE_KB}"
+  printf '  "log_final_size_kb": %s,\n' "${LOG_FINAL_SIZE_KB}"
+  zombies_json=$(array_to_json ZOMBIE_PROCESSES)
+  printf '  "zombie_check_enabled": %s,\n' "${CHECK_ZOMBIES}"
+  printf '  "zombie_count": %s,\n' "${ZOMBIE_COUNT}"
+  printf '  "zombie_processes": %s,\n' "$zombies_json"
+  sudoers_d_json=$(array_to_json SUDOERS_D_ISSUES)
+  printf '  "security_audit_enabled": %s,\n' "${SECURITY_AUDIT_ENABLED}"
+  printf '  "shadow_perms_ok": "%s",\n' "$(escape_json "${SHADOW_PERMS_OK}")"
+  printf '  "gshadow_perms_ok": "%s",\n' "$(escape_json "${GSHADOW_PERMS_OK}")"
+  printf '  "sudoers_perms_ok": "%s",\n' "$(escape_json "${SUDOERS_PERMS_OK}")"
+  printf '  "sudoers_d_issues": %s,\n' "$sudoers_d_json"
+  printf '  "browser_cache_report": %s,\n' "${BROWSER_CACHE_REPORT}"
+  printf '  "browser_cache_purge": %s,\n' "${BROWSER_CACHE_PURGE}"
+  printf '  "firefox_cache_bytes": %s,\n' "${FIREFOX_CACHE_BYTES}"
+  printf '  "chromium_cache_bytes": %s,\n' "${CHROMIUM_CACHE_BYTES}"
+  printf '  "chrome_cache_bytes": %s,\n' "${CHROME_CACHE_BYTES}"
+  printf '  "browser_cache_purged": %s,\n' "${BROWSER_CACHE_PURGED_FLAG}"
+      if [[ "${SIMULATE_UPGRADE:-false}" == "true" || -n "${SIMULATED_UPGRADE_COUNT:-}" ]]; then
+        sim_up=${SIMULATED_UPGRADE_COUNT:-0}
+        sim_rem=${SIMULATED_REMOVE_COUNT:-0}
+        sim_conf=${SIMULATED_CONFIGURE_COUNT:-0}
+        sim_path=$(escape_json "$LOG_DIR/simulate_${RUN_ID}.txt")
+        printf '  "simulation": {"upgrade": %d, "remove": %d, "configure": %d, "output_file": "%s"},\n' "$sim_up" "$sim_rem" "$sim_conf" "$sim_path"
+      fi
+  printf '  "apt_signature_status": "%s",\n' "$APT_SIG_STATUS"
+  printf '  "reboot_required": %s,\n' "${SUMMARY_REBOOT_REQUIRED}"
+  printf '  "reboot_recommended": %s,\n' "${SUMMARY_REBOOT_REQUIRED}"
+  caps_av_json=$(array_to_json CAPABILITIES_AVAILABLE)
+  caps_un_json=$(array_to_json CAPABILITIES_UNAVAILABLE)
+  printf '  "capabilities": {"available": %s, "unavailable": %s},\n' "$caps_av_json" "$caps_un_json"
+  skipped_caps_json=$(array_to_json SKIPPED_CAPABILITIES)
+  printf '  "skipped_capabilities": %s,\n' "$skipped_caps_json"
+  printf '  "desktop_mode": "%s",\n' "$(escape_json "$DESKTOP_MODE")"
+  printf '  "desktop_guard_enabled": %s,\n' "${DESKTOP_GUARD_ENABLED}"
+  printf '  "os_description": "%s",\n' "$(escape_json "$OS_DESCRIPTION")"
+  printf '  "hostname": "%s",\n' "$(escape_json "$(hostname 2>/dev/null || echo 'unknown')")"
+  printf '  "uptime_seconds": %s,\n' "${UPTIME_SECONDS}"
+  printf '  "package_count": %s,\n' "${PACKAGE_COUNT}"
+  printf '  "mem_total_kb": %s,\n' "${MEM_TOTAL_KB}"
+  printf '  "mem_available_start_kb": %s,\n' "${MEM_AVAILABLE_KB_START}"
+  printf '  "swap_total_kb": %s,\n' "${SWAP_TOTAL_KB}"
+  printf '  "disk_root_total_kb": %s,\n' "${DISK_ROOT_TOTAL_KB}"
+  printf '  "log_file": "%s",\n' "$(escape_json "$LOG_FILE")"
+  printf '  "checksum_sha256": "PLACEHOLDER"\n'
+      printf '}\n'
+    } >"$JSON_FILE" 2>>"$LOG_FILE"
+    # Compute checksum over placeholder version then replace placeholder
+    if command -v sha256sum >/dev/null 2>&1; then
+      sum=$(sha256sum "$JSON_FILE" | awk '{print $1}' || echo "unavailable")
+      sed -i "s/\"checksum_sha256\": \"PLACEHOLDER\"/\"checksum_sha256\": \"$sum\"/" "$JSON_FILE" 2>>"$LOG_FILE" || true
+    else
+      sum="unavailable"
+    fi
+    set -e
+    trap on_err ERR
+    # Validate JSON write
+    if [[ -s "$JSON_FILE" ]]; then
+      log "JSON summary written to $JSON_FILE (checksum=$sum)"
+    else
+      log "ERROR: JSON summary not written (file missing or empty): $JSON_FILE"
+    fi
+  fi
+  if [[ "${JSON_SUMMARY:-false}" == "true" && "${_JSON_WRITTEN:-false}" == "true" ]]; then
+    log "DEBUG: JSON summary generation skipped due to _JSON_WRITTEN guard"
+  fi
+}
+
+usage() {
+  cat <<'EOF'
+sysmaint — Automated Linux System Maintenance
+
+USAGE
+  sudo ./sysmaint [OPTIONS]
+  sudo ./sysmaint --gui              Interactive mode
+  sudo ./sysmaint --dry-run          Safe preview
+
+MODES
+  --gui, --tui        Interactive menu (requires dialog)
+  --dry-run           Preview without making changes
+  --auto              Unattended mode (no prompts)
+
+UPDATES
+  --upgrade           Full distribution upgrade
+  --no-snap           Skip Snap packages
+  --no-flatpak        Skip Flatpak packages
+  --no-firmware       Skip firmware updates
+
+CLEANUP
+  --purge-kernels     Remove old kernels
+  --keep-kernels N    Keep N old kernels (default: 2)
+  --orphan-purge      Remove orphaned packages
+  --fstrim            SSD TRIM optimization
+  --drop-caches       Clear kernel page cache
+  --journal-days N    Keep N days of logs
+
+SECURITY
+  --security-audit    Check critical file permissions
+  --check-zombies     Scan for zombie processes
+
+BROWSER
+  --browser-cache-report   Show cache sizes
+  --browser-cache-purge    Delete browser caches
+
+OUTPUT
+  --json-summary      Generate JSON report
+  --color MODE        auto|always|never
+  --progress MODE     none|dots|bar|spinner|adaptive
+
+AUTOMATION
+  --auto-reboot       Reboot if required
+  --auto-reboot-delay N   Wait N seconds before reboot
+  --yes               Auto-approve prompts
+
+DETECTION (no root required)
+  --detect            Show system detection report
+  --distro NAME       Override OS detection
+  --pkg-manager PM    Override package manager
+  --force-generic     Use generic mode
+
+EXIT CODES
+  0    Success
+  10   Repository issues
+  20   Missing keys
+  30   Failed services
+  75   Lock timeout
+  100  Reboot required
+
+Full documentation: https://github.com/Harery/SYSMAINT
+EOF
+}
+
+if [[ "${1:-}" =~ ^(--help|-h)$ ]]; then
+  usage
+  exit 0
+fi
+
+if [[ "${1:-}" =~ ^(--version|-v)$ ]]; then
+  echo "sysmaint version $SCRIPT_VERSION"
+  exit 0
+fi
+
+# Support older getopt or fallback callers: pre-scan args for simulate-upgrade so
+# the flag is honored even when getopt behaves unexpectedly in some envs.
+for _arg in "$@"; do
+  if [[ "$_arg" == "--simulate-upgrade" ]]; then
+    SIMULATE_UPGRADE=true
+    break
+  fi
+  # Pre-scan for keyserver override
+  if [[ "$_arg" =~ ^--keyserver= ]]; then
+    KEYSERVER="${_arg#--keyserver=}"
+  fi
+  if [[ "$_arg" == "--yes" ]]; then
+    ASSUME_YES=true
+  fi
+  if [[ "$_arg" == "--clear-tmp" ]]; then
+    CLEAR_TMP=true
+  fi
+  if [[ "$_arg" == "--no-clear-tmp" ]]; then
+    CLEAR_TMP=false
+  fi
+  if [[ "$_arg" == "--clear-tmp-force" ]]; then
+    CLEAR_TMP_FORCE=true
+  fi
+  if [[ "$_arg" == "--confirm-clear-tmp-force" ]]; then
+    CLEAR_TMP_FORCE_CONFIRMED=true
+  fi
+  if [[ "$_arg" =~ ^--clear-tmp-age= ]]; then
+    CLEAR_TMP_AGE_DAYS="${_arg#--clear-tmp-age=}"
+  fi
+  if [[ "$_arg" =~ ^--progress= ]]; then
+    PROGRESS_MODE="${_arg#--progress=}"
+  fi
+  if [[ "$_arg" =~ ^--progress-duration= ]]; then
+    PROGRESS_DURATION="${_arg#--progress-duration=}"
+  fi
+  if [[ "$_arg" =~ ^--lock-wait-seconds= ]]; then
+    LOCK_WAIT_SECONDS="${_arg#--lock-wait-seconds=}"
+  fi
+  if [[ "$_arg" == "--reset-progress-history" ]]; then
+    RESET_PROGRESS_HISTORY=true
+  fi
+done
+
+# Robust CLI parsing with getopt. Flags override environment variables for the run.
+# Note: GNU enhanced getopt returns exit code 4 from `getopt --test` to signal availability.
+# A return of 0 means basic (non-GNU) getopt, so we negate the test.
+# First check if getopt exists at all (some minimal Docker images don't have it)
+if command -v getopt >/dev/null 2>&1 && ! getopt --test >/dev/null 2>&1; then
+  PARSED=$(getopt -o h --long help,dry-run,no-reboot,auto-reboot,auto,auto-reboot-delay:,json-summary,no-json-summary,simulate-upgrade,fix-missing-keys,yes,keyserver:,no-snap,no-flatpak,flatpak-user-only,flatpak-system-only,no-firmware,clear-dns-cache,no-clear-dns-cache,no-clear-thumbnails,no-journal-vacuum,no-check-failed-services,clear-crash,no-clear-crash,fstrim,no-fstrim,drop-caches,no-drop-caches,purge-kernels,no-purge-kernels,keep-kernels:,orphan-purge,no-orphan-purge,progress:,progress-duration:,reset-progress-history,parallel,lock-wait-seconds:,clear-tmp,no-clear-tmp,clear-tmp-force,confirm-clear-tmp-force,clear-tmp-age:,snap-clean-old,snap-clear-cache,no-snap-clean-old,no-snap-clear-cache,mode:,no-desktop-guard,journal-days:,update-grub,upgrade,color:,log-max-size-mb:,log-tail-keep-kb:,check-zombies,no-check-zombies,security-audit,browser-cache-report,browser-cache-purge,detect,distro:,pkg-manager:,init-system:,force-generic -- "$@") || {
+    usage
+    exit 2
+  }
+  eval set -- "$PARSED"
+  while true; do
+    case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --clear-tmp)
+      CLEAR_TMP=true
+      shift
+      ;;
+    --no-clear-tmp)
+      CLEAR_TMP=false
+      shift
+      ;;
+    --clear-tmp-force)
+      CLEAR_TMP_FORCE=true
+      shift
+        ;;
+      --confirm-clear-tmp-force)
+        CLEAR_TMP_FORCE_CONFIRMED=true
+        shift
+      ;;
+    --clear-tmp-age)
+      CLEAR_TMP_AGE_DAYS="$2"
+      shift 2
+      ;;
+    --progress)
+      PROGRESS_MODE="$2"
+      shift 2
+      ;;
+    --progress-duration)
+      PROGRESS_DURATION="$2"
+      shift 2
+      ;;
+    --lock-wait-seconds)
+      LOCK_WAIT_SECONDS="$2"
+      shift 2
+      ;;
+    --fix-missing-keys)
+      FIX_MISSING_KEYS=true
+      shift
+      ;;
+    --yes)
+      ASSUME_YES=true
+      shift
+      ;;
+    --keyserver)
+      KEYSERVER="$2"
+      shift 2
+      ;;
+    --no-desktop-guard)
+      DESKTOP_GUARD_ENABLED=false
+      shift
+      ;;
+    --mode)
+      MODE_OVERRIDE="$2"
+      shift 2
+      ;;
+    --journal-days)
+      JOURNAL_VACUUM_TIME="${2}d"
+      shift 2
+      ;;
+    --no-reboot)
+      AUTO_REBOOT=false
+      shift
+      ;;
+    --no-snap)
+      NO_SNAP=true
+      shift
+      ;;
+    --clear-dns-cache)
+      CLEAR_DNS_CACHE=true
+      shift
+      ;;
+    --no-clear-dns-cache)
+      CLEAR_DNS_CACHE=false
+      shift
+      ;;
+    --no-clear-thumbnails)
+      CLEAR_THUMBNAILS=false
+      shift
+      ;;
+    --no-flatpak)
+      NO_FLATPAK=true
+      shift
+      ;;
+    --flatpak-user-only)
+      FLATPAK_SCOPE="user"
+      shift
+      ;;
+    --flatpak-system-only)
+      FLATPAK_SCOPE="system"
+      shift
+      ;;
+    --reset-progress-history)
+      RESET_PROGRESS_HISTORY=true
+      shift
+      ;;
+    --parallel)
+      PARALLEL_EXEC=true
+      shift
+      ;;
+    --no-firmware)
+      NO_FIRMWARE=true
+      shift
+      ;;
+    --no-journal-vacuum)
+      CLEAR_JOURNAL=false
+      shift
+      ;;
+    --no-check-failed-services)
+      CHECK_FAILED_SERVICES=false
+      shift
+      ;;
+    --clear-crash)
+      CLEAR_CRASH_DUMPS=true
+      shift
+      ;;
+    --no-clear-crash)
+      CLEAR_CRASH_DUMPS=false
+      shift
+      ;;
+    --fstrim)
+      FSTRIM_ENABLED=true
+      shift
+      ;;
+    --no-fstrim)
+      FSTRIM_ENABLED=false
+      shift
+      ;;
+    --drop-caches)
+      DROP_CACHES_ENABLED=true
+      shift
+      ;;
+    --no-drop-caches)
+      DROP_CACHES_ENABLED=false
+      shift
+      ;;
+    --purge-kernels)
+      PURGE_OLD_KERNELS=true
+      shift
+      ;;
+    --no-purge-kernels)
+      PURGE_OLD_KERNELS=false
+      shift
+      ;;
+    --keep-kernels=*)
+      KEEP_KERNELS="${1#--keep-kernels=}"
+      shift
+      ;;
+    --keep-kernels)
+      KEEP_KERNELS="$2"
+      shift 2
+      ;;
+    --orphan-purge)
+      ORPHAN_PURGE_ENABLED=true
+      shift
+      ;;
+    --no-orphan-purge)
+      ORPHAN_PURGE_ENABLED=false
+      shift
+      ;;
+    --upgrade)
+      UPGRADE_PHASE_ENABLED=true
+      shift
+      ;;
+    --update-grub)
+      UPDATE_GRUB_ENABLED=true
+      shift
+      ;;
+    --json-summary)
+      JSON_SUMMARY=true
+      shift
+      ;;
+    --no-json-summary)
+      JSON_SUMMARY=false
+      shift
+      ;;
+    --simulate-upgrade)
+      SIMULATE_UPGRADE=true
+      shift
+      ;;
+    --auto-reboot)
+      AUTO_REBOOT=true
+      shift
+      ;;
+    --auto)
+      AUTO_MODE=true
+      ASSUME_YES=true
+      AUTO_REBOOT=true
+      shift
+      ;;
+    --color)
+      COLOR_MODE="$2"
+      shift 2
+      ;;
+    --log-max-size-mb)
+      LOG_MAX_SIZE_MB="$2"
+      shift 2
+      ;;
+    --log-tail-keep-kb)
+      LOG_TAIL_PRESERVE_KB="$2"
+      shift 2
+      ;;
+    --check-zombies)
+      CHECK_ZOMBIES=true
+      shift
+      ;;
+    --no-check-zombies)
+      CHECK_ZOMBIES=false
+      shift
+      ;;
+    --security-audit)
+      SECURITY_AUDIT_ENABLED=true
+      shift
+      ;;
+    --browser-cache-report)
+      BROWSER_CACHE_REPORT=true
+      shift
+      ;;
+    --browser-cache-purge)
+      BROWSER_CACHE_PURGE=true
+      shift
+      ;;
+    --auto-reboot-delay)
+      AUTO_REBOOT_DELAY="$2"
+      shift 2
+      ;;
+    --snap-clean-old)
+      SNAP_CLEAN_OLD=true
+      shift
+      ;;
+    --snap-clear-cache)
+      SNAP_CLEAR_CACHE=true
+      shift
+      ;;
+    --no-snap-clean-old)
+      SNAP_CLEAN_OLD=false
+      shift
+      ;;
+    --no-snap-clear-cache)
+      SNAP_CLEAR_CACHE=false
+      shift
+      ;;
+    --detect)
+      # Phase 3: Show detection report and exit
+      SHOW_DETECTION_REPORT=true
+      shift
+      ;;
+    --distro)
+      # Phase 3: Override OS distribution
+      OVERRIDE_DISTRO="$2"
+      shift 2
+      ;;
+    --distro=*)
+      OVERRIDE_DISTRO="${1#--distro=}"
+      shift
+      ;;
+    --pkg-manager)
+      # Phase 3: Override package manager
+      OVERRIDE_PKG_MANAGER="$2"
+      shift 2
+      ;;
+    --pkg-manager=*)
+      OVERRIDE_PKG_MANAGER="${1#--pkg-manager=}"
+      shift
+      ;;
+    --init-system)
+      # Phase 3: Override init system
+      OVERRIDE_INIT_SYSTEM="$2"
+      shift 2
+      ;;
+    --init-system=*)
+      OVERRIDE_INIT_SYSTEM="${1#--init-system=}"
+      shift
+      ;;
+    --force-generic)
+      # Phase 3: Force generic fallback mode
+      FORCE_GENERIC_MODE=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    --*)
+      echo "ERROR: Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
+    *)
+      break
+      ;;
+    esac
+  done
+else
+  # Fallback: simple parse (POSIX systems without enhanced getopt)
+  while [[ ${#} -gt 0 ]]; do
+    case "${1:-}" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --clear-tmp)
+      CLEAR_TMP=true
+      shift
+      ;;
+    --no-clear-tmp)
+      CLEAR_TMP=false
+      shift
+      ;;
+    --clear-tmp-force)
+      CLEAR_TMP_FORCE=true
+      shift
+      ;;
+    --confirm-clear-tmp-force)
+      CLEAR_TMP_FORCE_CONFIRMED=true
+      shift
+      ;;
+    --clear-tmp-age=*)
+      CLEAR_TMP_AGE_DAYS="${1#--clear-tmp-age=}"
+      shift
+      ;;
+    --progress=*)
+      PROGRESS_MODE="${1#--progress=}"
+      shift
+      ;;
+    --progress-duration=*)
+      PROGRESS_DURATION="${1#--progress-duration=}"
+      shift
+      ;;
+    --lock-wait-seconds=*)
+      LOCK_WAIT_SECONDS="${1#--lock-wait-seconds=}"
+      shift
+      ;;
+    --fix-missing-keys)
+      FIX_MISSING_KEYS=true
+      shift
+      ;;
+    --no-snap)
+      NO_SNAP=true
+      shift
+      ;;
+    --clear-dns-cache)
+      CLEAR_DNS_CACHE=true
+      shift
+      ;;
+    --no-clear-dns-cache)
+      CLEAR_DNS_CACHE=false
+      shift
+      ;;
+    --no-clear-thumbnails)
+      CLEAR_THUMBNAILS=false
+      shift
+      ;;
+    --no-flatpak)
+      NO_FLATPAK=true
+      shift
+      ;;
+    --flatpak-user-only)
+      FLATPAK_SCOPE="user"
+      shift
+      ;;
+    --flatpak-system-only)
+      FLATPAK_SCOPE="system"
+      shift
+      ;;
+    --no-journal-vacuum)
+      CLEAR_JOURNAL=false
+      shift
+      ;;
+    --no-check-failed-services)
+      CHECK_FAILED_SERVICES=false
+      shift
+      ;;
+    --clear-crash)
+      CLEAR_CRASH_DUMPS=true
+      shift
+      ;;
+    --no-clear-crash)
+      CLEAR_CRASH_DUMPS=false
+      shift
+      ;;
+    --fstrim)
+      FSTRIM_ENABLED=true
+      shift
+      ;;
+    --no-fstrim)
+      FSTRIM_ENABLED=false
+      shift
+      ;;
+    --drop-caches)
+      DROP_CACHES_ENABLED=true
+      shift
+      ;;
+    --no-drop-caches)
+      DROP_CACHES_ENABLED=false
+      shift
+      ;;
+    --yes)
+      ASSUME_YES=true
+      shift
+      ;;
+    --keyserver=*)
+      KEYSERVER="${1#--keyserver=}"
+      shift
+      ;;
+    --no-reboot)
+      AUTO_REBOOT=false
+      shift
+      ;;
+    --json-summary)
+      JSON_SUMMARY=true
+      shift
+      ;;
+    --no-json-summary)
+      JSON_SUMMARY=false
+      shift
+      ;;
+    --parallel)
+      PARALLEL_EXEC=true
+      shift
+      ;;
+    --auto-reboot)
+      AUTO_REBOOT=true
+      shift
+      ;;
+    --upgrade)
+      UPGRADE_PHASE_ENABLED=true
+      shift
+      ;;
+    --auto)
+      AUTO_MODE=true
+      ASSUME_YES=true
+      AUTO_REBOOT=true
+      shift
+      ;;
+    --auto-reboot-delay=*)
+      AUTO_REBOOT_DELAY="${1#--auto-reboot-delay=}"
+      shift
+      ;;
+    --snap-clean-old)
+      SNAP_CLEAN_OLD=true
+      shift
+      ;;
+    --snap-clear-cache)
+      SNAP_CLEAR_CACHE=true
+      shift
+      ;;
+    --no-snap-clean-old)
+      SNAP_CLEAN_OLD=false
+      shift
+      ;;
+    --no-snap-clear-cache)
+      SNAP_CLEAR_CACHE=false
+      shift
+      ;;
+    --security-audit)
+      SECURITY_AUDIT_ENABLED=true
+      shift
+      ;;
+    --check-zombies)
+      CHECK_ZOMBIES=true
+      shift
+      ;;
+    --no-check-zombies)
+      CHECK_ZOMBIES=false
+      shift
+      ;;
+    --browser-cache-report)
+      BROWSER_CACHE_REPORT=true
+      shift
+      ;;
+    --browser-cache-purge)
+      BROWSER_CACHE_PURGE=true
+      shift
+      ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    --*)
+      echo "ERROR: Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
+    *)
+      # Non-option argument; stop parsing
+      break
+      ;;
+    esac
+  done
+fi
+
+
+# ---- Concurrency guard: acquire an exclusive flock so only one instance runs ----
+# Lockfile location: prefer /var/lock for real runs; for non-root dry-runs use the
+# per-run log directory so non-root users can test without root privileges.
+LOCKFILE="${LOCKFILE:-/var/lock/sysmaint.lock}"
+LOCKFILE_PID="${LOCKFILE}.pid"
+# Remember the originally requested lockfile (may be overridden by our search)
+REQUESTED_LOCKFILE="$LOCKFILE"
+if [[ "${DRY_RUN:-false}" == "true" && $EUID -ne 0 ]]; then
+  LOCKFILE="${LOCKFILE:-$LOG_DIR/sysmaint.lock}"
+  LOCKFILE_PID="${LOCKFILE}.pid"
+  mkdir -p "$(dirname "$LOCKFILE")" 2>/dev/null || true
+fi
+
+# Check if flock command is available; set fallback method
+if command -v flock >/dev/null 2>&1; then
+  _SM_LOCK_METHOD="flock"
+else
+  _SM_LOCK_METHOD="mkdir"
+  log "WARNING: flock command not found, using mkdir-based locking (consider installing util-linux)"
+fi
+
+# Handle --force-unlock flag: remove stale locks
+if [[ "${FORCE_UNLOCK:-false}" == "true" ]]; then
+  log "Force unlock requested: checking for stale locks..."
+  
+  # Check if lock file exists
+  if [[ -e "$LOCKFILE" ]]; then
+    # Check if there's a PID file
+    if [[ -f "$LOCKFILE_PID" ]]; then
+      old_pid=$(cat "$LOCKFILE_PID" 2>/dev/null || echo "")
+      if [[ -n "$old_pid" ]]; then
+        # Check if the process is still running
+        if kill -0 "$old_pid" 2>/dev/null; then
+          log "ERROR: Lock is held by active process PID $old_pid. Cannot force unlock while process is running."
+          ps -p "$old_pid" -o pid,ppid,user,cmd 2>/dev/null | tee -a "$LOG_FILE" || true
+          exit 75
+        else
+          log "Removing stale lock: process PID $old_pid is not running"
+          rm -f "$LOCKFILE" "$LOCKFILE_PID" 2>/dev/null || true
+        fi
+      else
+        log "Removing lock with invalid/empty PID file"
+        rm -f "$LOCKFILE" "$LOCKFILE_PID" 2>/dev/null || true
+      fi
+    else
+      log "Removing lock without PID file (legacy lock or incomplete state)"
+      rm -f "$LOCKFILE" 2>/dev/null || true
+    fi
+  else
+    log "No lock file found at $LOCKFILE"
+  fi
+  log "Force unlock complete"
+fi
+
+# Open a dedicated FD (200) for the lockfile. If the preferred lockfile isn't
+# writable (e.g., /var/lock on some environments), try multiple fallbacks and
+# do not fail the entire run just because a lock location is unavailable.
+# Acquire a blocking flock so the script waits silently until the lock is
+# available rather than exiting or notifying the user.
+lock_candidates=(
+  "${REQUESTED_LOCKFILE}"
+  "/run/lock/sysmaint.lock"
+  "/var/lock/sysmaint.lock"
+  "$LOG_DIR/sysmaint.lock"
+  "$LOG_DIR/sysmaint_${USER:-root}.lock"
+  "/tmp/sysmaint_${USER:-root}.lock"
+)
+
+LOCK_OPENED=0
+for candidate in "${lock_candidates[@]}"; do
+  # Ensure parent directory exists where possible
+  mkdir -p "$(dirname "$candidate")" 2>/dev/null || true
+  if { exec 200>"$candidate"; } 2>/dev/null; then
+    LOCKFILE="$candidate"
+    LOCKFILE_PID="${LOCKFILE}.pid"
+    LOCK_OPENED=1
+    break
+  fi
+done
+
+if [[ $LOCK_OPENED -ne 1 ]]; then
+  # As a last resort, create a uniquely named lock file in /tmp and use it.
+  # This sacrifices cross-user coordination but avoids hard failure.
+  fallback_tmp=$(mktemp /tmp/sysmaint_lock_XXXXXX) || fallback_tmp="/tmp/sysmaint_fallback_${USER:-root}.lock"
+  if { exec 200>"$fallback_tmp"; } 2>/dev/null; then
+    LOCKFILE="$fallback_tmp"
+    LOCKFILE_PID="${LOCKFILE}.pid"
+    log "WARNING: could not open preferred lock locations; using fallback lock $LOCKFILE. Concurrency may not be guaranteed."
+    # Provide actionable guidance so users running unattended jobs understand
+    # how to configure a persistent lock location or run as root.
+  locker_user="${USER:-$(id -un 2>/dev/null || echo unknown)}"
+    log "To ensure cross-process coordination, create or choose a writable lockfile and set LOCKFILE= that path; e.g.:"
+    log "  sudo touch /var/lock/sysmaint.lock && sudo chown ${locker_user} /var/lock/sysmaint.lock"
+    log "Or run the script as root so /var/lock is writable. The fallback lock is a per-run /tmp file and will not coordinate across users or reboots."
+  else
+    echo "ERROR: cannot open any lockfile (attempted common locations); proceeding without file lock. Concurrency not guaranteed." >&2
+  fi
+fi
+
+# If we were able to open a lock but it differs from the originally requested
+# LOCKFILE, log a helpful warning so users who set LOCKFILE to an explicit
+# path understand that it wasn't usable and what we chose instead.
+if [[ $LOCK_OPENED -eq 1 && -n "${REQUESTED_LOCKFILE:-}" && "$LOCKFILE" != "$REQUESTED_LOCKFILE" ]]; then
+  log "WARNING: requested LOCKFILE '$REQUESTED_LOCKFILE' was not usable; using '$LOCKFILE' instead."
+  log "If you intended to use '$REQUESTED_LOCKFILE', ensure it is writable or run as root. Example:"
+  log "  sudo touch $REQUESTED_LOCKFILE && sudo chown ${USER:-$(id -un 2>/dev/null || echo root)} $REQUESTED_LOCKFILE"
+fi
+
+# Block until we acquire the flock on FD 200. Behavior controlled by
+# LOCK_WAIT_SECONDS: if >0, wait up to that many seconds (`flock -w`),
+# otherwise block indefinitely (`flock 200`). This avoids indefinite hangs
+# when the system wants a bounded wait.
+if ! [[ "$LOCK_WAIT_SECONDS" =~ ^[0-9]+$ ]]; then
+  # Fallback safety: ensure numeric
+  LOCK_WAIT_SECONDS=30
+fi
+
+# Check if lock is already held and show who holds it
+if [[ -f "$LOCKFILE_PID" ]]; then
+  existing_pid=$(cat "$LOCKFILE_PID" 2>/dev/null || echo "")
+  if [[ -n "$existing_pid" ]]; then
+    if kill -0 "$existing_pid" 2>/dev/null; then
+      log "Lock is currently held by process PID $existing_pid. Waiting for lock..."
+      ps -p "$existing_pid" -o pid,ppid,user,start,cmd 2>/dev/null | tee -a "$LOG_FILE" || true
+    else
+      # PID file exists but process is not alive; evaluate staleness by age
+      now_ts=$(date +%s)
+      lock_mtime=$(stat -c %Y "$LOCKFILE" 2>/dev/null || echo "${now_ts}")
+      age_sec=$((now_ts - lock_mtime))
+      if (( age_sec > STALE_LOCK_THRESHOLD )); then
+        log "Stale lock detected (PID $existing_pid not running, age ${age_sec}s > ${STALE_LOCK_THRESHOLD}s). Auto-removing lock files."
+        rm -f "$LOCKFILE" "$LOCKFILE_PID" 2>/dev/null || true
+      else
+        log "Potential stale lock (PID $existing_pid not running, age ${age_sec}s <= threshold). Keeping for now; use --force-unlock if confirmed stale."
+      fi
+    fi
+  fi
+fi
+
+if [[ "$LOCK_WAIT_SECONDS" -gt 0 ]]; then
+  # Wait up to LOCK_WAIT_SECONDS seconds for the lock, then exit if not acquired
+  if [[ "$_SM_LOCK_METHOD" == "flock" ]]; then
+    if ! flock -w "$LOCK_WAIT_SECONDS" 200; then
+      # timed out waiting for the lock
+      if [[ -f "$LOCKFILE_PID" ]]; then
+        holder_pid=$(cat "$LOCKFILE_PID" 2>/dev/null || echo "unknown")
+        if declare -f log >/dev/null 2>&1; then
+          log "ERROR: timed out waiting ${LOCK_WAIT_SECONDS}s for lock $LOCKFILE (held by PID: $holder_pid)"
+          log "To force unlock if the process is stale, run: $0 --force-unlock"
+        else
+          echo "ERROR: timed out waiting ${LOCK_WAIT_SECONDS}s for lock $LOCKFILE (held by PID: $holder_pid)" >&2
+          echo "To force unlock if the process is stale, run: $0 --force-unlock" >&2
+        fi
+        # Re-check staleness after timeout; if holder PID vanished and lock aged, attempt one recovery
+        if [[ -n "$holder_pid" ]] && ! kill -0 "$holder_pid" 2>/dev/null; then
+          now_ts=$(date +%s)
+          lock_mtime=$(stat -c %Y "$LOCKFILE" 2>/dev/null || echo "${now_ts}")
+          age_sec=$((now_ts - lock_mtime))
+          if (( age_sec > STALE_LOCK_THRESHOLD )); then
+            log "Post-timeout stale lock confirmed (PID $holder_pid not running, age ${age_sec}s). Cleaning and one retry..."
+            rm -f "$LOCKFILE" "$LOCKFILE_PID" 2>/dev/null || true
+            if { exec 200>"$LOCKFILE"; } 2>/dev/null && flock -w "$LOCK_WAIT_SECONDS" 200; then
+              log "Recovered lock after stale cleanup."
+              _SM_LOCKED=1
+              echo "$$" > "$LOCKFILE_PID" 2>/dev/null || true
+            else
+              log "Failed to acquire lock after stale cleanup retry."
+              exit 75
+            fi
+          else
+            exit 75
+          fi
+        else
+          exit 75
+        fi
+      else
+        if declare -f log >/dev/null 2>&1; then
+          log "ERROR: timed out waiting ${LOCK_WAIT_SECONDS}s for lock $LOCKFILE"
+        else
+          echo "ERROR: timed out waiting ${LOCK_WAIT_SECONDS}s for lock $LOCKFILE" >&2
+        fi
+        exit 75
+      fi
+    fi
+  else
+    # mkdir-based fallback for systems without flock
+    lock_dir="${LOCKFILE}.dir"
+    elapsed=0
+    while (( elapsed < LOCK_WAIT_SECONDS )); do
+      if mkdir "$lock_dir" 2>/dev/null; then
+        # Lock acquired
+        _SM_LOCKED=1
+        echo "$$" > "$LOCKFILE_PID" 2>/dev/null || true
+        break
+      else
+        # Lock held, check if stale
+        if [[ -f "$LOCKFILE_PID" ]]; then
+          holder_pid=$(cat "$LOCKFILE_PID" 2>/dev/null || echo "unknown")
+          if ! kill -0 "$holder_pid" 2>/dev/null; then
+            now_ts=$(date +%s)
+            lock_mtime=$(stat -c %Y "$lock_dir" 2>/dev/null || echo "${now_ts}")
+            age_sec=$((now_ts - lock_mtime))
+            if (( age_sec > STALE_LOCK_THRESHOLD )); then
+              log "Stale lock detected (PID $holder_pid not running). Auto-removing..."
+              rm -rf "$lock_dir" "$LOCKFILE_PID" 2>/dev/null || true
+              continue
+            fi
+          fi
+        fi
+        sleep 1
+        ((elapsed++))
+      fi
+    done
+    if (( elapsed >= LOCK_WAIT_SECONDS )); then
+      log "ERROR: timed out waiting ${LOCK_WAIT_SECONDS}s for lock $LOCKFILE"
+      exit 75
+    fi
+  fi
+else
+  # No timeout - block indefinitely
+  if [[ "$_SM_LOCK_METHOD" == "flock" ]]; then
+    flock 200
+  else
+    # mkdir-based fallback
+    lock_dir="${LOCKFILE}.dir"
+    while ! mkdir "$lock_dir" 2>/dev/null; do
+      sleep 0.1
+    done
+    _SM_LOCKED=1
+  fi
+fi
+
+# Mark that we hold the lock and write our PID to the PID file (if not already set by mkdir fallback)
+if [[ "${_SM_LOCKED:-}" != "1" ]]; then
+  _SM_LOCKED=1
+  echo "$$" > "$LOCKFILE_PID" 2>/dev/null || true
+fi
+log "Lock acquired: $LOCKFILE (PID: $$) (method: $_SM_LOCK_METHOD)"
+
+# Improved exit trap: print summary and note failures on exit
+on_exit() {
+  rc=$?
+  # Only emit additional summary on error (normal successful runs print
+  # the summary as part of the main flow, so avoid duplicate output).
+  if [[ $rc -ne 0 && "${_SUMMARY_PRINTED:-false}" != "true" ]]; then
+    # Run diagnostics before emitting summary so JSON reflects results
+    check_zombie_processes || true
+    security_audit || true
+    truncate_log_if_needed || true
+    if declare -f print_summary >/dev/null 2>&1; then
+      print_summary || true
+    fi
+    log "ERROR: Script exited with code $rc. See $LOG_FILE"
+  fi
+  # Ensure adaptive panel stops (cleanup screen region)
+  if declare -f stop_status_panel >/dev/null 2>&1; then
+    stop_status_panel || true
+  fi
+  # Release lock and clean up PID file
+  if [[ -n "${_SM_LOCKED:-}" ]]; then
+    log "Releasing lock: $LOCKFILE (PID: $$) (method: $_SM_LOCK_METHOD)"
+    rm -f "$LOCKFILE_PID" 2>/dev/null || true
+    if [[ "$_SM_LOCK_METHOD" == "flock" ]]; then
+      flock -u 200 2>/dev/null || true
+      exec 200>&- || true
+    else
+      # mkdir-based fallback - remove lock directory
+      rm -rf "${LOCKFILE}.dir" 2>/dev/null || true
+    fi
+  fi
+  return $rc
+}
+
+on_err() {
+  # Some checks intentionally run commands that return non-zero while
+  # behaving correctly (e.g., pgrep when no process matches). Allow code
+  # to temporarily suppress ERR logging by setting _SM_IGNORED_ERR=1.
+  if [[ "${_SM_IGNORED_ERR:-0}" == "1" ]]; then
+    return 0
+  fi
+  log "ERROR: Line $LINENO failed. See log at $LOG_FILE"
+}
+
+trap on_err ERR
+trap on_exit EXIT
+
+# --- Load Platform Detection Module -----------------------------------------------
+# v2.5.0: Platform-specific modules for OS-dependent behaviors and fallbacks
+# This provides platform-aware implementations for:
+# - Locking mechanism (flock vs mkdir-based fallback)
+# - Math operations (bc vs awk fallback)
+# - Platform-specific quirks and workarounds
+# Load after logging is available but before main execution
+
+if [[ -f "$SCRIPT_DIR/lib/platform/detector.sh" ]]; then
+  source "$SCRIPT_DIR/lib/platform/detector.sh"
+  if declare -f log >/dev/null 2>&1; then
+    log "Platform module loaded: $(get_platform_module 2>/dev/null || echo "unknown") ($(get_platform_name 2>/dev/null || echo "unknown"))"
+  fi
+fi
+
+require_root "$@"
+check_os
+
+# Phase 3: Show detection report and exit if --detect flag is provided
+if [[ "${SHOW_DETECTION_REPORT:-false}" == "true" ]]; then
+  show_detection_report
+  # Never returns - exits in show_detection_report()
+fi
+
+mkdir -p "$LOG_DIR"
+
+# Collect host profile early (after log dir exists and before timing estimates used)
+if declare -f _collect_host_profile >/dev/null 2>&1; then
+  _init_state_dir || true
+  _collect_host_profile || true
+  log "Host profile: cores scaling=$CPU_SCALE, ram scaling=$RAM_SCALE, net scaling=$NETWORK_SCALE"
+fi
+
+# Handle reset of adaptive timing history if requested
+if [[ "${RESET_PROGRESS_HISTORY:-false}" == "true" ]]; then
+  if declare -f _state_file >/dev/null 2>&1; then
+    sf=$(_state_file)
+    if [[ -f "$sf" ]]; then
+      rm -f "$sf" 2>/dev/null || true
+      log "Adaptive timing history reset (removed $sf)"
+    else
+      log "Adaptive timing history reset requested but no existing file found ($sf)"
+    fi
+  fi
+fi
+
+# Run health checks before proceeding
+if ! health_checks; then
+  log "ERROR: Pre-flight health checks failed"
+  exit 1
+fi
+
+# Detect system capabilities and desktop/server mode early for gating & JSON
+detect_capabilities_and_mode() {
+  CAPABILITIES_AVAILABLE=()
+  CAPABILITIES_UNAVAILABLE=()
+  local caps=(snap flatpak fwupdmgr cloud-init docker fstrim deborphan)
+  for c in "${caps[@]}"; do
+    local present=false
+    case "$c" in
+      cloud-init)
+        [[ -x /usr/bin/cloud-init || -d /etc/cloud ]] && present=true || present=false
+        ;;
+      docker)
+        command -v docker >/dev/null 2>&1 && present=true || present=false
+        ;;
+      snap|flatpak|fwupdmgr|fstrim|deborphan)
+        command -v "$c" >/dev/null 2>&1 && present=true || present=false
+        ;;
+      *) command -v "$c" >/dev/null 2>&1 && present=true || present=false ;;
+    esac
+    if [[ "$present" == true ]]; then
+      CAPABILITIES_AVAILABLE+=("$c")
+    else
+      CAPABILITIES_UNAVAILABLE+=("$c")
+    fi
+  done
+
+  # Mode resolution
+  local guessed="server"
+  if [[ -n "$MODE_OVERRIDE" ]]; then
+    case "$MODE_OVERRIDE" in
+      desktop|server) guessed="$MODE_OVERRIDE" ;;
+      auto) ;; # fall through to heuristic
+      *) log "WARNING: unknown mode override '$MODE_OVERRIDE' (expected desktop|server|auto); falling back to auto" ;;
+    esac
+  fi
+  if [[ "$guessed" == "server" && ( -n "${DISPLAY:-}" || -n "${XDG_CURRENT_DESKTOP:-}" ) ]]; then
+    guessed="desktop"
+  fi
+  # Heuristic: presence of ubuntu-desktop or gnome-shell packages
+  if [[ "$guessed" == "server" ]]; then
+    if dpkg -l ubuntu-desktop 2>/dev/null | awk '/^ii/ {exit 0} END{exit 1}'; then guessed="desktop"; fi
+    if dpkg -l gnome-shell 2>/dev/null | awk '/^ii/ {exit 0} END{exit 1}'; then guessed="desktop"; fi
+  fi
+  DESKTOP_MODE="$guessed"
+  log "Capability detection: available={${CAPABILITIES_AVAILABLE[*]}} unavailable={${CAPABILITIES_UNAVAILABLE[*]}} mode=$DESKTOP_MODE guard=$DESKTOP_GUARD_ENABLED"
+}
+
+detect_capabilities_and_mode || true
+
+# Early simulate-only mode: perform a safe dist-upgrade simulation, emit summary, then exit
+if [[ "${SIMULATE_UPGRADE:-false}" == "true" ]]; then
+  log "=== Simulate upgrade (apt-get -s dist-upgrade) ==="
+  sim_file="$LOG_DIR/simulate_${RUN_ID}.txt"
+  # Perform a metadata refresh first (safe even outside DRY_RUN; but honor DRY_RUN by skipping update)
+  if [[ "${DRY_RUN:-false}" != "true" ]]; then
+    run apt-get update -o Acquire::Retries=3 || true
+  else
+    log "DRY_RUN: would run: apt-get update -o Acquire::Retries=3 (skipped due to --dry-run)"
+  fi
+  set +e
+  sim_output=$(apt-get -s dist-upgrade 2>&1)
+  sim_rc=$?
+  set -e
+  printf '%s\n' "$sim_output" | tee -a "$LOG_FILE" >"$sim_file" || true
+  SIMULATED_UPGRADE_COUNT=$(printf '%s\n' "$sim_output" | grep -c '^Inst ' || true)
+  SIMULATED_REMOVE_COUNT=$(printf '%s\n' "$sim_output" | grep -c '^Remv ' || true)
+  SIMULATED_CONFIGURE_COUNT=$(printf '%s\n' "$sim_output" | grep -c '^Conf ' || true)
+  log "Simulation results: upgrade=${SIMULATED_UPGRADE_COUNT}, remove=${SIMULATED_REMOVE_COUNT}, configure=${SIMULATED_CONFIGURE_COUNT}"
+  log "Simulation output written to $sim_file"
+  # Skip remaining maintenance steps; still perform kernel status & summary for completeness
+  kernel_status || true
+  print_summary
+  log "Logging to $LOG_FILE"
+  log "Log directory: $LOG_DIR"
+  log "Log file name: $(basename "$LOG_FILE")"
+  exit $sim_rc
+fi
+# Capture disk usage before maintenance
+DISK_BEFORE=$(df -P / | awk 'NR==2 {print $3}')
+# Capture extended system information early for JSON summary
+OS_DESCRIPTION="$( ( [ -r /etc/os-release ] && . /etc/os-release && printf '%s' "${PRETTY_NAME:-${NAME:-Unknown}}" ) 2>/dev/null || uname -sr )"
+UPTIME_SECONDS="$(cut -d. -f1 /proc/uptime 2>/dev/null || echo 0)"
+# Count installed packages using package manager abstraction (tr removes any embedded newlines/whitespace)
+PACKAGE_COUNT="$(pkg_list_installed 2>/dev/null | wc -l 2>/dev/null | tr -d '\n\r ' || echo 0)"
+MEM_TOTAL_KB="$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
+MEM_AVAILABLE_KB_START="$(awk '/MemAvailable/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
+SWAP_TOTAL_KB="$(awk '/SwapTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)"
+DISK_ROOT_TOTAL_KB="$(df -P / | awk 'NR==2 {print $2}')"
+
+start_status_panel
+show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Preparing to start maintenance"
+log "=== System maintenance started (v$SCRIPT_VERSION) ==="
+log "Run ID: $RUN_ID"
+
+if [[ "${PARALLEL_EXEC}" == "true" ]]; then
+  log "Parallel execution mode enabled (DAG-based)"
+  execute_parallel
+else
+  log "Sequential execution mode"
+  # Perform temporary directory cleanup (configurable via CLEAR_TMP* vars or CLI flags)
+  record_phase_start "clean_tmp"
+  clean_tmp || true
+  record_phase_end "clean_tmp"
+
+  update_status_panel_phase "clean_tmp"
+
+  record_phase_start "fix_broken"
+  fix_broken_if_any
+  record_phase_end "fix_broken"
+  update_status_panel_phase "fix_broken"
+
+  record_phase_start "validate_repos"
+  validate_repos
+  record_phase_end "validate_repos"
+  update_status_panel_phase "validate_repos"
+  # Detect missing APT public keys (NO_PUBKEY); skipped under --dry-run
+  record_phase_start "detect_missing_pubkeys"
+  detect_missing_pubkeys
+  record_phase_end "detect_missing_pubkeys"
+  update_status_panel_phase "detect_missing_pubkeys"
+
+  if [[ "${FIX_MISSING_KEYS:-false}" == "true" ]]; then
+    record_phase_start "fix_missing_pubkeys"
+    fix_missing_pubkeys || true
+    record_phase_end "fix_missing_pubkeys"
+    update_status_panel_phase "fix_missing_pubkeys"
+  fi
+
+  record_phase_start "kernel_status"
+  kernel_status
+  record_phase_end "kernel_status"
+  update_status_panel_phase "kernel_status"
+
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Checking kernel and packages"
+
+  record_phase_start "apt_maintenance"
+  apt_maintenance
+  record_phase_end "apt_maintenance"
+  update_status_panel_phase "apt_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "APT maintenance"
+
+  record_phase_start "kernel_purge_phase"
+  kernel_purge_phase || true
+  record_phase_end "kernel_purge_phase"
+  update_status_panel_phase "kernel_purge_phase"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Kernel purge"
+
+  record_phase_start "post_kernel_finalize"
+  post_kernel_finalize || true
+  record_phase_end "post_kernel_finalize"
+  update_status_panel_phase "post_kernel_finalize"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Post-kernel finalize"
+
+  record_phase_start "orphan_purge_phase"
+  orphan_purge_phase || true
+  record_phase_end "orphan_purge_phase"
+  update_status_panel_phase "orphan_purge_phase"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Orphan purge"
+
+  record_phase_start "snap_maintenance"
+  snap_maintenance
+  record_phase_end "snap_maintenance"
+  update_status_panel_phase "snap_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Snap maintenance"
+
+  record_phase_start "snap_cleanup_old"
+  snap_cleanup_old || true
+  record_phase_end "snap_cleanup_old"
+  update_status_panel_phase "snap_cleanup_old"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Snap old revision cleanup"
+
+  record_phase_start "snap_clear_cache"
+  snap_clear_cache || true
+  record_phase_end "snap_clear_cache"
+  update_status_panel_phase "snap_clear_cache"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Snap cache clear"
+
+  record_phase_start "flatpak_maintenance"
+  flatpak_maintenance
+  record_phase_end "flatpak_maintenance"
+  update_status_panel_phase "flatpak_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Flatpak maintenance"
+
+  record_phase_start "firmware_maintenance"
+  firmware_maintenance
+  record_phase_end "firmware_maintenance"
+  update_status_panel_phase "firmware_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Firmware maintenance"
+
+  record_phase_start "dns_maintenance"
+  dns_maintenance
+  record_phase_end "dns_maintenance"
+  update_status_panel_phase "dns_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "DNS cache clearing"
+
+  record_phase_start "journal_maintenance"
+  journal_maintenance
+  record_phase_end "journal_maintenance"
+  update_status_panel_phase "journal_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Journal cleanup"
+
+  record_phase_start "thumbnail_maintenance"
+  thumbnail_maintenance
+  record_phase_end "thumbnail_maintenance"
+  update_status_panel_phase "thumbnail_maintenance"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Thumbnail cache cleanup"
+
+  record_phase_start "browser_cache_phase"
+  browser_cache_phase || true
+  record_phase_end "browser_cache_phase"
+  update_status_panel_phase "browser_cache_phase"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Browser cache phase"
+
+  record_phase_start "crash_dump_purge"
+  crash_dump_purge || true
+  record_phase_end "crash_dump_purge"
+  update_status_panel_phase "crash_dump_purge"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Crash dump purge"
+
+  record_phase_start "fstrim_phase"
+  fstrim_phase || true
+  record_phase_end "fstrim_phase"
+  update_status_panel_phase "fstrim_phase"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Filesystem TRIM"
+
+  record_phase_start "drop_caches_phase"
+  drop_caches_phase || true
+  record_phase_end "drop_caches_phase"
+  update_status_panel_phase "drop_caches_phase"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Drop caches"
+
+  record_phase_start "upgrade_finalize"
+  upgrade_finalize || true
+  record_phase_end "upgrade_finalize"
+  update_status_panel_phase "upgrade_finalize"
+  show_progress "$PROGRESS_DURATION" "$PROGRESS_MODE" "Final upgrade"
+
+  record_phase_start "check_failed_services"
+  check_failed_services
+  record_phase_end "check_failed_services"
+  update_status_panel_phase "check_failed_services"
+fi
+
+reboot_if_required
+
+# Capture disk usage after maintenance
+DISK_AFTER=$(df -P / | awk 'NR==2 {print $3}')
+if [[ -n "$DISK_BEFORE" && -n "$DISK_AFTER" ]]; then
+  DISK_SAVED_KB=$((DISK_BEFORE - DISK_AFTER))
+fi
+
+log "=== System maintenance finished successfully ==="
+_SUMMARY_PRINTED=true
+# Run diagnostics before summary so JSON includes them
+
+# Debug logging for troubleshooting (enable with DEBUG_SYSMAINT=true)
+if [[ "${DEBUG_SYSMAINT:-false}" == "true" ]]; then
+  echo "DEBUG: Line $LINENO: About to run check_zombie_processes" >&2
+fi
+
+check_zombie_processes || true
+
+# Debug logging for troubleshooting (enable with DEBUG_SYSMAINT=true)
+if [[ "${DEBUG_SYSMAINT:-false}" == "true" ]]; then
+  echo "DEBUG: Line $LINENO: About to run security_audit, SECURITY_AUDIT_ENABLED=${SECURITY_AUDIT_ENABLED:-false}" >&2
+fi
+
+security_audit || true
+truncate_log_if_needed || true
+print_summary
+stop_status_panel
+
+# Print log file location/details at the end so it's the final output the user sees
+log "Logging to $LOG_FILE"
+log "Log directory: $LOG_DIR"
+log "Log file name: $(basename "$LOG_FILE")"
+
+# Determine exit code based on findings
+EXIT_CODE=0
+if [[ "${SUMMARY_REBOOT_REQUIRED}" == "true" ]]; then
+  EXIT_CODE=100
+elif ((${#FAILED_SERVICES[@]} > 0)); then
+  EXIT_CODE=30
+elif ((${#MISSING_PUBKEYS[@]} > 0)); then
+  EXIT_CODE=20
+elif ((${#REPO_FAIL[@]} > 0)); then
+  EXIT_CODE=10
+fi
+
+exit $EXIT_CODE

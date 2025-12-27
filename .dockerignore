@@ -1,0 +1,26 @@
+# Docker build artifacts
+.dockerignore
+
+# Git
+.git
+.gitignore
+
+# GitHub
+.github
+
+# Documentation (not needed in image)
+*.md
+docs/
+LICENSE
+
+# Tests (not needed in image)
+tests/
+benchmarks/
+scanner_artifacts/
+
+# Debian packaging (not needed in image)
+debian/
+
+# Build artifacts
+*.deb
+build_deb/

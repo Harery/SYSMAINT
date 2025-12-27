@@ -1,0 +1,9 @@
+sysmaint (2.5.0) unstable; urgency=medium
+
+  * Multi-distro system maintenance
+  * Interactive TUI mode (--gui)
+  * Auto-detection of OS and package manager
+  * Support for APT, DNF, Pacman, Zypper, Snap, Flatpak
+  * Security audits and JSON telemetry
+
+ -- Mohamed Elharery <Mohamed@Harery.com>  Sat, 01 Jan 2000 00:00:00 +0000

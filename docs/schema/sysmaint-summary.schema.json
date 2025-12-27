@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/sysmaint-summary.schema.json",
+  "title": "sysmaint JSON summary",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "script_version",
+    "run_id",
+    "timestamp",
+    "checksum_sha256",
+    "disk_usage",
+    "final_upgrade_enabled",
+    "color_mode",
+    "log_truncated",
+    "zombie_check_enabled",
+    "zombie_count",
+    "security_audit_enabled",
+    "browser_cache_report",
+    "reboot_required",
+    "log_file"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "script_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "checksum_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "disk_usage": {
+      "type": "object",
+      "required": ["before_kb", "after_kb", "saved_kb"],
+      "properties": {
+        "before_kb": { "type": ["integer", "string"] },
+        "after_kb": { "type": ["integer", "string"] },
+        "saved_kb": { "type": ["integer", "string"] }
+      }
+    },
+    "final_upgrade_enabled": { "type": ["boolean", "string"] },
+    "final_upgrade_upgraded_count": { "type": ["integer", "string"] },
+    "final_upgrade_removed_count": { "type": ["integer", "string"] },
+    "color_mode": { "type": "string" },
+    "log_truncated": { "type": ["boolean", "string"] },
+    "log_original_size_kb": { "type": ["integer", "string"] },
+    "log_final_size_kb": { "type": ["integer", "string"] },
+    "zombie_check_enabled": { "type": ["boolean", "string"] },
+    "zombie_count": { "type": ["integer", "string"] },
+    "security_audit_enabled": { "type": ["boolean", "string"] },
+    "shadow_perms_ok": { "type": "string" },
+    "gshadow_perms_ok": { "type": "string" },
+    "sudoers_perms_ok": { "type": "string" },
+    "browser_cache_report": { "type": ["boolean", "string"] },
+    "browser_cache_purge": { "type": ["boolean", "string"] },
+    "firefox_cache_bytes": { "type": ["integer", "string"] },
+    "chromium_cache_bytes": { "type": ["integer", "string"] },
+    "chrome_cache_bytes": { "type": ["integer", "string"] },
+    "hostname": { "type": "string" },
+    "reboot_required": { "type": ["boolean", "string"] },
+    "reboot_recommended": { "type": ["boolean", "string"] },
+    "log_file": { "type": "string" }
+  }
+}

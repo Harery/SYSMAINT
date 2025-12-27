@@ -1,0 +1,43 @@
+---
+name: Security vulnerability
+about: Report a security vulnerability
+title: '[SECURITY] '
+labels: security
+assignees: Harery
+---
+
+**⚠️ WARNING: For critical security issues, please email directly:**
+
+**📧 Mohamed@Harery.com**
+
+## Vulnerability Details
+
+**Please describe the security vulnerability:**
+
+## Affected Version
+
+**Which version of SYSMAINT is affected?**
+
+## Impact
+
+**What is the impact of this vulnerability?**
+- [ ] Critical - Allows unauthorized system access
+- [ ] High - Data loss or corruption
+- [ ] Medium - Service disruption
+- [ ] Low - Minor impact
+
+## Steps to Reproduce
+
+**How can this vulnerability be reproduced?**
+
+1.
+2.
+3.
+
+## Proposed Fix (Optional)
+
+**Do you have a suggestion for how to fix this?**
+
+## Additional Context
+
+**Any other information about the vulnerability:**

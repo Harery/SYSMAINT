@@ -1,0 +1,36 @@
+# Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
+[Unit]
+Description=System Maintenance (sysmaint)
+Documentation=https://github.com/your-org/sysmaint
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+# Optional environment overrides
+# EnvironmentFile=-/etc/sysmaint/sysmaint.env
+# Conservative defaults: dry-run is off; JSON summary on
+Environment=JSON_SUMMARY=true
+Environment=LOG_MAX_SIZE_MB=10
+ExecStart=/usr/bin/sysmaint --auto --check-zombies --security-audit
+# For desktops, consider enabling cache report:
+# ExecStart=/usr/bin/sysmaint --auto --check-zombies --security-audit --browser-cache-report
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

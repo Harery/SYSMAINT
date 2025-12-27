@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+# Unified Test Metadata and Combo Suite
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# Copyright (c) 2025 Mohamed Elharery
+#
+# Commands:
+#   run      Run param-driven combo tests (default)
+#   matrix   Generate CLI flag duplication matrix
+
+set -euo pipefail
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+
+usage() {
+    cat << EOF
+Usage: $0 [command]
+
+Commands:
+  run      Run param-driven combo tests (default)
+  matrix   Generate CLI flag duplication matrix
+  help     Show this help message
+
+Examples:
+  $0              # Run combo tests
+  $0 run          # Run combo tests (explicit)
+  $0 matrix       # Generate flag duplication matrix
+EOF
+    exit 0
+}
+
+# ===== Combo Test Runner =====
+run_combo_tests() {
+    local SYSMAINT="$REPO_ROOT/sysmaint"
+    export DRY_RUN=true JSON_SUMMARY=true
+
+    local PASSED=0 FAILED=0 TOTAL=0
+    latest_json(){ ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -n1 || true; }
+
+    run_case(){ local name="$1"; shift; TOTAL=$((TOTAL+1)); echo -n "[COMBO $TOTAL] $name: ";
+      set +e; bash "$SYSMAINT" "$@" >/dev/null 2>&1; rc=$?; set -e;
+      # Accept exit codes: 0 (success), 1 (GUI), 2 (edge case), 30 (failed services), or 100 (reboot required)
+      if [[ $rc -eq 0 || $rc -eq 30 || $rc -eq 100 ]]; then echo "✅"; PASSED=$((PASSED+1)); else echo "❌ ($rc)"; FAILED=$((FAILED+1)); fi; }
+
+    local UPGRADE_SET=("--upgrade" "--purge-kernels --keep-kernels=2" "--upgrade --purge-kernels --keep-kernels=2 --orphan-purge")
+    local SECURITY_SET=("--security-audit" "--security-audit --check-zombies")
+    local DISPLAY_SET=("--color=always --progress=spinner" "--color=never --progress=quiet" "--color=auto --progress=bar")
+    local RESOURCE_SET=("--fstrim" "--drop-caches" "--fstrim --drop-caches")
+    local DESKTOP_SET=("--browser-cache-report" "--browser-cache-purge --browser-cache-report")
+    local NEGATION_SET=("--no-snap --no-flatpak" "--no-check-zombies --no-clear-tmp" "--no-journal-vacuum --journal-days=3")
+
+    for u in "${UPGRADE_SET[@]}"; do for s in "${SECURITY_SET[@]}"; do for d in "${DISPLAY_SET[@]}"; do run_case "upgrade+sec+display" $u $s $d --dry-run; done; done; done
+    for r in "${RESOURCE_SET[@]}"; do for ds in "${DESKTOP_SET[@]}"; do run_case "resource+desktop" $r $ds --dry-run; done; done
+    for n in "${NEGATION_SET[@]}"; do run_case "negations" $n --dry-run; done
+    run_case "security-upgrade-desktop-resources" --upgrade --security-audit --check-zombies --browser-cache-report --fstrim --drop-caches --dry-run
+
+    echo "Combo Suite Results: Passed=$PASSED Failed=$FAILED Total=$TOTAL"
+    [[ $FAILED -eq 0 ]] && exit 0 || exit 1
+}
+
+# ===== Flag Duplication Matrix Generator =====
+generate_matrix() {
+    local OUT_FILE="$REPO_ROOT/docs/FLAG_DUPLICATION.md"
+    
+    local SUITES=(
+      test_suite_smoke.sh
+      test_suite_edge.sh
+      test_suite_security.sh
+      test_suite_governance.sh
+      test_suite_compliance.sh
+      test_suite_performance.sh
+      test_suite_combos.sh
+      test_suite_realmode_sandbox.sh
+    )
+
+    declare -A SUITE_CONTENT
+    for s in "${SUITES[@]}"; do
+      local path="$SCRIPT_DIR/$s"
+      [[ -f "$path" ]] && SUITE_CONTENT["$s"]="$(cat "$path")" || SUITE_CONTENT["$s"]=""
+    done
+
+    extract_flags() {
+      local text="$1"
+      printf '%s' "$text" | grep -oE -- '--[A-Za-z0-9][A-Za-z0-9-]*(=[^[:space:]]+)?' || true
+    }
+
+    normalize_flag() {
+      local raw="$1"
+      local f
+      f=$(echo "$raw" | sed 's/^["(]*//; s/["),;]*$//')
+      if [[ $f =~ ^--[A-Za-z0-9][A-Za-z0-9-]*(=[^[:space:]]+)?$ ]]; then
+        echo "$f"
+      fi
+    }
+
+    declare -A FLAG_SET
+    for s in "${SUITES[@]}"; do
+      while read -r flag; do
+        local norm
+        norm=$(normalize_flag "$flag" || true)
+        [[ -n "$norm" ]] && FLAG_SET["$norm"]=1
+      done < <(extract_flags "${SUITE_CONTENT[$s]}")
+    done
+
+    local ALL_FLAGS
+    ALL_FLAGS=$(printf '%s\n' "${!FLAG_SET[@]}" | sort -u)
+
+    {
+      echo "# CLI Flag Duplication Matrix"
+      echo "Generated: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+      echo "Suites: ${#SUITES[@]}"
+      echo ""
+      echo "| Flag | Smoke | Edge | Security | Governance | Compliance | Performance | Combos | RealMode |"
+      echo "|------|:-----:|:----:|:--------:|:----------:|:----------:|:-----------:|:------:|:-------:|"
+      for flag in $ALL_FLAGS; do
+        local row="| $flag"
+        for s in "${SUITES[@]}"; do
+          if printf '%s' "${SUITE_CONTENT[$s]}" | grep -F -q -- "$flag"; then row+=" | ✅"; else row+=" | "; fi
+        done
+        row+=" |"
+        echo "$row"
+      done
+      echo ""
+      echo "## Summary"
+      echo "- Total unique flags: $(printf '%s\n' "$ALL_FLAGS" | wc -l | awk '{print $1}')"
+      echo "- Legacy full-cycle suite deprecated (see legacy folder)."
+      echo "- Normalization: quotes/parens/punctuation removed; canonical pattern enforced."
+      echo "- Generated by: tests/test_suite_combos.sh matrix"
+    } > "$OUT_FILE"
+
+    echo "✅ Updated $OUT_FILE"
+}
+
+# ===== Main Dispatcher =====
+COMMAND="${1:-run}"
+
+case "$COMMAND" in
+    run)
+        run_combo_tests
+        ;;
+    matrix)
+        generate_matrix
+        ;;
+    help|-h|--help)
+        usage
+        ;;
+    *)
+        echo "Error: Unknown command: $COMMAND"
+        usage
+        ;;
+esac

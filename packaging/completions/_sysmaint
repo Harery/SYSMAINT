@@ -1,0 +1,54 @@
+#compdef sysmaint
+# Author: Mohamed Elharery <Mohamed@Harery.com>
+# (c) 2025 Mohamed Elharery
+_arguments \
+  '--dry-run[Preview actions without changes]' \
+  '--json-summary[Emit JSON summary]' \
+  '--simulate-upgrade[Run apt-get -s dist-upgrade and summarize]' \
+  '--upgrade[Enable final full-upgrade phase]' \
+  '--purge-kernels[Purge old kernels]' \
+  '--keep-kernels=[Keep N kernels]:number' \
+  '--update-grub[Run update-grub after purge]' \
+  '--fstrim[Run filesystem TRIM]' \
+  '--drop-caches[Drop kernel caches]' \
+  '--orphan-purge[Purge orphan packages]' \
+  '--no-snap[Disable snap phases]' \
+  '--snap-clean-old[Remove old snap revisions]' \
+  '--snap-clear-cache[Clear snap cache]' \
+  '--no-flatpak[Disable flatpak phases]' \
+  '--flatpak-user-only[User scope only]' \
+  '--flatpak-system-only[System scope only]' \
+  '--no-firmware[Disable fwupd check]' \
+  '--clear-dns-cache[Clear DNS caches]' \
+  '--no-clear-dns-cache[Skip DNS cache clear]' \
+  '--no-journal-vacuum[Skip journal cleanup]' \
+  '--journal-days=[Journal retention days]:number' \
+  '--no-clear-thumbnails[Skip thumbnail cleanup]' \
+  '--clear-crash[Purge crash dumps]' \
+  '--no-clear-crash[Skip crash purge]' \
+  '--clear-tmp[Enable /tmp cleanup]' \
+  '--no-clear-tmp[Disable /tmp cleanup]' \
+  '--clear-tmp-age=[/tmp age days]:number' \
+  '--clear-tmp-force[Dangerous: wipe /tmp contents]' \
+  '--confirm-clear-tmp-force[Confirm force wipe]' \
+  '--check-zombies[Enable zombie check]' \
+  '--no-check-zombies[Disable zombie check]' \
+  '--security-audit[Run security audit]' \
+  '--browser-cache-report[Report browser caches]' \
+  '--browser-cache-purge[Purge browser caches]' \
+  '--color=[Color mode]:mode:((auto\:auto always\:always never\:never))' \
+  '--log-max-size-mb=[Max log size MB]:number' \
+  '--log-tail-keep-kb=[Tail keep KB]:number' \
+  '--auto[Autopilot mode]' \
+  '--auto-reboot-delay=[Auto reboot delay seconds]:number' \
+  '--no-reboot[Disable auto reboot]' \
+  '--lock-wait-seconds=[Lock wait seconds]:number' \
+  '--progress=[Progress UI]:mode:((none dots countdown bar spinner adaptive))' \
+  '--progress-duration=[Progress section length seconds]:number' \
+  '--mode=[Mode override]:mode:((desktop server auto))' \
+  '--no-desktop-guard[Disable desktop guard]' \
+  '--yes[Assume yes]' \
+  '--keyserver=[Keyserver host]:host' \
+  '--fix-missing-keys[Install missing APT keys]' \
+  '(-h --help)'{-h,--help}'[Show help]' \
+  '(-v --version)'{-v,--version}'[Show version]'

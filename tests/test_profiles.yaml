@@ -1,0 +1,156 @@
+# Test Profiles for sysmaint
+# Define different test execution profiles based on environment and requirements
+
+profiles:
+  # Minimal profile - Works in Docker without external tools
+  minimal:
+    description: "Tests that work in minimal Docker environments"
+    exclude:
+      - test_suite_performance.sh      # Requires hyperfine
+      - test_suite_scanners.sh          # Requires lynis, rkhunter
+      - test_suite_combos.sh            # Various external deps
+      - test_package_build.sh          # Requires build tools
+      - test_docker_detection.sh       # Requires Docker-in-Docker
+      - test_gui_mode.sh               # Requires dialog/whiptail
+    include:
+      - test_suite_smoke.sh
+      - test_suite_edge.sh
+      - test_suite_security.sh
+      - test_suite_compliance.sh
+      - test_suite_governance.sh
+      - test_suite_functions.sh
+      - test_suite_os_families.sh
+      - test_suite_exit_codes.sh
+      - test_suite_environment.sh
+      - test_suite_data_types.sh
+      - test_suite_argument_matrix.sh
+      - test_suite_parallel_execution.sh
+      - test_suite_error_handling.sh
+      - test_suite_gui_mode_extended.sh
+      - test_json_validation.sh
+      - test_json_checksum.sh
+      - test_mock_failures.sh
+
+  # Standard profile - Balanced for CI/CD
+  standard:
+    description: "Standard test suite for CI/CD pipelines"
+    include:
+      - test_suite_smoke.sh
+      - test_suite_edge.sh
+      - test_suite_security.sh
+      - test_suite_functions.sh
+      - test_suite_data_types.sh
+      - test_json_validation.sh
+
+  # Full profile - All tests including external tools
+  full:
+    description: "All tests including external tool dependencies"
+    requires:
+      - hyperfine
+      - lynis
+      - rkhunter
+      - dpkg-buildpackage
+      - rpmbuild
+      - dialog
+      - whiptail
+    all_suites: true
+
+  # Quick profile - Fast smoke tests only
+  quick:
+    description: "Quick smoke tests for development"
+    include:
+      - test_suite_smoke.sh
+      - test_suite_functions.sh
+      - test_json_validation.sh
+
+  # Security profile - Security and compliance focused
+  security:
+    description: "Security and compliance test suite"
+    include:
+      - test_suite_security.sh
+      - test_suite_compliance.sh
+      - test_suite_governance.sh
+
+  # Performance profile - Performance benchmarks
+  performance:
+    description: "Performance testing (requires hyperfine)"
+    requires:
+      - hyperfine
+    include:
+      - test_suite_performance.sh
+      - test_suite_smoke.sh
+
+# Platform-specific test requirements
+platform_requirements:
+  ubuntu:
+    packages:
+      - bash
+      - python3
+      - ca-certificates
+    optional:
+      - hyperfine
+      - lynis
+      - rkhunter
+      - dialog
+
+  fedora:
+    packages:
+      - bash
+      - python3
+      - ca-certificates
+    optional:
+      - hyperfine
+      - lynis
+      - rkhunter
+      - dialog
+
+  archlinux:
+    packages:
+      - bash
+      - python3
+      - ca-certificates
+    optional:
+      - hyperfine
+      - lynis
+      - rkhunter
+      - dialog
+
+  opensuse:
+    packages:
+      - bash
+      - python3
+      - ca-certificates
+    optional:
+      - hyperfine
+      - lynis
+      - rkhunter
+      - dialog
+
+# CI/CD integration examples
+ci_examples:
+  github_actions:
+    minimal: |
+      - name: Run Tests (Minimal)
+        run: |
+          docker run --rm -v \${{ github.workspace }}:/sysmaint:ro \\
+            ubuntu:24.04 \\
+            bash -c "cd /sysmaint && bash tests/cross_os_test_runner.sh --profile minimal"
+
+    standard: |
+      - name: Run Tests (Standard)
+        run: |
+          bash tests/run_tests.sh --profile standard
+
+  gitlab_ci:
+    minimal: |
+      test:minimal:
+        image: ubuntu:24.04
+        script:
+          - bash tests/cross_os_test_runner.sh --profile minimal
+
+# Environment variables for test configuration
+environment:
+  DRY_RUN: "true"           # Enable dry-run mode for tests
+  JSON_SUMMARY: "true"      # Enable JSON output for tests
+  TEST_TIMEOUT: "120"       # Test timeout in seconds
+  LOG_LEVEL: "info"         # Logging level

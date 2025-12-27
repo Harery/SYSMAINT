@@ -1,0 +1,26 @@
+# Code Owners
+
+# Project Lead
+* @Harery
+
+# Core Modules
+/lib/modules/ @Harery
+/lib/core/ @Harery
+/init.sh @Harery
+/sysmaint @Harery
+
+# Documentation
+/docs/ @Harery
+*.md @Harery
+
+# Tests
+/tests/ @Harery
+
+# GitHub Actions
+.github/ @Harery
+
+# Security
+SECURITY.md @Harery
+
+# Releases
+# Release requires approval from project lead

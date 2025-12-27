@@ -1,0 +1,26 @@
+Source: sysmaint
+Section: admin
+Priority: optional
+Maintainer: Mohamed Elharery <Mohamed@Harery.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/Harery/SYSMAINT
+
+Package: sysmaint
+Architecture: all
+Depends: bash (>= 4.2), apt, systemd, ${misc:Depends}
+Recommends: fwupd, snapd, dialog
+Suggests: whiptail
+Description: Multi-distro Linux maintenance with modern TUI (9 platforms)
+ sysmaint is a multi-distro maintenance orchestrator supporting 9 platforms
+ across 4 OS families: Debian (Ubuntu, Debian 13, Zorin), Red Hat (Fedora,
+ CentOS, RHEL, Rocky, Alma), Arch (Arch, Manjaro), SUSE (openSUSE).
+ .
+ NEW in v2.5.0: Interactive TUI mode with modern 2026 UX/UI design.
+ Features ANSI color gradients, animated ASCII art, card-based layouts,
+ and multiple themes. Dual-boot CLI/TUI operation - use --gui flag.
+ .
+ Manages 6 package managers: APT, DNF, Pacman, Zypper, Snap, Flatpak.
+ Features include disk cleanup, security audits, JSON telemetry, and
+ unattended operation with systemd timer support.
