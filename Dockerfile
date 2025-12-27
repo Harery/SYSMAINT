@@ -38,23 +38,31 @@ ENV SYSMAINT_VERSION="${SYSMAINT_VERSION}"
 ENV SYSMAINT_HOME="/opt/sysmaint"
 ENV SYSMAINT_LOG_LEVEL="info"
 ENV PATH="${SYSMAINT_HOME}:${PATH}"
-ENV DEBIAN_FRONTEND=noninteractive
 
 # Health Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD command -v sysmaint && sysmaint --version || exit 1
 
-# Install Runtime Dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        bash \
-        bc \
-        coreutils \
-        curl \
-        jq \
-        ca-certificates \
-        && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Install Runtime Dependencies (Multi-distribution support)
+RUN if command -v apt-get >/dev/null 2>&1; then \
+        export DEBIAN_FRONTEND=noninteractive && \
+        apt-get update && \
+        apt-get install -y --no-install-recommends bash bc coreutils curl jq ca-certificates && \
+        rm -rf /var/lib/apt/lists/* && \
+        apt-get clean; \
+    elif command -v dnf >/dev/null 2>&1; then \
+        dnf install -y --allowerasing bash bc coreutils curl jq ca-certificates && \
+        dnf clean all; \
+    elif command -v yum >/dev/null 2>&1; then \
+        yum install -y --skip-broken bash bc coreutils curl jq ca-certificates && \
+        yum clean all; \
+    elif command -v pacman >/dev/null 2>&1; then \
+        pacman -Sy --noconfirm bash bc coreutils curl jq ca-certificates; \
+    elif command -v zypper >/dev/null 2>&1; then \
+        zypper install -y bash bc coreutils curl jq ca-certificates; \
+    else \
+        echo "ERROR: No supported package manager found" && exit 1; \
+    fi
 
 # Create Application Directory
 WORKDIR ${SYSMAINT_HOME}
@@ -68,19 +76,24 @@ RUN chmod +x ${SYSMAINT_HOME}/sysmaint && \
     chmod -R 755 ${SYSMAINT_HOME}/lib/
 
 # Create Non-Root User (Security Best Practice)
-RUN groupadd -r sysmaint && \
-    useradd -r -g sysmaint -s /bin/bash -d ${SYSMAINT_HOME} sysmaint && \
-    chown -R sysmaint:sysmaint ${SYSMAINT_HOME}
+RUN if command -v groupadd >/dev/null 2>&1; then \
+        groupadd -r sysmaint && \
+        useradd -r -g sysmaint -s /bin/bash -d ${SYSMAINT_HOME} sysmaint && \
+        chown -R sysmaint:sysmaint ${SYSMAINT_HOME}; \
+    else \
+        echo "WARNING: groupadd/useradd not available, running as root"; \
+    fi
 
-# Switch to Non-Root User
+# Switch to Non-Root User (if available)
+RUN if id sysmaint >/dev/null 2>&1; then \
+        usermod -aG root sysmaint 2>/dev/null || true; \
+    fi
+
 USER sysmaint
 
 # Verify Installation
 RUN sysmaint --version && \
     sysmaint --help
-
-# Expose Custom Ports (if applicable)
-# EXPOSE 8080
 
 # Set Default Command
 ENTRYPOINT ["sysmaint"]
@@ -88,5 +101,6 @@ CMD ["--help"]
 
 # Image Metadata
 # Build: docker build -t ghcr.io/harery/sysmaint:latest .
-# Run:   docker run --rm ghcr.io/harery/sysmaint:latest --help
+# Build with custom base: docker build --build-arg BASE_IMAGE=fedora:41 -t ghcr.io/harery/sysmaint:fedora-41 .
+# Run:   docker run --rm --privileged ghcr.io/harery/sysmaint:latest
 # Push:  docker push ghcr.io/harery/sysmaint:latest
