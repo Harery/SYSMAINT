@@ -60,9 +60,12 @@ RUN apt-get update && \
 WORKDIR ${SYSMAINT_HOME}
 
 # Copy Application Files
-COPY --chmod=755 sysmaint ${SYSMAINT_HOME}/sysmaint
+COPY sysmaint ${SYSMAINT_HOME}/sysmaint
 COPY lib/ ${SYSMAINT_HOME}/lib/
-COPY README.md LICENSE ${SYSMAINT_HOME}/
+
+# Set executable permissions
+RUN chmod +x ${SYSMAINT_HOME}/sysmaint && \
+    chmod -R 755 ${SYSMAINT_HOME}/lib/
 
 # Create Non-Root User (Security Best Practice)
 RUN groupadd -r sysmaint && \
