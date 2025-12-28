@@ -207,9 +207,9 @@ Built with enterprise-grade tools:
 | Tool | Purpose | Provider |
 |------|---------|----------|
 | **VS Code** | Development Environment | Microsoft |
-| **Claude (Opus 4.5)** | Code Generation | Anthropic |
-| **Cline (GPT-4)** | Debugging & QA | OpenAI |
-| **Kilo (GLM-4.7)** | Code Analysis | Zhipu AI |
+| **ShellCheck** | Static Analysis | ShellCheck |
+| **Bash** | Script Execution | GNU Project |
+| **Docker** | Container Build | Docker Inc |
 
 ---
 
