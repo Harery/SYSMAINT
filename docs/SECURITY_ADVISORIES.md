@@ -213,9 +213,9 @@ For responsible disclosure, report vulnerabilities privately:
    - Provide detailed vulnerability information
    - Receive automated tracking
 
-2. **Email (PGP Preferred)**
+2. **Email**
    - Email: security@harery.com
-   - PGP Key: https://github.com/Harery/SYSMAINT/blob/main/.github/KEYS.asc
+   - Email: Mohamed@Harery.com
 
 ### Disclosure Timeline
 
