@@ -1,0 +1,64 @@
+# Issue Labels Configuration
+
+# Bug Reports
+bug:
+  - "Bug: Critical"
+  - "Bug: Major"
+  - "Bug: Minor"
+
+# Features
+enhancement:
+  - "Feature Request"
+  - "Enhancement"
+documentation:
+  - "Documentation"
+
+# Priority
+priority:
+  - "Priority: Critical"
+  - "Priority: High"
+  - "Priority: Medium"
+  - "Priority: Low"
+
+# Status
+status:
+  - "Status: Blocked"
+  - "Status: In Progress"
+  - "Status: Review Needed"
+  - "Status: Done"
+
+# Platform
+platform:
+  - "Platform: Ubuntu"
+  - "Platform: Debian"
+  - "Platform: Fedora"
+  - "Platform: RHEL"
+  - "Platform: Arch"
+  - "Platform: CentOS"
+  - "Platform: Rocky"
+  - "Platform: Alma"
+  - "Platform: SUSE"
+
+# Good First Issues
+"good first issue":
+  - "Good First Issue"
+  - "Help Wanted"
+
+# Dependencies
+dependencies:
+  - "Dependencies"
+
+# Security
+security:
+  - "Security: Vulnerability"
+  - "Security: Audit"
+
+# Performance
+performance:
+  - "Performance"
+
+# Testing
+testing:
+  - "Tests: Unit"
+  - "Tests: Integration"
+  - "Tests: E2E"
