@@ -1,0 +1,33 @@
+# SYSMAINT Kubernetes ConfigMap
+# Configuration for sysmaint operations
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysmaint-config
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+data:
+  # Log level: debug, info, warn, error
+  SYSMAINT_LOG_LEVEL: "info"
+
+  # Timezone
+  TZ: "UTC"
+
+  # Maintenance schedule notes
+  schedule.notes: |
+    Weekly: Sundays at 2 AM
+    Daily: 3 AM
+    Monthly: 1st at 2 AM
+
+  # Example configuration for different maintenance modes
+  mode.full: "--auto --cleanup --purge-kernels --security-audit"
+  mode.minimal: "--upgrade --quiet"
+  mode.cleanup: "--cleanup --purge-kernels"

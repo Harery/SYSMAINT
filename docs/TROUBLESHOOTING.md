@@ -524,6 +524,247 @@ docker run --rm --privileged ghcr.io/harery/sysmaint:latest
 
 # Or try with explicit host mount
 docker run --rm --privileged -v /:/host:ro ghcr.io/harery/sysmaint:latest
+
+# Check container logs for detailed errors
+docker logs <container-id>
+```
+
+---
+
+### Issue: "No matching manifest for linux/arm64"
+
+**Symptom:**
+```bash
+no matching manifest for linux/arm64 in the manifest list entries
+```
+
+**Cause:** Trying to run an image that doesn't support your architecture.
+
+**Solution:**
+```bash
+# Check available architectures
+docker manifest inspect ghcr.io/harery/sysmaint:latest
+
+# SYSMAINT supports multi-architecture (amd64/arm64)
+# Pull the correct image for your platform
+docker pull ghcr.io/harery/sysmaint:latest
+
+# If issue persists, try platform-specific image
+docker pull ghcr.io/harery/sysmaint:ubuntu
+```
+
+---
+
+### Issue: "Health check failed"
+
+**Symptom:** Container health status shows `unhealthy`.
+
+**Cause:** The sysmaint command is not functioning correctly inside container.
+
+**Solution:**
+```bash
+# Check health status
+docker ps --format "table {{.Names}}\t{{.Status}}"
+
+# Inspect health check logs
+docker inspect --format='{{json .State.Health}}' <container-id> | jq
+
+# Run manual health check
+docker exec <container-id> sysmaint --version
+
+# Restart container
+docker restart <container-id>
+```
+
+---
+
+### Issue: "Volume mount permission denied"
+
+**Symptom:**
+```bash
+docker: Error response from daemon: OCI runtime create failed: ...
+permission denied while trying to connect to the Docker daemon
+```
+
+**Cause:** SELinux or AppArmor is blocking the volume mount.
+
+**Solution:**
+```bash
+# For SELinux systems (Fedora/RHEL)
+docker run --rm --privileged \
+  -v /:/host:ro,Z \
+  ghcr.io/harery/sysmaint:latest
+
+# Disable SELinux temporarily (not recommended for production)
+sudo setenforce 0
+
+# For AppArmor (Ubuntu/Debian)
+# Check if AppArmor is blocking
+dmesg | grep -i apparmor
+
+# Try with different mount options
+docker run --rm --privileged \
+  --security-opt apparmor=unconfined \
+  -v /:/host:ro \
+  ghcr.io/harery/sysmaint:latest
+```
+
+---
+
+### Issue: "Image not found" or "manifest unknown"
+
+**Symptom:**
+```bash
+Error response from daemon: manifest for ghcr.io/harery/sysmaint:latest not found
+```
+
+**Cause:** Image tag doesn't exist or registry is inaccessible.
+
+**Solution:**
+```bash
+# Check available tags
+# Visit: https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint
+
+# Pull specific version
+docker pull ghcr.io/harery/sysmaint:v1.0.0
+
+# Check if you're authenticated (for private images)
+docker login ghcr.io
+
+# Verify registry connectivity
+curl -I https://ghcr.io/v2/
+```
+
+---
+
+### Issue: Docker Compose fails to start
+
+**Symptom:**
+```bash
+ERROR: for sysmaint  Cannot create container for service sysmaint:
+OCI runtime create failed
+```
+
+**Cause:** Incorrect docker-compose.yml configuration or missing privileges.
+
+**Solution:**
+```bash
+# Validate docker-compose.yml syntax
+docker-compose config
+
+# Check for syntax errors
+docker-compose config --quiet
+
+# Ensure privileged mode is set in docker-compose.yml
+# privileged: true
+
+# Try running with verbose output
+docker-compose --verbose up
+
+# Recreate containers
+docker-compose down
+docker-compose up --force-recreate
+```
+
+---
+
+### Issue: "Container has no Internet access"
+
+**Symptom:** Container cannot reach package repositories.
+
+**Cause:** Network configuration or DNS issues.
+
+**Solution:**
+```bash
+# Check container network
+docker network inspect bridge
+
+# Run with host network
+docker run --rm --privileged --network host \
+  ghcr.io/harery/sysmaint:latest
+
+# Specify custom DNS
+docker run --rm --privileged \
+  --dns 8.8.8.8 --dns 8.8.4.4 \
+  ghcr.io/harery/sysmaint:latest
+
+# Check firewall rules
+sudo iptables -L DOCKER -n -v
+```
+
+---
+
+### Issue: "Docker build fails on multi-architecture"
+
+**Symptom:**
+```bash
+multiple platforms feature is currently not supported for docker driver
+```
+
+**Cause:** Docker builder doesn't support multi-architecture builds.
+
+**Solution:**
+```bash
+# Use buildx for multi-architecture builds
+docker buildx create --name multiarch --use
+
+# Build and push multi-architecture image
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -f Dockerfile.ubuntu \
+  -t ghcr.io/harery/sysmaint:ubuntu \
+  --push .
+
+# Or build for specific platform only
+docker buildx build --platform linux/amd64 \
+  -f Dockerfile.ubuntu \
+  -t ghcr.io/harery/sysmaint:ubuntu .
+```
+
+---
+
+### Issue: "Non-root user cannot access host filesystem"
+
+**Symptom:** Operations fail with permission errors inside container.
+
+**Cause:** Container runs as non-root user but needs elevated access.
+
+**Solution:**
+```bash
+# SYSMAINT Docker images use non-root user by default
+# The --privileged flag is required for system maintenance
+
+# Correct usage:
+docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+
+# If you need to run as root inside container:
+docker run --rm --privileged --user root \
+  ghcr.io/harery/sysmaint:latest
+
+# Note: Running as root inside container is safe when
+# the container itself is isolated and temporary
+```
+
+---
+
+### Issue: "Docker image is outdated"
+
+**Symptom:** New features in latest sysmaint version aren't available.
+
+**Cause:** Using cached or outdated image.
+
+**Solution:**
+```bash
+# Pull latest image
+docker pull ghcr.io/harery/sysmaint:latest
+
+# Remove old images
+docker image prune -a
+
+# Verify version
+docker run --rm ghcr.io/harery/sysmaint:latest --version
+
+# Use specific version for reproducibility
+docker pull ghcr.io/harery/sysmaint:v1.0.0
 ```
 
 ---

@@ -1,0 +1,188 @@
+# SYSMAINT Kubernetes CronJob
+# Recommended for automated system maintenance
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sysmaint
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid  # Only one job at a time
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sysmaint
+        app.kubernetes.io/component: system-maintenance
+    spec:
+      backoffLimit: 0  # Don't retry on failure
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: sysmaint
+        spec:
+          restartPolicy: OnFailure
+          hostPID: true
+          containers:
+          - name: sysmaint
+            image: ghcr.io/harery/sysmaint:latest
+            imagePullPolicy: IfNotPresent
+            command: ["sysmaint"]
+            args: ["--auto", "--quiet"]
+            securityContext:
+              privileged: true
+            env:
+            - name: SYSMAINT_LOG_LEVEL
+              value: "info"
+            - name: SYSMAINT_VERSION
+              value: "1.0.0"
+            - name: TZ
+              value: "UTC"
+            volumeMounts:
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+          volumes:
+          - name: host-root
+            hostPath:
+              path: /
+              type: Directory
+          nodeSelector:
+            kubernetes.io/os: linux
+
+---
+# Daily CronJob variant (more frequent maintenance)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sysmaint-daily
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint-daily
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  schedule: "0 3 * * *"  # Daily at 3 AM
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sysmaint-daily
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: sysmaint-daily
+        spec:
+          restartPolicy: OnFailure
+          hostPID: true
+          containers:
+          - name: sysmaint
+            image: ghcr.io/harery/sysmaint:latest
+            imagePullPolicy: IfNotPresent
+            command: ["sysmaint"]
+            args: ["--upgrade", "--quiet"]  # Only updates
+            securityContext:
+              privileged: true
+            env:
+            - name: SYSMAINT_LOG_LEVEL
+              value: "info"
+            volumeMounts:
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "50m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
+          volumes:
+          - name: host-root
+            hostPath:
+              path: /
+              type: Directory
+          nodeSelector:
+            kubernetes.io/os: linux
+
+---
+# Monthly CronJob variant (full cleanup)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sysmaint-monthly
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint-monthly
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  schedule: "0 2 1 * *"  # Monthly on the 1st at 2 AM
+  successfulJobsHistoryLimit: 12
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sysmaint-monthly
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: sysmaint-monthly
+        spec:
+          restartPolicy: OnFailure
+          hostPID: true
+          containers:
+          - name: sysmaint
+            image: ghcr.io/harery/sysmaint:latest
+            imagePullPolicy: IfNotPresent
+            command: ["sysmaint"]
+            args: ["--auto", "--cleanup", "--purge-kernels"]  # Full cleanup
+            securityContext:
+              privileged: true
+            env:
+            - name: SYSMAINT_LOG_LEVEL
+              value: "info"
+            volumeMounts:
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+          volumes:
+          - name: host-root
+            hostPath:
+              path: /
+              type: Directory
+          nodeSelector:
+            kubernetes.io/os: linux

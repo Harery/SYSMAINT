@@ -157,6 +157,19 @@ docker pull ghcr.io/harery/sysmaint:latest
 docker run --rm --privileged ghcr.io/harery/sysmaint:latest
 ```
 
+**Available Docker Images:**
+| Image | Description |
+|-------|-------------|
+| `ghcr.io/harery/sysmaint:latest` | Latest stable release |
+| `ghcr.io/harery/sysmaint:v1.0.0` | Version pinned |
+| `ghcr.io/harery/sysmaint:ubuntu` | Ubuntu-based variant |
+| `ghcr.io/harery/sysmaint:debian` | Debian-based variant |
+| `ghcr.io/harery/sysmaint:fedora` | Fedora-based variant |
+
+**Multi-architecture:** `linux/amd64`, `linux/arm64`
+
+> **🐳 Full Docker Guide:** [docs/DOCKER.md](docs/DOCKER.md)
+
 ### Method 4: System-Wide Installation
 
 ```bash

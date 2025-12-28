@@ -1,0 +1,47 @@
+# SYSMAINT Helm Chart
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: v2
+name: sysmaint
+description: Enterprise-grade automated system maintenance toolkit for Linux
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - system-maintenance
+  - linux
+  - automation
+  - cleanup
+  - security
+home: https://github.com/Harery/SYSMAINT
+sources:
+  - https://github.com/Harery/SYSMAINT
+maintainers:
+  - name: Mohamed Elharery
+    email: Mohamed@Harery.com
+    url: https://www.harery.com
+icon: https://raw.githubusercontent.com/Harery/SYSMAINT/main/assets/logo.png
+annotations:
+  artifacthub.io/category: "utilities"
+  artifacthub.io/license: "MIT"
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://github.com/Harery/SYSMAINT/wiki
+    - name: Support
+      url: https://github.com/Harery/SYSMAINT/issues
+  artifacthub.io/changes: |
+    - Initial release
+    - Multi-distribution support (Ubuntu, Debian, Fedora)
+    - CronJob automation
+    - DaemonSet mode for cluster-wide operations
+  artifacthub.io/images: |
+    - name: sysmaint
+      image: ghcr.io/harery/sysmaint:latest
+      platforms:
+        - linux/amd64
+        - linux/arm64
+  artifacthub.io/signKey: |
+    fingerprint: <YOUR-GPG-KEY-FINGERPRINT>
+    url: https://github.com/Harery/SYSMAINT

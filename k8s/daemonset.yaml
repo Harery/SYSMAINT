@@ -1,0 +1,74 @@
+# SYSMAINT Kubernetes DaemonSet
+# Runs sysmaint on every node in the cluster
+# Use with caution - this will run maintenance on ALL nodes
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sysmaint
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sysmaint
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sysmaint
+        app.kubernetes.io/component: system-maintenance
+    spec:
+      serviceAccountName: sysmaint
+      restartPolicy: Always
+      hostPID: true
+      tolerations:
+      # Allow running on master nodes (use with caution)
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      # Allow running on tainted nodes
+      - operator: Exists
+      containers:
+      - name: sysmaint
+        image: ghcr.io/harery/sysmaint:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh"]
+        args: ["-c", "sleep infinity"]  # Keep alive for on-demand execution
+        securityContext:
+          privileged: true
+        env:
+        - name: SYSMAINT_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: sysmaint-config
+              key: SYSMAINT_LOG_LEVEL
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: sysmaint-config
+              key: TZ
+        volumeMounts:
+        - name: host-root
+          mountPath: /host
+          readOnly: true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: host-root
+        hostPath:
+          path: /
+          type: Directory
+      nodeSelector:
+        kubernetes.io/os: linux

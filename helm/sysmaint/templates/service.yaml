@@ -1,0 +1,25 @@
+# SYSMAINT Helm Chart - Service Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+{{- if .Values.service.enabled }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "sysmaint.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: metrics
+    port: {{ .Values.service.port }}
+    targetPort: 8080
+    protocol: TCP
+
+{{- end }}

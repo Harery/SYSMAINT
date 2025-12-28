@@ -1,42 +1,266 @@
+# SYSMAINT Multi-Variant Docker Build Workflow
+# Builds and pushes container images for Ubuntu, Debian, and Fedora variants
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
 name: Docker
 
 on:
   push:
     branches: [ main ]
     tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      variant:
+        description: 'Build specific variant only'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ubuntu
+          - debian
+          - fedora
 
 permissions:
   contents: read
   packages: write
+  actions: read  # Required for cache
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/harery/sysmaint
 
 jobs:
-  build:
+  # Build Ubuntu variant
+  build-ubuntu:
+    name: Build Ubuntu
     runs-on: ubuntu-latest
+    if: github.event.inputs.variant != 'debian' && github.event.inputs.variant != 'fedora'
     steps:
-      - uses: actions/checkout@v6
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/metadata-action@v5
+
+      - name: Extract metadata
         id: meta
+        uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/harery/sysmaint
+          images: ${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+            suffix=-ubuntu
           tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable={{is_default_branch}}
-      - uses: docker/build-push-action@v6
+            type=ref,event=branch,suffix=-ubuntu
+            type=semver,pattern={{version}},suffix=-ubuntu
+            type=semver,pattern={{major}}.{{minor}},suffix=-ubuntu
+            type=raw,value=latest,enable={{is_default_branch}},suffix=-ubuntu
+
+      - name: Build and push Ubuntu
+        uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./Dockerfile.ubuntu
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=ubuntu
+          cache-to: type=gha,mode=max,scope=ubuntu
+          build-args: |
+            BASE_IMAGE=ubuntu:24.04
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+  # Build Debian variant
+  build-debian:
+    name: Build Debian
+    runs-on: ubuntu-latest
+    if: github.event.inputs.variant != 'ubuntu' && github.event.inputs.variant != 'fedora'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+            suffix=-debian
+          tags: |
+            type=ref,event=branch,suffix=-debian
+            type=semver,pattern={{version}},suffix=-debian
+            type=semver,pattern={{major}}.{{minor}},suffix=-debian
+            type=raw,value=latest,enable={{is_default_branch}},suffix=-debian
+
+      - name: Build and push Debian
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.debian
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=debian
+          cache-to: type=gha,mode=max,scope=debian
+          build-args: |
+            BASE_IMAGE=debian:13
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+  # Build Fedora variant
+  build-fedora:
+    name: Build Fedora
+    runs-on: ubuntu-latest
+    if: github.event.inputs.variant != 'ubuntu' && github.event.inputs.variant != 'debian'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+            suffix=-fedora
+          tags: |
+            type=ref,event=branch,suffix=-fedora
+            type=semver,pattern={{version}},suffix=-fedora
+            type=semver,pattern={{major}}.{{minor}},suffix=-fedora
+            type=raw,value=latest,enable={{is_default_branch}},suffix=-fedora
+
+      - name: Build and push Fedora
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.fedora
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=fedora
+          cache-to: type=gha,mode=max,scope=fedora
+          build-args: |
+            BASE_IMAGE=fedora:41
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+  # Build default image (Ubuntu-based)
+  build-default:
+    name: Build Default (Latest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Default
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.ubuntu
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=default
+          cache-to: type=gha,mode=max,scope=default
+          build-args: |
+            BASE_IMAGE=ubuntu:24.04
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+  # Generate build summary
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [build-ubuntu, build-debian, build-fedora, build-default]
+    if: always()
+    steps:
+      - name: Build Summary
+        run: |
+          echo "# Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Variant | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Ubuntu | ${{ needs.build-ubuntu.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Debian | ${{ needs.build-debian.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fedora | ${{ needs.build-fedora.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Default | ${{ needs.build-default.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Available Images" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/sysmaint:latest\` (Ubuntu-based)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/sysmaint:ubuntu\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/sysmaint:debian\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/sysmaint:fedora\`" >> $GITHUB_STEP_SUMMARY

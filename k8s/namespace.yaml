@@ -1,0 +1,15 @@
+# SYSMAINT Kubernetes Namespace
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sysmaint
+  labels:
+    name: sysmaint
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl

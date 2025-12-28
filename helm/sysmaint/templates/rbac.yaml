@@ -1,0 +1,73 @@
+# SYSMAINT Helm Chart - RBAC Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+{{- if .Values.rbac.create }}
+
+---
+# Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "sysmaint.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "sysmaint.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "sysmaint.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "sysmaint.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+
+{{- end }}

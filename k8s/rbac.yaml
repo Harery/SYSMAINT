@@ -1,0 +1,88 @@
+# SYSMAINT Kubernetes RBAC
+# ServiceAccount, Role, and RoleBinding for sysmaint
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sysmaint
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sysmaint
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+rules:
+  # Allow reading pods and jobs in sysmaint namespace
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sysmaint
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+subjects:
+  - kind: ServiceAccount
+    name: sysmaint
+    namespace: sysmaint
+roleRef:
+  kind: Role
+  name: sysmaint
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ClusterRole for privileged operations
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sysmaint-privileged
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+rules:
+  # Allow listing nodes for cluster-wide operations
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sysmaint-privileged
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+subjects:
+  - kind: ServiceAccount
+    name: sysmaint
+    namespace: sysmaint
+roleRef:
+  kind: ClusterRole
+  name: sysmaint-privileged
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,145 @@
+# SYSMAINT Helm Chart Values
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+# -- Image configuration
+image:
+  # -- Image repository
+  repository: ghcr.io/harery/sysmaint
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag (defaults to Chart appVersion)
+  tag: "latest"
+
+# -- Image pull secrets
+imagePullSecrets: []
+
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full chart name
+fullnameOverride: ""
+
+# -- SYSMAINT configuration
+sysmaint:
+  # -- Log level: debug, info, warn, error
+  logLevel: "info"
+  # -- Version
+  version: "1.0.0"
+  # -- Timezone
+  timezone: "UTC"
+
+# -- CronJob schedules
+schedule:
+  # -- Weekly maintenance (every Sunday at 2 AM)
+  weekly: "0 2 * * 0"
+  # -- Daily maintenance (every day at 3 AM)
+  daily: "0 3 * * *"
+  # -- Monthly maintenance (1st of month at 2 AM)
+  monthly: "0 2 1 * *"
+
+# -- Command arguments for different schedules
+args:
+  # -- Arguments for weekly run
+  weekly: ["--auto", "--quiet"]
+  # -- Arguments for daily run
+  daily: ["--upgrade", "--quiet"]
+  # -- Arguments for monthly run
+  monthly: ["--auto", "--cleanup", "--purge-kernels"]
+
+# -- CronJob settings
+cronjob:
+  # -- Enable weekly CronJob
+  enabled: true
+  # -- Successful jobs history limit
+  successfulJobsHistoryLimit: 3
+  # -- Failed jobs history limit
+  failedJobsHistoryLimit: 3
+  # -- Concurrency policy: Allow, Forbid, Replace
+  concurrencyPolicy: Forbid
+  # -- Restart policy: OnFailure, Never
+  restartPolicy: OnFailure
+  # -- Backoff limit
+  backoffLimit: 0
+
+# -- Deployment settings (for interactive/debugging)
+deployment:
+  # -- Enable deployment (not recommended for production use)
+  enabled: false
+  # -- Number of replicas
+  replicas: 1
+
+# -- DaemonSet settings (for node-level operations)
+daemonset:
+  # -- Enable DaemonSet (runs on all nodes)
+  enabled: false
+
+# -- Resource limits and requests
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# -- Node selector
+nodeSelector:
+  kubernetes.io/os: linux
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity rules
+affinity: {}
+
+# -- Security context
+securityContext:
+  privileged: true
+
+# -- Service account configuration
+serviceAccount:
+  # -- Create service account
+  create: true
+  # -- Service account name
+  name: ""
+  # -- Annotations for service account
+  annotations: {}
+
+# -- RBAC configuration
+rbac:
+  # -- Create RBAC resources
+  create: true
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod labels
+podLabels: {}
+
+# -- Service configuration
+service:
+  # -- Create service
+  enabled: false
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 8080
+
+# -- Priority class name
+priorityClassName: ""
+
+# -- Host PID (required for system operations)
+hostPID: true
+
+# -- Volume mounts
+volumes:
+  - name: host-root
+    hostPath:
+      path: /
+      type: Directory
+
+volumeMounts:
+  - name: host-root
+    mountPath: /host
+    readOnly: true

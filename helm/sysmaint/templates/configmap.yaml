@@ -1,0 +1,15 @@
+# SYSMAINT Helm Chart - ConfigMap Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sysmaint.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+data:
+  SYSMAINT_LOG_LEVEL: {{ .Values.sysmaint.logLevel | quote }}
+  TZ: {{ .Values.sysmaint.timezone | quote }}

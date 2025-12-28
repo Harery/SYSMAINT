@@ -1,0 +1,25 @@
+# SYSMAINT Kubernetes Service
+# For cluster-internal access (not typically used for sysmaint)
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sysmaint
+  namespace: sysmaint
+  labels:
+    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/component: system-maintenance
+    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/managed-by: kubectl
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: sysmaint
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+    protocol: TCP

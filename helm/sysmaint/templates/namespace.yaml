@@ -1,0 +1,14 @@
+# SYSMAINT Helm Chart - Namespace Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+{{- if .Values.namespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace.name | default "sysmaint" }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+    app.kubernetes.io/component: namespace
+{{- end }}

@@ -1,0 +1,181 @@
+# SYSMAINT Helm Chart - CronJob Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+{{- if .Values.cronjob.enabled }}
+
+---
+# Weekly CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "sysmaint.fullname" . }}-weekly
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+    app.kubernetes.io/schedule: weekly
+spec:
+  schedule: {{ .Values.schedule.weekly | quote }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "sysmaint.selectorLabels" . | nindent 8 }}
+    spec:
+      backoffLimit: {{ .Values.cronjob.backoffLimit }}
+      template:
+        metadata:
+          labels:
+            {{- include "sysmaint.selectorLabels" . | nindent 12 }}
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        spec:
+          serviceAccountName: {{ include "sysmaint.serviceAccountName" . }}
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          hostPID: {{ .Values.hostPID }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: sysmaint
+            image: {{ include "sysmaint.image" . }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command: ["sysmaint"]
+            args: {{- toYaml .Values.args.weekly | nindent 14 }}
+            securityContext:
+              privileged: {{ .Values.securityContext.privileged }}
+            env:
+            - name: SYSMAINT_LOG_LEVEL
+              value: {{ .Values.sysmaint.logLevel | quote }}
+            - name: SYSMAINT_VERSION
+              value: {{ .Values.sysmaint.version | quote }}
+            - name: TZ
+              value: {{ .Values.sysmaint.timezone | quote }}
+            volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 14 }}
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+          volumes:
+            {{- toYaml .Values.volumes | nindent 12 }}
+
+---
+# Daily CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "sysmaint.fullname" . }}-daily
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+    app.kubernetes.io/schedule: daily
+spec:
+  schedule: {{ .Values.schedule.daily | quote }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "sysmaint.selectorLabels" . | nindent 8 }}
+    spec:
+      backoffLimit: {{ .Values.cronjob.backoffLimit }}
+      template:
+        metadata:
+          labels:
+            {{- include "sysmaint.selectorLabels" . | nindent 12 }}
+        spec:
+          serviceAccountName: {{ include "sysmaint.serviceAccountName" . }}
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          hostPID: {{ .Values.hostPID }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: sysmaint
+            image: {{ include "sysmaint.image" . }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command: ["sysmaint"]
+            args: {{- toYaml .Values.args.daily | nindent 14 }}
+            securityContext:
+              privileged: {{ .Values.securityContext.privileged }}
+            env:
+            - name: SYSMAINT_LOG_LEVEL
+              value: {{ .Values.sysmaint.logLevel | quote }}
+            - name: TZ
+              value: {{ .Values.sysmaint.timezone | quote }}
+            volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 14 }}
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+          volumes:
+            {{- toYaml .Values.volumes | nindent 12 }}
+
+---
+# Monthly CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "sysmaint.fullname" . }}-monthly
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+    app.kubernetes.io/schedule: monthly
+spec:
+  schedule: {{ .Values.schedule.monthly | quote }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "sysmaint.selectorLabels" . | nindent 8 }}
+    spec:
+      backoffLimit: {{ .Values.cronjob.backoffLimit }}
+      template:
+        metadata:
+          labels:
+            {{- include "sysmaint.selectorLabels" . | nindent 12 }}
+        spec:
+          serviceAccountName: {{ include "sysmaint.serviceAccountName" . }}
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          hostPID: {{ .Values.hostPID }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: sysmaint
+            image: {{ include "sysmaint.image" . }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command: ["sysmaint"]
+            args: {{- toYaml .Values.args.monthly | nindent 14 }}
+            securityContext:
+              privileged: {{ .Values.securityContext.privileged }}
+            env:
+            - name: SYSMAINT_LOG_LEVEL
+              value: {{ .Values.sysmaint.logLevel | quote }}
+            - name: TZ
+              value: {{ .Values.sysmaint.timezone | quote }}
+            volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 14 }}
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+          volumes:
+            {{- toYaml .Values.volumes | nindent 12 }}
+
+{{- end }}

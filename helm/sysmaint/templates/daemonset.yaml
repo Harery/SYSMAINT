@@ -1,0 +1,71 @@
+# SYSMAINT Helm Chart - DaemonSet Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+{{- if .Values.daemonset.enabled }}
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "sysmaint.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sysmaint.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "sysmaint.serviceAccountName" . }}
+      hostPID: {{ .Values.hostPID }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      tolerations:
+        # Allow running on control-plane nodes
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        # Allow running on all tainted nodes
+        - operator: Exists
+      containers:
+      - name: sysmaint
+        image: {{ include "sysmaint.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/bin/sh"]
+        args: ["-c", "sleep infinity"]
+        securityContext:
+          privileged: {{ .Values.securityContext.privileged }}
+        env:
+        - name: SYSMAINT_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "sysmaint.fullname" . }}-config
+              key: SYSMAINT_LOG_LEVEL
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "sysmaint.fullname" . }}-config
+              key: TZ
+        volumeMounts:
+        {{- toYaml .Values.volumeMounts | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      volumes:
+        {{- toYaml .Values.volumes | nindent 8 }}
+
+{{- end }}

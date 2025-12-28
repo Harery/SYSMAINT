@@ -1,0 +1,82 @@
+# SYSMAINT Helm Chart - Installation Notes
+
+Thank you for installing SYSMAINT!
+
+Your release is named: {{ .Release.Name }}
+
+## CronJobs Created
+
+{{- if .Values.cronjob.enabled }}
+
+The following CronJobs have been created:
+
+- **Weekly**: {{ .Release.Namespace }}/{{ include "sysmaint.fullname" . }}-weekly
+  Schedule: {{ .Values.schedule.weekly }}
+  Command: sysmaint {{- range .Values.args.weekly }} {{ . }}{{- end }}
+
+- **Daily**: {{ .Release.Namespace }}/{{ include "sysmaint.fullname" . }}-daily
+  Schedule: {{ .Values.schedule.daily }}
+  Command: sysmaint {{- range .Values.args.daily }} {{ . }}{{- end }}
+
+- **Monthly**: {{ .Release.Namespace }}/{{ include "sysmaint.fullname" . }}-monthly
+  Schedule: {{ .Values.schedule.monthly }}
+  Command: sysmaint {{- range .Values.args.monthly }} {{ . }}{{- end }}
+
+{{- end }}
+
+## Check Status
+
+To check the status of your CronJobs:
+
+```bash
+kubectl get cronjobs -n {{ .Release.Namespace }}
+kubectl get jobs -n {{ .Release.Namespace }}
+```
+
+## Manual Execution
+
+To run maintenance manually:
+
+```bash
+# Create a one-time job
+kubectl create job --from=cronjob/{{ include "sysmaint.fullname" . }}-weekly manual-$(date +%s) -n {{ .Release.Namespace }}
+```
+
+## View Logs
+
+To view logs from the last run:
+
+```bash
+# Get the latest job
+JOB=$(kubectl get jobs -n {{ .Release.Namespace }} -o name | tail -n 1 | cut -d'/' -f2)
+kubectl logs -n {{ .Release.Namespace }} job/$JOB
+```
+
+## Uninstall
+
+To uninstall this release:
+
+```bash
+helm uninstall {{ .Release.Name }}
+```
+
+## Configuration
+
+To customize your installation, create a values.yaml file:
+
+```bash
+helm install {{ .Release.Name }} ./helm/sysmaint -f custom-values.yaml
+```
+
+Available configuration options:
+- Schedule times (schedule.weekly, schedule.daily, schedule.monthly)
+- Command arguments (args.weekly, args.daily, args.monthly)
+- Resource limits (resources)
+- Log level (sysmaint.logLevel)
+- Timezone (sysmaint.timezone)
+
+## Documentation
+
+For more information, visit:
+- GitHub: https://github.com/Harery/SYSMAINT
+- Documentation: https://github.com/Harery/SYSMAINT/wiki

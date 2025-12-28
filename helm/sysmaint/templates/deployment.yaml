@@ -1,0 +1,71 @@
+# SYSMAINT Helm Chart - Deployment Template
+#
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+{{- if .Values.deployment.enabled }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sysmaint.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sysmaint.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "sysmaint.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sysmaint.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "sysmaint.serviceAccountName" . }}
+      hostPID: {{ .Values.hostPID }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: sysmaint
+        image: {{ include "sysmaint.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 3600"]
+        securityContext:
+          privileged: {{ .Values.securityContext.privileged }}
+        env:
+        - name: SYSMAINT_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "sysmaint.fullname" . }}-config
+              key: SYSMAINT_LOG_LEVEL
+        - name: SYSMAINT_VERSION
+          value: {{ .Values.sysmaint.version | quote }}
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "sysmaint.fullname" . }}-config
+              key: TZ
+        volumeMounts:
+        {{- toYaml .Values.volumeMounts | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      volumes:
+        {{- toYaml .Values.volumes | nindent 8 }}
+
+{{- end }}
