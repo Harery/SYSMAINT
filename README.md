@@ -163,20 +163,23 @@ services:
 
 | Document | Description |
 |----------|-------------|
+| **[Product Requirements (PRD)](docs/PRD.md)** | Product vision & requirements |
+| [Project Structure](docs/PROJECT_STRUCTURE.md) | Directory organization |
 | [Full Documentation](docs/) | Complete guide |
 | [Installation Guide](docs/INSTALLATION.md) | All installation methods |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues |
 | [Architecture](docs/ARCHITECTURE.md) | Code structure |
 | [Performance](docs/PERFORMANCE.md) | Benchmarks by OS |
 | [Security](docs/SECURITY.md) | Security policy |
-| [Contributing](CONTRIBUTING.md) | Dev guidelines |
+| [Contributing](docs/CONTRIBUTING.md) | Dev guidelines |
+| [Code of Conduct](docs/CODE_OF_CONDUCT.md) | Community guidelines |
 | [Release Notes](RELEASE_NOTES_v1.0.0.md) | v1.0.0 details |
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+We welcome contributions! Please see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ---
 

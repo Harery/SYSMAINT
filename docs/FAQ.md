@@ -1,7 +1,6 @@
-# Frequently Asked Questions
+# FAQ
 
-**Version:** v1.0.0
-**Last Updated:** 2025-12-27
+**Frequently Asked Questions**
 
 ---
 
@@ -9,174 +8,168 @@
 
 ### What is SYSMAINT?
 
-SYSMAINT is an automated Linux system maintenance tool that supports 9 major Linux distributions. It provides a single command to update, clean, and secure your system.
+SYSMAINT is an automated system maintenance toolkit for Linux that handles package updates, system cleanup, security auditing, and performance optimization.
+
+---
 
 ### Which distributions are supported?
 
-- Ubuntu 24.04, 22.04
-- Debian 13, 12
-- Fedora 41
-- RHEL 10
-- Rocky Linux 9
-- AlmaLinux 9
-- CentOS Stream 9
-- Arch Linux
-- openSUSE Tumbleweed
-
-### Is SYSMAINT free?
-
-Yes! SYSMAINT is open-source and released under the MIT License.
+| Distribution | Versions |
+|--------------|----------|
+| Ubuntu | 22.04, 24.04 |
+| Debian | 12, 13 |
+| Fedora | 41 |
+| RHEL | 10 |
+| Rocky Linux | 9 |
+| AlmaLinux | 9 |
+| CentOS Stream | 9 |
+| Arch Linux | Rolling |
+| openSUSE | Tumbleweed |
 
 ---
 
-## Installation & Usage
+### Is SYSMAINT safe to use?
 
-### How do I install SYSMAINT?
+Yes. SYSMAINT includes:
+- Input validation
+- Dry-run mode for testing
+- Least privilege principle
+- No data collection
 
+**Always run with `--dry-run` first to preview changes.**
+
+---
+
+## Usage Questions
+
+### How often should I run SYSMAINT?
+
+Recommended:
+- **Personal systems:** Weekly or bi-weekly
+- **Servers:** Weekly with scheduled automation
+- **Critical systems:** After security updates are available
+
+---
+
+### Can I automate SYSMAINT?
+
+Yes, use cron or systemd:
+
+**Cron (weekly):**
 ```bash
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
-sudo ./sysmaint
+0 2 * * 0 /path/to/sysmaint --json > /var/log/sysmaint.log 2>&1
 ```
 
-### Do I need to use sudo?
-
-Yes, SYSMAINT requires root privileges to perform system maintenance tasks.
-
-### Can I run it automatically?
-
-Yes! You can set up a cron job:
-
+**Systemd timer:**
 ```bash
-# Run weekly on Sunday at 2 AM
-0 2 * * 0 /path/to/sysmaint/sysmaint --auto
+sudo systemctl enable sysmaint.timer
+sudo systemctl start sysmaint.timer
 ```
 
 ---
 
-## Safety & Security
+### What does dry-run mode do?
 
-### Will SYSMAINT delete my data?
-
-No! SYSMAINT only removes:
-- Old kernel packages (keeping the latest 2)
-- Cached package files
-- Temporary files
-- Old log files (rotated, not active logs)
-
-### Is it safe to run?
-
-Yes! SYSMAINT includes:
-- Input validation on all operations
-- Dry-run mode to preview changes: `sudo ./sysmaint --dry-run`
-- Confirmation prompts for destructive operations
-- Comprehensive testing on all supported platforms
-
-### Does SYSMAINT collect data?
-
-No! SYSMAINT has zero telemetry and collects no data.
+Dry-run mode shows what would be done without making changes:
+- Checks for available updates
+- Identifies cleanable files
+- Reports security issues
+- Validates system state
 
 ---
 
-## Troubleshooting
+## Technical Questions
 
-### "Permission denied" error
+### Does SYSMAINT modify system configurations?
 
-```bash
-chmod +x sysmaint
-sudo ./sysmaint
-```
+No. SYSMAINT only:
+- Updates packages
+- Cleans caches and temporary files
+- Reports security issues
 
-### "command not found: dialog"
+It does not modify configuration files.
 
-Install dialog for the TUI interface:
+---
 
+### Can I run SYSMAINT without root?
+
+Some features work without root, but package updates and system cleanup require root/sudo privileges.
+
+---
+
+### How much disk space can SYSMAINT free?
+
+This varies by system, but typically:
+- Package caches: 500MB - 5GB
+- Temporary files: 100MB - 2GB
+- Log rotation: Variable
+
+Use `--dry-run` to see potential space savings.
+
+---
+
+### Does SYSMAINT remove important files?
+
+No. SYSMAINT only removes:
+- Package manager caches
+- Temporary files in /tmp
+- Old log files (per logrotate config)
+- Thumbnail caches
+
+---
+
+## Error Questions
+
+### What if SYSMAINT fails?
+
+1. Check the error message
+2. Run with `--debug` for details
+3. See [Troubleshooting](Troubleshooting)
+4. Open an issue on GitHub
+
+---
+
+### Can I undo changes made by SYSMAINT?
+
+Package updates can be rolled back:
 ```bash
 # Ubuntu/Debian
-sudo apt install dialog
+sudo apt install --reinstall package-name
 
 # Fedora/RHEL
-sudo dnf install dialog
+sudo history undo
 
 # Arch
-sudo pacman -S dialog
-
-# openSUSE
-sudo zypper install dialog
+sudo downgrade package-name
 ```
-
-### SYSMAINT doesn't detect my distribution
-
-Please open an issue with:
-- Your distribution name and version
-- Output of: `cat /etc/os-release`
-- Any error messages
-
-See [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more help.
 
 ---
 
-## Development
+## Development Questions
 
 ### How can I contribute?
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](https://github.com/Harery/SYSMAINT/blob/main/CONTRIBUTING.md)
 
-### What coding standards are used?
+### What tools were used to build SYSMAINT?
 
-- Shell Script (Bash 4.0+)
-- 4-space indentation
-- ShellCheck compliance (zero errors)
-- Function documentation headers
-
-### How do I run tests?
-
-```bash
-# Quick smoke test
-bash tests/test_suite_smoke.sh
-
-# Full test suite
-bash tests/test_profile_ci.sh
-
-# Check code quality
-shellcheck -x sysmaint lib/**/*.sh
-```
+| Tool | Purpose |
+|------|---------|
+| VS Code | Development environment |
+| Claude | Code generation |
+| Cline | Debugging |
+| Kilo | Code analysis |
 
 ---
 
-## Support
+## Getting More Help
 
-### Where can I get help?
-
-- [Documentation](README.md)
-- [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
-- [Support Policy](SUPPORT.md)
-- [GitHub Issues](https://github.com/Harery/SYSMAINT/issues)
-- [Email: Mohamed@Harery.com](mailto:Mohamed@Harery.com)
-
-### How do I report a bug?
-
-Open an issue on GitHub with:
-- Distribution and version
-- Steps to reproduce
-- Expected vs actual behavior
-- Error messages
-
-### How do I request a feature?
-
-Open an issue with the `enhancement` label and describe:
-- The problem you're solving
-- Proposed solution
-- Alternative approaches considered
+- **Issues:** https://github.com/Harery/SYSMAINT/issues
+- **Email:** [Mohamed@Harery.com](mailto:Mohamed@Harery.com)
+- **Documentation:** https://github.com/Harery/SYSMAINT
 
 ---
 
-## License
+## Project
 
-MIT License - See [LICENSE](../LICENSE)
-
----
-
-**Project:** https://github.com/Harery/SYSMAINT
-**Version:** v1.0.0
+https://github.com/Harery/SYSMAINT
