@@ -1,4 +1,4 @@
-# Sysmaint — AI Agent Development Guide
+# SYSMAINT — Development Guide
 
 Multi-distro Linux system maintenance toolkit. Bash 5.x, modular architecture.
 

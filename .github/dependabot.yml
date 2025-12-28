@@ -1,0 +1,30 @@
+# Dependabot Configuration
+# Automated dependency updates and security monitoring
+
+version: 2
+updates:
+
+  # GitHub Actions workflow dependencies
+  - directory: /
+    package-ecosystem: "github-actions"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Dockerfile dependencies (container builds)
+  - directory: "/"
+    package-ecosystem: "docker"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+
+  # Note: SYSMAINT uses Bash/shell scripts with minimal external dependencies
+  # Additional package ecosystems can be added here as the project evolves
