@@ -1,11 +1,64 @@
 # SYSMAINT Governance
 
+**Vibe Coding Enterprise Lifecycle — Governance Document**
+
 **Version:** v1.0.0
-**Last Updated:** 2025-12-27
+**Last Updated:** 2025-12-28
 
 ---
 
-## Project Leadership
+## ⭐ SECTION 0 — METADATA
+
+```
+Document Title: SYSMAINT — Governance Framework
+Project: SYSMAINT - Enterprise-Grade System Maintenance Toolkit
+Version: 1.0.0
+Classification: Internal / Restricted
+Security Level: Moderate (CIA: 3.3/5)
+Document Type: Governance and RACI Framework
+Traceability ID: SYSMAINT-GOV-001
+Phase: Cross-Phase (All Phases)
+```
+
+---
+
+## ⭐ SECTION 1 — ENTERPRISE RACI MATRIX
+
+### Cross-Phase RACI (Phases 1–8)
+
+| Phase | Product Owner | Architect | Dev Lead | QA Lead | Security | DevOps | SRE | PMO |
+|-------|---------------|-----------|----------|---------|----------|--------|-----|-----|
+| **Phase 1: Vision** | R | C | I | I | I | I | I | A |
+| **Phase 2: Requirements** | C | R | C | C | C | I | I | A |
+| **Phase 3: Architecture** | I | R | C | C | C | C | C | A |
+| **Phase 4: Planning** | R | C | R | C | C | I | I | A |
+| **Phase 5: Development** | C | C | R | C | C | C | I | A |
+| **Phase 6: QA/Security** | I | C | C | R | R | C | I | A |
+| **Phase 7: Release** | I | C | C | C | R | R | C | A |
+| **Phase 8: Operations** | I | C | I | C | R | C | R | A |
+
+**Legend:**
+- **R** = Responsible (owns the work)
+- **A** = Accountable (final approval)
+- **C** = Consulted (provides input)
+- **I** = Informed (kept updated)
+
+### Current Role Assignments
+
+| Role | Assigned To | Responsibilities |
+|------|-------------|-----------------|
+| **Product Owner** | Harery | Vision, roadmap, stakeholder management |
+| **Architect** | Harery | Technical architecture, system design |
+| **Dev Lead** | Harery | Implementation leadership, code quality |
+| **QA Lead** | Open (seeking contributors) | Test strategy, quality gates |
+| **Security Lead** | Harery | Security architecture, vulnerability management |
+| **DevOps Lead** | Harery | CI/CD pipelines, automation |
+| **SRE Lead** | Open (seeking contributors) | Reliability, monitoring, incident response |
+| **PMO** | Harery | Timeline, releases, governance |
+
+---
+
+## ⭐ SECTION 2 — PROJECT LEADERSHIP
 
 ### Project Lead
 
