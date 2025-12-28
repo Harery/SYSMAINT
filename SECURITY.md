@@ -44,15 +44,14 @@ We are committed to maintaining the security and integrity of SYSMAINT. This inc
 
 ### Reporting Channels
 
-**Primary Channel (Encrypted):**
+**Preferred Channel:**
 ```
-PGP Key: https://github.com/Harery/SYSMAINT/blob/main/.github/KEYS.asc
-Email: security@harery.com
+GitHub Private Vulnerability Reporting: https://github.com/Harery/SYSMAINT/security/advisories/new
 ```
 
 **Alternative Channels:**
-- **GitHub Private Vulnerability Reporting:** https://github.com/Harery/SYSMAINT/security/advisories
-- **Encrypted Email:** [Mohamed@Harery.com](mailto:Mohamed@Harery.com) (Use PGP encryption)
+- **Email:** [security@harery.com](mailto:security@harery.com)
+- **Email:** [Mohamed@Harery.com](mailto:Mohamed@Harery.com)
 
 ### Vulnerability Report Checklist
 
@@ -224,28 +223,6 @@ We use the **CVSS v3.1** scoring system for severity classification:
    - Comment on security-sensitive code
    - Update SECURITY.md for changes
    - Document any new permissions required
-
----
-
-## 🔐 Encryption and Communication
-
-### PGP Key
-
-For sensitive security communications, please use our PGP key:
-
-\`\`\`
------BEGIN PGP PUBLIC KEY BLOCK-----
-
-[PGP key would be published here]
-
------END PGP PUBLIC KEY BLOCK-----
-\`\`\`
-
-**Key Details:**
-- **Key ID:** `XXXX XXXX`
-- **Key Type:** RSA 4096-bit
-- **Fingerprint:** `XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX`
-- **Download:** https://github.com/Harery/SYSMAINT/blob/main/.github/KEYS.asc
 
 ---
 
