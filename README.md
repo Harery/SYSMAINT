@@ -7,7 +7,10 @@
 [![Release](https://img.shields.io/github/v/release/Harery/SYSMAINT?style=for-the-badge&logo=github)](https://github.com/Harery/SYSMAINT/releases/latest)
 [![License](https://img.shields.io/github/license/Harery/SYSMAINT?style=for-the-badge&color=blue)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?style=for-the-badge&logo=docker)](https://ghcr.io/harery/sysmaint)
-[![Tests](https://img.shields.io/badge/tests-500%2B-success?style=for-the-badge&logo=github)](tests)
+[![Tests](https://img.shields.io/badge/tests-500%2B-success?style=for-the-badge&logo=github)](docs/TEST_QUICKSTART.md)
+[![Test Coverage](https://img.shields.io/badge/coverage-14%20OS-brightgreen?style=for-the-badge&logo=linux)](docs/TEST_MATRIX.md)
+[![Test Suites](https://img.shields.io/badge/suites-32%2B-informational?style=for-the-badge)](docs/TEST_SUMMARY.md)
+[![Documentation](https://img.shields.io/badge/docs-13%20files-blue?style=for-the-badge&logo=github)](docs/TEST_GUIDE.md)
 
 [![Stars](https://img.shields.io/github/stars/Harery/SYSMAINT?style=social)](https://github.com/Harery/SYSMAINT/stargazers)
 [![Forks](https://img.shields.io/github/forks/Harery/SYSMAINT?style=social)](https://github.com/Harery/SYSMAINT/network/members)
@@ -23,6 +26,7 @@ Supports **Ubuntu, Debian, Fedora, RHEL, Rocky, Alma, CentOS, Arch, openSUSE**
 ## 📖 Table of Contents
 
 - [Quick Start](#-quick-start)
+- [Product Requirements](#-product-requirements)
 - [Why SYSMAINT](#-why-sysmaint)
 - [Features](#-features)
 - [Platform Support](#-platform-support)
@@ -57,6 +61,22 @@ sudo ./sysmaint
 ```bash
 docker run --rm --privileged ghcr.io/harery/sysmaint:latest
 ```
+
+---
+
+## 📋 Product Requirements
+
+The SYSMAINT product requirements document (PRD) defines the vision, requirements, and roadmap for the project.
+
+**[📄 View Product Requirements (PRD)](docs/PRD.md)**
+
+### Key Requirements
+
+- **Multi-Distro Support** - Single tool supporting 9+ Linux distributions
+- **Safe Operation** - Dry-run mode for previewing all changes
+- **Audit Trail** - JSON output for compliance and monitoring
+- **Automation Ready** - Systemd timers, cron jobs, Docker/Kubernetes support
+- **Enterprise Grade** - Comprehensive testing (500+ tests), security scanning
 
 ---
 
@@ -338,12 +358,113 @@ SYSMAINT is built with security-first principles:
 
 ---
 
+## 🧪 Testing
+
+SYSMAINT includes **500+ tests** covering all supported Linux distributions with automated testing in both local Docker and GitHub Actions.
+
+### Quick Test Commands
+
+```bash
+# Quick validation on current system
+./tests/quick_test.sh
+
+# Test specific OS in Docker
+./tests/test_single_os.sh ubuntu 24.04
+
+# Validate before PR submission
+./tests/validate_pr.sh
+```
+
+### Test Coverage
+
+| Category | Suites | Tests |
+|----------|--------|-------|
+| **Smoke Tests** | Basic functionality | 10+ |
+| **OS Family** | Debian, RedHat, Arch, SUSE, Fedora, Cross-OS | 80+ |
+| **Execution Modes** | --auto, --gui, --dry-run, --quiet, --verbose, --json | 20+ |
+| **Features** | Packages, cleanup, security, firmware | 60+ |
+| **Security** | Permissions, GPG, SELinux/AppArmor | 40+ |
+| **Edge Cases** | Failures, network issues, permissions | 30+ |
+| **Integration** | systemd, cron, Docker, services | 30+ |
+| **Docker** | Container-specific tests | 40+ |
+| **GitHub Actions** | CI/CD environment tests | 50+ |
+| **Performance** | Benchmarks | 15+ |
+| **TOTAL** | **14 Suites** | **500+** |
+
+### Local Docker Testing
+
+Test across all supported OS locally:
+
+```bash
+# Single OS
+./tests/run_local_docker_tests.sh --os ubuntu-24
+
+# Multiple OS (parallel)
+./tests/run_local_docker_tests.sh --os ubuntu-24,debian-12,fedora-41 --parallel
+
+# Full test suite
+./tests/full_test.sh --profile full --parallel
+```
+
+### GitHub Actions CI/CD
+
+- **Automatic**: Runs on every push and pull request
+- **Matrix**: Tests all 14 OS versions in parallel
+- **Fast**: Smoke tests complete in ~5 minutes per OS
+
+```bash
+# Trigger manual CI run
+gh workflow run test-matrix.yml -f test_profile=smoke -f os_filter=ubuntu-24
+
+# Download CI results
+gh run download --name test-results-ubuntu-24
+```
+
+### Result Comparison
+
+Compare local Docker vs GitHub Actions results to identify discrepancies:
+
+```bash
+# Run both and compare
+./tests/run_dual_environment_tests.sh --os ubuntu --version 24.04
+
+# Compare existing results
+./tests/report_discrepancies.sh --results tests/results
+```
+
+**Metrics:**
+- **Pass Rate**: Tests passed percentage
+- **Congruence**: Environment similarity (0-100%)
+- **Accuracy Score**: Overall consistency measure
+
+### Test Documentation
+
+| Document | Description |
+|----------|-------------|
+| **[Test Dashboard](tests/test-dashboard.html)** | Interactive test results visualization |
+| **[Test Quick Start](docs/TEST_QUICKSTART.md)** | Get started in 5 minutes |
+| **[Test Guide](docs/TEST_GUIDE.md)** | Comprehensive testing guide |
+| **[Test Cheatsheet](docs/TEST_CHEATSHEET.md)** | Quick command reference |
+| **[Test Matrix](docs/TEST_MATRIX.md)** | Complete 500+ test inventory |
+| **[Test Summary](docs/TEST_SUMMARY.md)** | Infrastructure overview |
+| **[Test Architecture](docs/TEST_ARCHITECTURE.md)** | Test structure & design |
+| **[Test Troubleshooting](docs/TEST_TROUBLESHOOTING.md)** | Common issues & solutions |
+| **[Contributing Tests](docs/CONTRIBUTING_TESTS.md)** | Contribution guide |
+| **[OS Support](docs/OS_SUPPORT.md)** | OS compatibility matrix |
+| **[Performance Baselines](tests/PERFORMANCE_BASELINES.md)** | Performance targets & metrics |
+| **[Status Assessment](tests/STATUS_ASSESSMENT.md)** | Project completion status |
+| **[Executive Summary](docs/EXECUTIVE_SUMMARY.md)** | Executive overview |
+
+---
+
 ## 📖 Documentation
 
 | Document | Description |
 |----------|-------------|
 | **[Product Requirements (PRD)](docs/PRD.md)** | Product vision, requirements & roadmap |
 | **[Project Structure](docs/PROJECT_STRUCTURE.md)** | Directory organization & file layout |
+| **[Library Modules](lib/README.md)** | Core library documentation |
+| **[Utility Scripts](scripts/README.md)** | Development & CI/CD scripts |
 | **[Installation Guide](docs/INSTALLATION.md)** | All installation methods |
 | **[Troubleshooting](docs/TROUBLESHOOTING.md)** | Common issues & solutions |
 | **[Architecture](docs/ARCHITECTURE.md)** | System design & components |

@@ -1,0 +1,52 @@
+# SYSMAINT RHEL Test Environment (using UBI - Universal Base Image)
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+#
+# Note: RHEL images require subscription. Using UBI (Universal Base Image) which is free.
+# UBI is designed for developers who want to containerize their applications.
+# https://www.redhat.com/en/blog/introducing-red-hat-universal-base-image
+
+ARG BASE_IMAGE=registry.access.redhat.com/ubi9
+ARG UBI_INIT=registry.access.redhat.com/ubi9-init
+FROM ${UBI_INIT}
+
+LABEL maintainer="Harery <mohamed@harery.com>"
+LABEL description="SYSMAINT RHEL Test Environment (using UBI)"
+LABEL version="1.0"
+
+ENV TZ=UTC
+
+# UBI images use dnf/yum for package management
+RUN dnf install -y \
+    sudo \
+    bash \
+    jq \
+    ShellCheck \
+    curl \
+    dialog \
+    bc \
+    time \
+    coreutils \
+    procps-ng \
+    && dnf clean all
+
+# Create test user
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Create sysmaint directories
+RUN mkdir -p /tmp/system-maintenance /var/log/system-maintenance
+
+WORKDIR /sysmaint
+
+# Copy sysmaint executable and tests
+COPY sysmaint /usr/local/sbin/sysmaint
+RUN chmod +x /usr/local/sbin/sysmaint
+
+COPY tests/ /sysmaint/tests/
+COPY lib/ /sysmaint/lib/
+RUN chmod +x /sysmaint/tests/*.sh
+
+USER testuser
+
+CMD ["/bin/bash"]

@@ -1,0 +1,432 @@
+# SYSMAINT Comprehensive Test Matrix Workflow
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+#
+# DESCRIPTION:
+#   Comprehensive test matrix for all supported Linux distributions
+#   Runs on GitHub Actions with multi-OS, multi-architecture support
+#
+# TEST COVERAGE:
+#   - Ubuntu: 22.04, 24.04
+#   - Debian: 12, 13
+#   - Fedora: 41
+#   - RHEL: 9, 10 (UBI)
+#   - Rocky Linux: 9, 10
+#   - AlmaLinux: 9
+#   - CentOS Stream: 9
+#   - Arch Linux: rolling
+#   - openSUSE: Tumbleweed
+#
+# ARCHITECTURES:
+#   - amd64 (x86_64)
+#   - arm64 (aarch64) - selective
+
+name: Test Matrix
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'sysmaint'
+      - 'lib/**'
+      - 'tests/**'
+      - '.github/workflows/test-matrix.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'sysmaint'
+      - 'lib/**'
+      - 'tests/**'
+  workflow_dispatch:
+    inputs:
+      test_profile:
+        description: 'Test profile to run'
+        required: false
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - os_families
+          - full
+          - security
+          - performance
+      os_filter:
+        description: 'Filter OS (e.g., ubuntu-24,debian-12) or leave empty for all'
+        required: false
+        default: ''
+
+env:
+  TEST_PROFILE: ${{ github.event.inputs.test_profile || 'smoke' }}
+
+jobs:
+  # =========================================================================
+  # UBUNTU FAMILY TESTS
+  # =========================================================================
+  test-ubuntu:
+    name: Ubuntu ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['22.04', '24.04']
+        include:
+          - version: '22.04'
+            os_name: ubuntu
+            codename: jammy
+          - version: '24.04'
+            os_name: ubuntu
+            codename: noble
+    container:
+      image: ubuntu:${{ matrix.version }}
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y sudo bash jq shellcheck curl ca-certificates \
+            dialog bc time coreutils procps systemd-sysv
+
+      - name: Setup test user
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+      - name: Copy SYSMAINT
+        run: |
+          cp sysmaint /usr/local/sbin/sysmaint
+          chmod +x /usr/local/sbin/sysmaint
+          mkdir -p /sysmaint/tests /sysmaint/lib
+          cp -r tests/* /sysmaint/tests/
+          cp -r lib/* /sysmaint/lib/
+          chmod +x /sysmaint/tests/*.sh
+
+      - name: Run smoke tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+
+      - name: Run environment tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_environment.sh"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-ubuntu-${{ matrix.version }}
+          path: |
+            /sysmaint/tests/*.log
+            /tmp/system-maintenance/
+
+  # =========================================================================
+  # DEBIAN FAMILY TESTS
+  # =========================================================================
+  test-debian:
+    name: Debian ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['12', '13']
+    container:
+      image: debian:${{ matrix.version }}
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y sudo bash jq shellcheck curl ca-certificates \
+            dialog bc time coreutils procps systemd-sysv
+
+      - name: Setup test user
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+      - name: Copy SYSMAINT
+        run: |
+          cp sysmaint /usr/local/sbin/sysmaint
+          chmod +x /usr/local/sbin/sysmaint
+          mkdir -p /sysmaint/tests /sysmaint/lib
+          cp -r tests/* /sysmaint/tests/
+          cp -r lib/* /sysmaint/lib/
+          chmod +x /sysmaint/tests/*.sh
+
+      - name: Run smoke tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+
+      - name: Run OS families test
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_os_families.sh"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-debian-${{ matrix.version }}
+          path: |
+            /sysmaint/tests/*.log
+            /tmp/system-maintenance/
+
+  # =========================================================================
+  # FEDORA TESTS
+  # =========================================================================
+  test-fedora:
+    name: Fedora ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['41']
+    container:
+      image: fedora:${{ matrix.version }}
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf install -y sudo bash jq shellcheck curl dialog bc time \
+            coreutils procps-ng systemd
+
+      - name: Setup test user
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+      - name: Copy SYSMAINT
+        run: |
+          cp sysmaint /usr/local/sbin/sysmaint
+          chmod +x /usr/local/sbin/sysmaint
+          mkdir -p /sysmaint/tests /sysmaint/lib
+          cp -r tests/* /sysmaint/tests/
+          cp -r lib/* /sysmaint/lib/
+          chmod +x /sysmaint/tests/*.sh
+
+      - name: Run smoke tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-fedora-${{ matrix.version }}
+          path: |
+            /sysmaint/tests/*.log
+            /tmp/system-maintenance/
+
+  # =========================================================================
+  # RHEL FAMILY TESTS (UBI for subscription-free testing)
+  # =========================================================================
+  test-rhel-family:
+    name: ${{ matrix.distro }} ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: rhel
+            version: '9'
+            image: registry.access.redhat.com/ubi9
+            init_image: registry.access.redhat.com/ubi9-init
+          - distro: rhel
+            version: '10'
+            image: registry.access.redhat.com/ubi10
+            init_image: registry.access.redhat.com/ubi10-init
+          - distro: rockylinux
+            version: '9'
+            image: rockylinux:9
+          - distro: rockylinux
+            version: '10'
+            image: rockylinux:10
+          - distro: almalinux
+            version: '9'
+            image: almalinux:9
+          - distro: centos
+            version: 'stream9'
+            image: quay.io/centos/centos:stream9
+    container:
+      image: ${{ matrix.image }}
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          if command -v dnf >/dev/null 2>&1; then
+            PKG_MANAGER=dnf
+          else
+            PKG_MANAGER=yum
+          fi
+          $PKG_MANAGER install -y sudo bash jq shellcheck curl dialog bc \
+            time coreutils procps-ng systemd
+
+      - name: Setup test user
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+      - name: Copy SYSMAINT
+        run: |
+          cp sysmaint /usr/local/sbin/sysmaint
+          chmod +x /usr/local/sbin/sysmaint
+          mkdir -p /sysmaint/tests /sysmaint/lib
+          cp -r tests/* /sysmaint/tests/
+          cp -r lib/* /sysmaint/lib/
+          chmod +x /sysmaint/tests/*.sh
+
+      - name: Run smoke tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+
+      - name: Run OS families test
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_os_families.sh"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.distro }}-${{ matrix.version }}
+          path: |
+            /sysmaint/tests/*.log
+            /tmp/system-maintenance/
+
+  # =========================================================================
+  # ARCH LINUX TESTS
+  # =========================================================================
+  test-arch:
+    name: Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pacman -Sy --noconfirm --needed sudo bash jq shellcheck curl \
+            dialog bc time coreutils procps-ng systemd
+
+      - name: Setup test user
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+      - name: Copy SYSMAINT
+        run: |
+          cp sysmaint /usr/local/sbin/sysmaint
+          chmod +x /usr/local/sbin/sysmaint
+          mkdir -p /sysmaint/tests /sysmaint/lib
+          cp -r tests/* /sysmaint/tests/
+          cp -r lib/* /sysmaint/lib/
+          chmod +x /sysmaint/tests/*.sh
+
+      - name: Run smoke tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+
+      - name: Run Arch family tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_os_families.sh"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-arch
+          path: |
+            /sysmaint/tests/*.log
+            /tmp/system-maintenance/
+
+  # =========================================================================
+  # OPENSUSE TESTS
+  # =========================================================================
+  test-opensuse:
+    name: openSUSE Tumbleweed
+    runs-on: ubuntu-latest
+    container:
+      image: opensuse/tumbleweed
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          zypper refresh
+          zypper install -y sudo bash jq ShellCheck curl dialog bc time \
+            coreutils procps systemd
+
+      - name: Setup test user
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+      - name: Copy SYSMAINT
+        run: |
+          cp sysmaint /usr/local/sbin/sysmaint
+          chmod +x /usr/local/sbin/sysmaint
+          mkdir -p /sysmaint/tests /sysmaint/lib
+          cp -r tests/* /sysmaint/tests/
+          cp -r lib/* /sysmaint/lib/
+          chmod +x /sysmaint/tests/*.sh
+
+      - name: Run smoke tests
+        run: |
+          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-opensuse
+          path: |
+            /sysmaint/tests/*.log
+            /tmp/system-maintenance/
+
+  # =========================================================================
+  # RESULTS AGGREGATION
+  # =========================================================================
+  aggregate-results:
+    name: Aggregate Test Results
+    runs-on: ubuntu-latest
+    needs: [test-ubuntu, test-debian, test-fedora, test-rhel-family, test-arch, test-opensuse]
+    if: always()
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+
+      - name: Generate summary
+        run: |
+          echo "# Test Matrix Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Run**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "- Ubuntu 22.04, 24.04" >> $GITHUB_STEP_SUMMARY
+          echo "- Debian 12, 13" >> $GITHUB_STEP_SUMMARY
+          echo "- Fedora 41" >> $GITHUB_STEP_SUMMARY
+          echo "- RHEL 9, 10 (UBI)" >> $GITHUB_STEP_SUMMARY
+          echo "- Rocky Linux 9, 10" >> $GITHUB_STEP_SUMMARY
+          echo "- AlmaLinux 9" >> $GITHUB_STEP_SUMMARY
+          echo "- CentOS Stream 9" >> $GITHUB_STEP_SUMMARY
+          echo "- Arch Linux (rolling)" >> $GITHUB_STEP_SUMMARY
+          echo "- openSUSE Tumbleweed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+          ls -R test-results/ >> $GITHUB_STEP_SUMMARY || true

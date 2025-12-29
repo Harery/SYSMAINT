@@ -1,0 +1,280 @@
+# SYSMAINT Test Profiles Configuration
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+---
+# Quick smoke tests - run before every commit
+smoke:
+  description: "Fast smoke tests for quick validation"
+  os:
+    - ubuntu:22.04
+    - debian:12
+  arch:
+    - amd64
+  modes:
+    - --dry-run
+  scenarios:
+    - H001
+    - H002
+    - H003
+  timeout_minutes: 5
+
+# OS family testing - one representative from each family
+os_families:
+  description: "Test one OS from each package manager family"
+  os:
+    - ubuntu:24.04      # Debian/apt
+    - rockylinux:9      # RedHat/dnf
+    - archlinux:base    # Arch/pacman
+    - opensuse:tumbleweed # SUSE/zypper
+    - fedora:41         # Fedora/dnf
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --dry-run
+  scenarios:
+    - H001
+    - H002
+    - H003
+    - H004
+    - H005
+    - F001
+    - F002
+    - F003
+    - S001
+    - S002
+  timeout_minutes: 15
+
+# Full OS version testing - all supported versions
+full_versions:
+  description: "Test all supported OS versions"
+  os:
+    - ubuntu:22.04
+    - ubuntu:24.04
+    - debian:12
+    - debian:13
+    - rhel:9
+    - rockylinux:9
+    - rockylinux:10
+    - almalinux:9
+    - almalinux:10
+    - centos:9
+    - archlinux:base
+    - opensuse:tumbleweed
+    - fedora:41
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --dry-run
+    - --json-summary
+  scenarios:
+    - H001
+    - H002
+    - H003
+    - H004
+    - H005
+    - E001
+    - E002
+    - E003
+    - E004
+    - E005
+    - F001
+    - F002
+    - F003
+    - F004
+    - F005
+    - F006
+    - S001
+    - S002
+    - S003
+    - S004
+    - S005
+    - S006
+  timeout_minutes: 30
+
+# Multi-architecture testing
+multi_arch:
+  description: "Test on multiple architectures"
+  os:
+    - ubuntu:24.04
+    - debian:12
+    - fedora:41
+  arch:
+    - amd64
+    - arm64
+  modes:
+    - --auto
+    - --dry-run
+  scenarios:
+    - H001
+    - H002
+    - H003
+    - S001
+    - S002
+  timeout_minutes: 20
+
+# Execution mode testing
+mode_coverage:
+  description: "Test all execution modes"
+  os:
+    - ubuntu:22.04
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --gui
+    - --dry-run
+    - --quiet
+    - --verbose
+    - --json-summary
+  scenarios:
+    - H001
+    - H004
+    - H005
+  timeout_minutes: 10
+
+# Security testing
+security:
+  description: "Security-focused test suite"
+  os:
+    - ubuntu:22.04
+    - debian:12
+    - rockylinux:9
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --dry-run
+  scenarios:
+    - S001
+    - S002
+    - S003
+    - S004
+    - S005
+    - S006
+    - F002
+    - F003
+  timeout_minutes: 15
+
+# Performance testing
+performance:
+  description: "Performance and benchmark tests"
+  os:
+    - ubuntu:22.04
+    - debian:12
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --quiet
+  scenarios:
+    - P001
+    - P002
+    - P003
+    - P004
+    - P005
+  timeout_minutes: 20
+
+# Integration testing
+integration:
+  description: "Integration tests with deployment targets"
+  os:
+    - ubuntu:24.04
+  arch:
+    - amd64
+  modes:
+    - --auto
+  scenarios:
+    - I001
+    - I002
+    - I003
+    - I004
+    - I005
+  timeout_minutes: 15
+
+# Feature combination testing
+features:
+  description: "Test all feature flag combinations"
+  os:
+    - ubuntu:22.04
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --dry-run
+  features:
+    - --upgrade
+    - --cleanup
+    - --purge-kernels
+    - --security-audit
+  combinations:
+    - --upgrade --cleanup
+    - --upgrade --purge-kernels
+    - --upgrade --cleanup --purge-kernels
+    - --security-audit --json-summary
+  timeout_minutes: 15
+
+# Nightly build testing - comprehensive
+nightly:
+  description: "Comprehensive nightly test suite"
+  os:
+    - ubuntu:22.04
+    - ubuntu:24.04
+    - debian:12
+    - debian:13
+    - rockylinux:9
+    - fedora:41
+    - archlinux:base
+    - opensuse:tumbleweed
+  arch:
+    - amd64
+    - arm64
+  modes:
+    - --auto
+    - --dry-run
+    - --json-summary
+    - --quiet
+    - --verbose
+  scenarios:
+    - All
+  timeout_minutes: 60
+
+# PR validation - quick but thorough
+pr_validation:
+  description: "Quick but thorough tests for PR validation"
+  os:
+    - ubuntu:24.04
+    - debian:12
+    - rockylinux:9
+  arch:
+    - amd64
+  modes:
+    - --auto
+    - --dry-run
+    - --json-summary
+  scenarios:
+    - H001
+    - H002
+    - H003
+    - H004
+    - H005
+    - E001
+    - E002
+    - E003
+    - E004
+    - E005
+    - F001
+    - F002
+    - F003
+    - F004
+    - F005
+    - F006
+    - S001
+    - S002
+    - S003
+    - S004
+    - S005
+    - S006
+  timeout_minutes: 20

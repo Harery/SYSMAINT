@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sysmaint.io/schemas/test-result-v1.json",
+  "title": "SYSMAINT Test Result Format",
+  "description": "Unified test result format for local Docker and GitHub Actions testing",
+  "type": "object",
+  "required": ["version", "run_id", "timestamp", "environment", "results"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Test result format version",
+      "enum": ["1.0"]
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for this test run"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when test run started"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Total duration of test run in seconds"
+    },
+    "environment": {
+      "type": "object",
+      "required": ["type", "os_name", "os_version", "architecture"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["local-docker", "github-actions", "local-vm", "cloud-vm"],
+          "description": "Test execution environment type"
+        },
+        "os_name": {
+          "type": "string",
+          "description": "Operating system name (ubuntu, debian, fedora, etc.)"
+        },
+        "os_version": {
+          "type": "string",
+          "description": "OS version (22.04, 12, 41, etc.)"
+        },
+        "architecture": {
+          "type": "string",
+          "enum": ["x86_64", "amd64", "aarch64", "arm64", "unknown"],
+          "description": "System architecture"
+        },
+        "hostname": {
+          "type": "string",
+          "description": "Hostname of the test machine/container"
+        },
+        "container_info": {
+          "type": "object",
+          "description": "Container-specific information (if applicable)",
+          "properties": {
+            "platform": {
+              "type": "string",
+              "description": "Container platform (docker, podman, etc.)"
+            },
+            "image": {
+              "type": "string",
+              "description": "Container image used"
+            },
+            "privileged": {
+              "type": "boolean",
+              "description": "Whether container ran in privileged mode"
+            }
+          }
+        },
+        "github_actions": {
+          "type": "object",
+          "description": "GitHub Actions specific information (if applicable)",
+          "properties": {
+            "workflow": {
+              "type": "string",
+              "description": "Workflow name"
+            },
+            "run_id": {
+              "type": "string",
+              "description": "GitHub Actions run ID"
+            },
+            "run_number": {
+              "type": "integer",
+              "description": "GitHub Actions run number"
+            },
+            "job": {
+              "type": "string",
+              "description": "Job name"
+            },
+            "repository": {
+              "type": "string",
+              "description": "Repository (owner/repo)"
+            },
+            "sha": {
+              "type": "string",
+              "description": "Git SHA being tested"
+            },
+            "actor": {
+              "type": "string",
+              "description": "User or trigger that initiated the run"
+            }
+          }
+        }
+      }
+    },
+    "test_profile": {
+      "type": "string",
+      "description": "Test profile used (smoke, full, security, etc.)",
+      "enum": ["smoke", "os_families", "full", "security", "performance", "integration", "features", "nightly", "pr_validation"]
+    },
+    "results": {
+      "type": "object",
+      "description": "Test results grouped by suite/category",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "description": "Total number of tests in this suite"
+            },
+            "passed": {
+              "type": "integer",
+              "description": "Number of tests passed"
+            },
+            "failed": {
+              "type": "integer",
+              "description": "Number of tests failed"
+            },
+            "skipped": {
+              "type": "integer",
+              "description": "Number of tests skipped"
+            },
+            "tests": {
+              "type": "array",
+              "description": "Individual test results",
+              "items": {
+                "type": "object",
+                "required": ["name", "status"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Test name"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["passed", "failed", "skipped", "error"],
+                    "description": "Test status"
+                  },
+                  "duration_ms": {
+                    "type": "number",
+                    "description": "Test duration in milliseconds"
+                  },
+                  "error_message": {
+                    "type": "string",
+                    "description": "Error message if test failed"
+                  },
+                  "stack_trace": {
+                    "type": "string",
+                    "description": "Stack trace if test errored"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "Overall test summary",
+      "required": ["total", "passed", "failed"],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "Total number of tests run"
+        },
+        "passed": {
+          "type": "integer",
+          "description": "Total number of tests passed"
+        },
+        "failed": {
+          "type": "integer",
+          "description": "Total number of tests failed"
+        },
+        "skipped": {
+          "type": "integer",
+          "description": "Total number of tests skipped"
+        },
+        "pass_rate": {
+          "type": "number",
+          "description": "Pass rate as percentage (0-100)"
+        },
+        "exit_code": {
+          "type": "integer",
+          "description": "Overall exit code of test run"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about the test run",
+      "properties": {
+        "sysmaint_version": {
+          "type": "string",
+          "description": "SYSMAINT script version"
+        },
+        "commit_sha": {
+          "type": "string",
+          "description": "Git commit SHA tested"
+        },
+        "commit_message": {
+          "type": "string",
+          "description": "Git commit message"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Git branch name"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Git tag if present"
+        },
+        "test_runner_version": {
+          "type": "string",
+          "description": "Test runner script version"
+        }
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   shellcheck:
@@ -24,9 +25,60 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
-      - run: sudo apt-get update && sudo apt-get install -y shellcheck jq
-      - run: bash tests/test_suite_smoke.sh
-      - run: bash tests/test_suite_functions.sh
-      - run: bash tests/test_suite_security.sh
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck jq curl dialog
+
+      - name: Create results directory
+        run: mkdir -p tests/results
+
+      - name: Run Smoke Tests
+        run: bash tests/test_suite_smoke.sh
+
+      - name: Run Function Tests
+        run: bash tests/test_suite_functions.sh
+
+      - name: Run Security Tests
+        run: bash tests/test_suite_security.sh
+
+      - name: Run Mode Tests
+        run: bash tests/test_suite_modes.sh
+
+      - name: Run Feature Tests
+        run: bash tests/test_suite_features.sh
+
+      - name: Run GitHub Actions Tests
+        run: bash tests/test_suite_github_actions.sh
+
+      - name: Collect Results
+        run: bash tests/collect_test_results.sh
+        env:
+          GITHUB_ACTIONS: true
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          RUNNER_OS: ${{ runner.os }}
+          RUNNER_ARCH: ${{ runner.arch }}
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-ci
+          path: tests/results/*.json
+          retention-days: 30
+
+      - name: Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-ci
+          path: |
+            tests/results/*.txt
+            tests/results/*.log
+          retention-days: 7

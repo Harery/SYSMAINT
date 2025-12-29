@@ -39,3 +39,11 @@ debian/sysmaint/
 tests/*.log
 tests/*.pyc
 tests/__pycache__/
+
+# Test results (keep schema, ignore actual results)
+tests/results/*.json
+!tests/results/test_result_schema.json
+
+# Performance baseline data (collected measurements)
+tests/performance_baselines/*.txt
+tests/performance_baselines/*.md

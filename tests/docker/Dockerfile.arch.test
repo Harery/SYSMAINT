@@ -1,0 +1,44 @@
+# SYSMAINT Arch Linux Test Environment
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+ARG BASE_IMAGE=archlinux:base
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="Harery <mohamed@harery.com>"
+LABEL description="SYSMAINT Arch Linux Test Environment"
+LABEL version="1.0"
+
+ENV TZ=UTC
+
+RUN pacman -Sy --noconfirm --needed \
+    sudo \
+    bash \
+    jq \
+    shellcheck \
+    curl \
+    dialog \
+    bc \
+    time \
+    coreutils \
+    procps-ng \
+    systemd \
+    && pacman -Sc --noconfirm
+
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+RUN mkdir -p /tmp/system-maintenance /var/log/system-maintenance
+
+WORKDIR /sysmaint
+
+COPY sysmaint /usr/local/sbin/sysmaint
+RUN chmod +x /usr/local/sbin/sysmaint
+
+COPY tests/ /sysmaint/tests/
+COPY lib/ /sysmaint/lib/
+RUN chmod +x /sysmaint/tests/*.sh
+
+USER testuser
+
+CMD ["/bin/bash"]

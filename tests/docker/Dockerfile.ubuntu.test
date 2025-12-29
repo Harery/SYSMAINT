@@ -1,0 +1,64 @@
+# SYSMAINT Ubuntu Test Environment
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+#
+# Dockerfile for testing SYSMAINT on Ubuntu 22.04 and 24.04
+#
+# Usage:
+#   docker build -f tests/docker/Dockerfile.ubuntu.test --build-arg BASE_IMAGE=ubuntu:22.04 -t sysmaint-test:ubuntu-22.04 .
+#   docker build -f tests/docker/Dockerfile.ubuntu.test --build-arg BASE_IMAGE=ubuntu:24.04 -t sysmaint-test:ubuntu-24.04 .
+#   docker run --rm -it --privileged sysmaint-test:ubuntu-22.04
+
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="Harery <mohamed@harery.com>"
+LABEL description="SYSMAINT Ubuntu Test Environment"
+LABEL version="1.0"
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# Install test dependencies
+RUN apt-get update && apt-get install -y \
+    sudo \
+    bash \
+    jq \
+    shellcheck \
+    curl \
+    ca-certificates \
+    dialog \
+    apt-utils \
+    bc \
+    time \
+    coreutils \
+    procps \
+    systemd-sysv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create test user with sudo privileges
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Create necessary directories
+RUN mkdir -p /tmp/system-maintenance \
+    /var/log/system-maintenance
+
+# Set working directory
+WORKDIR /sysmaint
+
+# Copy sysmaint script
+COPY sysmaint /usr/local/sbin/sysmaint
+RUN chmod +x /usr/local/sbin/sysmaint
+
+# Copy test files
+COPY tests/ /sysmaint/tests/
+COPY lib/ /sysmaint/lib/
+RUN chmod +x /sysmaint/tests/*.sh
+
+# Switch to test user
+USER testuser
+
+# Set default command
+CMD ["/bin/bash"]

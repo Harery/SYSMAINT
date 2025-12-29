@@ -1,0 +1,47 @@
+# SYSMAINT Debian Test Environment
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Harery
+
+ARG BASE_IMAGE=debian:13
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="Harery <mohamed@harery.com>"
+LABEL description="SYSMAINT Debian Test Environment"
+LABEL version="1.0"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+RUN apt-get update && apt-get install -y \
+    sudo \
+    bash \
+    jq \
+    shellcheck \
+    curl \
+    ca-certificates \
+    dialog \
+    apt-utils \
+    bc \
+    time \
+    coreutils \
+    procps \
+    systemd-sysv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+RUN mkdir -p /tmp/system-maintenance /var/log/system-maintenance
+
+WORKDIR /sysmaint
+
+COPY sysmaint /usr/local/sbin/sysmaint
+RUN chmod +x /usr/local/sbin/sysmaint
+
+COPY tests/ /sysmaint/tests/
+COPY lib/ /sysmaint/lib/
+RUN chmod +x /sysmaint/tests/*.sh
+
+USER testuser
+
+CMD ["/bin/bash"]
