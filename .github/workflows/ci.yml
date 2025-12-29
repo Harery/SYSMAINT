@@ -67,7 +67,7 @@ jobs:
           RUNNER_ARCH: ${{ runner.arch }}
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-ci
           path: tests/results/*.json
@@ -75,7 +75,7 @@ jobs:
 
       - name: Upload Test Logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-logs-ci
           path: |
