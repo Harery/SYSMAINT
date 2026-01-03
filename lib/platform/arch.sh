@@ -136,7 +136,11 @@ platform_upgrade_cmd() {
 }
 
 platform_autoremove_cmd() {
-    echo "pacman -Qtdq | pacman -Rns -"
+    # WARNING: This command can remove packages you need!
+    # pacman -Qtdq lists packages installed as deps that are no longer required
+    # This may include: manually installed packages, base-devel, AUR build deps
+    # DRY_RUN handling is done by the pkg_autoremove function in package_manager.sh
+    echo "pacman -Qtdq | pacman -Rns --noconfirm -"
 }
 
 # -----------------------------------------------------------------------------

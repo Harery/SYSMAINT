@@ -359,7 +359,8 @@ if [[ "${DEBUG_SYSMAINT:-false}" == "true" ]]; then
   echo "DEBUG: Line $LINENO: LOG_FILE=$LOG_FILE" >&2
 fi
 
-AUTO_REBOOT="${AUTO_REBOOT:-true}"
+# AUTO_REBOOT defaults to false for safety - use --auto-reboot to enable
+AUTO_REBOOT="${AUTO_REBOOT:-false}"
 DRY_RUN="${DRY_RUN:-false}"
 JSON_SUMMARY="${JSON_SUMMARY:-false}"
 _JSON_WRITTEN=false
