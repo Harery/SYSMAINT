@@ -494,10 +494,9 @@ MIT © 2025 [Mohamed Elharery](https://www.harery.com)
 
 ---
 
-## ⭐ Star History
+## Star History
 
-[![Star History Chart](https://www.star-history.com/#Harery/SYSMAINT&type=date&legend=top-left)]
-
+[![Star History Chart](https://api.star-history.com/svg?repos=Harery/SYSMAINT&type=date&legend=top-left)](https://www.star-history.com/#Harery/SYSMAINT&type=date&legend=top-left)
 
 **If you find SYSMAINT useful, please consider giving it a star! ⭐**
 
