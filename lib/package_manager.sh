@@ -147,15 +147,40 @@ pkg_autoremove() {
       ;;
     pacman)
       # Pacman doesn't have direct autoremove, use -Qdtq to find orphans
+      # WARNING: This can remove packages that were intentionally installed!
+      # Always review orphan list before running without --dry-run
       local orphans
       orphans=$(pacman -Qdtq 2>/dev/null || true)
       if [[ -n "$orphans" ]]; then
-        echo "$orphans" | xargs -r pacman -Rns --noconfirm
+        if [[ "${DRY_RUN:-false}" == "true" ]]; then
+          log "DRY_RUN: would remove orphan packages:"
+          echo "$orphans" | while read -r pkg; do log "  - $pkg"; done
+        else
+          log "Removing orphan packages: $(echo "$orphans" | tr '\n' ' ')"
+          echo "$orphans" | xargs -r pacman -Rns --noconfirm
+        fi
+      else
+        log "No orphan packages found"
       fi
       ;;
+
     zypper)
-      run zypper -n packages --unneeded | tail -n +5 | awk '{print $5}' | xargs -r zypper -n remove
+      # Get list of unneeded packages first, then remove with DRY_RUN check
+      local unneeded
+      unneeded=$(zypper -n packages --unneeded 2>/dev/null | tail -n +5 | awk '{print $5}' | grep -v '^$' || true)
+      if [[ -n "$unneeded" ]]; then
+        if [[ "${DRY_RUN:-false}" == "true" ]]; then
+          log "DRY_RUN: would remove unneeded packages:"
+          echo "$unneeded" | while read -r pkg; do log "  - $pkg"; done
+        else
+          log "Removing unneeded packages: $(echo "$unneeded" | tr '\n' ' ')"
+          echo "$unneeded" | xargs -r zypper -n remove
+        fi
+      else
+        log "No unneeded packages found"
+      fi
       ;;
+
     *)
       log "ERROR: Unknown package manager type: $PKG_MANAGER_TYPE"
       return 1
