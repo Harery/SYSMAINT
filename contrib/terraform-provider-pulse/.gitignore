@@ -1,0 +1,24 @@
+# Binaries
+terraform-provider-pulse
+terraform-provider-pulse_*
+
+# Test files
+*.test
+*.out
+
+# Terraform files (in examples)
+examples/.terraform
+examples/*.tfstate
+examples/*.tfstate.*
+examples/.terraform.lock.hcl
+examples/terraform.tfvars
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

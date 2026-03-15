@@ -1,0 +1,10 @@
+[Unit]
+Description=OCTALUM-PULSE Scheduled Maintenance
+Documentation=https://docs.pulse.harery.com
+
+[Timer]
+OnCalendar={{ pulse_schedule }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

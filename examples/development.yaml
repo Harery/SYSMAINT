@@ -1,0 +1,27 @@
+version: 1
+log_level: debug
+
+plugins:
+  packages:
+    enabled: true
+    security_only: false
+  performance:
+    enabled: true
+    aggressive: true
+    bbr_v3: true
+  security:
+    enabled: true
+    standards: [cis]
+  observability:
+    enabled: false
+
+ai:
+  enabled: true
+  mode: local
+  local:
+    model: "llama3.2:1b"
+    ollama_endpoint: "http://localhost:11434"
+  features:
+    predictive_maintenance: true
+    recommendations: true
+    nlp_interface: true

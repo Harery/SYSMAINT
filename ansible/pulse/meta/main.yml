@@ -1,0 +1,36 @@
+---
+galaxy_info:
+  author: OCTALUME Team
+  namespace: octalume
+  role_name: pulse
+  description: Install and configure OCTALUM-PULSE
+  company: OCTALUME
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - linux
+    - maintenance
+    - automation
+    - sysadmin
+    - packages
+    - security
+    - system
+
+dependencies: []

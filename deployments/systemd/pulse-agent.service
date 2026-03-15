@@ -1,0 +1,16 @@
+[Unit]
+Description=OCTALUM-PULSE Agent - Continuous Monitoring
+Documentation=https://docs.pulse.harery.com
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/pulse-agent
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

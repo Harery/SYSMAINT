@@ -1,0 +1,33 @@
+version: 1
+log_level: {{ pulse_log_level }}
+
+plugins:
+{% for plugin_name, plugin_config in pulse_plugins.items() %}
+  {{ plugin_name }}:
+    enabled: {{ plugin_config.enabled | default(true) }}
+{% if plugin_config.security_only is defined %}
+    security_only: {{ plugin_config.security_only }}
+{% endif %}
+{% if plugin_config.standards is defined %}
+    standards:
+{% for standard in plugin_config.standards %}
+      - {{ standard }}
+{% endfor %}
+{% endif %}
+{% if plugin_config.aggressive is defined %}
+    aggressive: {{ plugin_config.aggressive }}
+{% endif %}
+{% endfor %}
+
+ai:
+  enabled: {{ pulse_ai_enabled }}
+  mode: {{ pulse_ai_mode }}
+{% if pulse_ai_mode == 'local' %}
+  local:
+    model: {{ pulse_ai_model }}
+    ollama_endpoint: {{ pulse_ai_ollama_url }}
+{% endif %}
+
+paths:
+  log_dir: {{ pulse_log_dir }}
+  data_dir: {{ pulse_data_dir }}

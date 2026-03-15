@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pulse-maintenance
+  namespace: pulse
+  labels:
+    app.kubernetes.io/name: pulse
+    app.kubernetes.io/component: cronjob
+spec:
+  schedule: "0 2 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: pulse
+          restartPolicy: OnFailure
+          containers:
+            - name: pulse
+              image: ghcr.io/harery/octalum-pulse:latest
+              imagePullPolicy: Always
+              securityContext:
+                privileged: true
+              env:
+                - name: PULSE_LOG_LEVEL
+                  value: "info"
+                - name: PULSE_AUTO_MODE
+                  value: "true"
+              volumeMounts:
+                - name: host-root
+                  mountPath: /host
+                  readOnly: true
+                - name: pulse-data
+                  mountPath: /var/lib/pulse
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+          volumes:
+            - name: host-root
+              hostPath:
+                path: /
+            - name: pulse-data
+              emptyDir: {}

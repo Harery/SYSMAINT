@@ -1,0 +1,84 @@
+#compdef pulse
+
+_pulse() {
+    local -a commands
+    commands=(
+        'doctor:Run system health check'
+        'fix:Fix detected issues'
+        'update:Update system packages'
+        'cleanup:Clean up system'
+        'security:Security commands'
+        'compliance:Compliance commands'
+        'explain:AI-powered explanations'
+        'history:View operation history'
+        'rollback:Rollback to previous state'
+        'tui:Launch interactive TUI'
+        'plugin:Plugin management'
+        'version:Print version'
+    )
+
+    if (( CURRENT == 2 )); then
+        _describe 'command' commands
+        return
+    fi
+
+    local curcontext="${curcontext}" context state state_descr line
+    _arguments -C '*:: :->subcmd'
+
+    case ${words[1]} in
+        doctor)
+            _arguments \
+                '--quick[Quick check only]' \
+                '--full[Full diagnostic]' \
+                '--fix[Attempt to fix issues]' \
+                '--json[JSON output]'
+            ;;
+        fix)
+            _arguments \
+                '--auto[Automatically fix without prompting]' \
+                '--category[Fix specific category]:category:(packages security performance)'
+            ;;
+        update)
+            _arguments \
+                '--security-only[Only security updates]' \
+                '--smart[Smart update mode]' \
+                '--hold[Packages to hold]:packages:_sequence' \
+                '--exclude[Packages to exclude]:packages:_sequence' \
+                '--dry-run[Preview only]'
+            ;;
+        cleanup)
+            _arguments \
+                '--all[Clean everything]' \
+                '--logs[Clean logs only]' \
+                '--cache[Clean cache only]' \
+                '--temp[Clean temp files only]' \
+                '--kernels[Remove old kernels]' \
+                '--threshold[Free space threshold]:gb:' \
+                '--dry-run[Preview only]'
+            ;;
+        security)
+            _arguments \
+                '1:subcommand:(audit scan harden)' \
+                '--standard[Compliance standard]:standard:(cis stig)' \
+                '--fix[Apply fixes]'
+            ;;
+        compliance)
+            _arguments \
+                '1:subcommand:(check)' \
+                '--standard[Compliance standard]:standard:(hipaa soc2 pci-dss cis gdpr)'
+            ;;
+        rollback)
+            _arguments \
+                '--last[Rollback last operation]' \
+                '--id[Snapshot ID]:id:' \
+                '--list[List available snapshots]'
+            ;;
+        plugin)
+            _arguments \
+                '1:subcommand:(list install update remove init)' \
+                '2:argument:'
+            ;;
+    esac
+}
+
+_pulse

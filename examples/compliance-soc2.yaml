@@ -1,0 +1,29 @@
+version: 1
+log_level: info
+
+plugins:
+  packages:
+    enabled: true
+    security_only: true
+  security:
+    enabled: true
+    standards: [cis, stig]
+    cve_scan: true
+  compliance:
+    enabled: true
+    standards: [soc2]
+  observability:
+    enabled: true
+    prometheus: true
+    grafana: true
+    endpoint: ":9090"
+
+ai:
+  enabled: true
+  mode: cloud
+  cloud:
+    provider: openai
+    model: gpt-4o-mini
+
+cloud:
+  enabled: true

@@ -1,0 +1,34 @@
+---
+pulse_version: latest
+pulse_install_dir: /usr/local/bin
+pulse_config_dir: /etc/pulse
+pulse_log_dir: /var/log/pulse
+pulse_data_dir: /var/lib/pulse
+
+pulse_user: root
+pulse_group: root
+
+pulse_schedule_enabled: true
+pulse_schedule: "weekly"
+pulse_schedule_time: "02:00"
+
+pulse_plugins:
+  packages:
+    enabled: true
+    security_only: false
+  security:
+    enabled: true
+    standards:
+      - cis
+  performance:
+    enabled: true
+    aggressive: false
+
+pulse_ai_enabled: false
+pulse_ai_mode: local
+pulse_ai_model: llama3.2:1b
+pulse_ai_ollama_url: http://localhost:11434
+
+pulse_log_level: info
+pulse_json_output: false
+pulse_dry_run: false

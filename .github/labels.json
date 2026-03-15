@@ -1,0 +1,24 @@
+{
+  "labels": [
+    { "name": "bug", "color": "d73a4a", "description": "Something isn't working" },
+    { "name": "documentation", "color": "0075ca", "description": "Improvements or additions to documentation" },
+    { "name": "enhancement", "color": "a2eeef", "description": "New feature or request" },
+    { "name": "good first issue", "color": "7057ff", "description": "Good for newcomers" },
+    { "name": "help wanted", "color": "008672", "description": "Extra attention is needed" },
+    { "name": "security", "color": "b60205", "description": "Security related issue" },
+    { "name": "dependencies", "color": "0366d6", "description": "Pull requests that update a dependency file" },
+    { "name": "go", "color": "00ADD8", "description": "Go language related" },
+    { "name": "docker", "color": "0db7ed", "description": "Docker related" },
+    { "name": "kubernetes", "color": "326ce5", "description": "Kubernetes related" },
+    { "name": "plugin", "color": "5319e7", "description": "Plugin system related" },
+    { "name": "performance", "color": "fbca04", "description": "Performance improvement" },
+    { "name": "breaking-change", "color": "d93f0b", "description": "Breaking change" },
+    { "name": "needs-review", "color": "fbca04", "description": "Needs code review" },
+    { "name": "work-in-progress", "color": "c2e0c6", "description": "Work in progress" },
+    { "name": "blocked", "color": "000000", "description": "Blocked by another issue/PR" },
+    { "name": "question", "color": "d876e3", "description": "Further information is requested" },
+    { "name": "wontfix", "color": "ffffff", "description": "This will not be worked on" },
+    { "name": "duplicate", "color": "cfd3d7", "description": "This issue or pull request already exists" },
+    { "name": "invalid", "color": "e4e669", "description": "This doesn't seem right" }
+  ]
+}

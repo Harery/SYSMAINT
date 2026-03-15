@@ -1,0 +1,27 @@
+version: 1
+log_level: warn
+
+plugins:
+  packages:
+    enabled: true
+    security_only: true
+    auto_reboot: false
+  security:
+    enabled: true
+    standards: [cis]
+    cve_scan: true
+  compliance:
+    enabled: true
+    standards: [cis]
+  observability:
+    enabled: true
+    prometheus: true
+    endpoint: ":9090"
+
+ai:
+  enabled: true
+  mode: local
+
+cloud:
+  enabled: true
+  endpoint: "${PULSE_CLOUD_ENDPOINT}"

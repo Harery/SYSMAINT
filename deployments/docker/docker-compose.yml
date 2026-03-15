@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  pulse:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile
+      args:
+        VERSION: ${VERSION:-v2.0.0}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+    image: ghcr.io/harery/octalum-pulse:${VERSION:-latest}
+    container_name: pulse
+    hostname: pulse
+    privileged: true
+    pid: host
+    volumes:
+      - /:/host:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/pulse:/var/lib/pulse
+      - /var/log/pulse:/var/log/pulse
+      - pulse-config:/home/pulse/.config/pulse
+    environment:
+      - PULSE_LOG_LEVEL=${PULSE_LOG_LEVEL:-info}
+      - PULSE_AUTO_MODE=${PULSE_AUTO_MODE:-false}
+      - PULSE_DRY_RUN=${PULSE_DRY_RUN:-false}
+    command: ["doctor"]
+    restart: unless-stopped
+
+  pulse-scheduled:
+    extends:
+      service: pulse
+    container_name: pulse-scheduled
+    command: ["pulse", "update", "--smart", "--quiet"]
+    profiles:
+      - scheduled
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+volumes:
+  pulse-config:
+    driver: local

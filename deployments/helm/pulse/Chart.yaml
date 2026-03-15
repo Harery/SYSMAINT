@@ -1,0 +1,25 @@
+apiVersion: v2
+name: pulse
+description: OCTALUM-PULSE - Your Infrastructure's Heartbeat
+type: application
+version: 2.0.0
+appVersion: "2.0.0"
+kubeVersion: ">=1.23.0-0"
+home: https://pulse.harery.com
+sources:
+  - https://github.com/Harery/OCTALUM-PULSE
+maintainers:
+  - name: harery
+    email: pulse@harery.com
+    url: https://harery.com
+keywords:
+  - linux
+  - maintenance
+  - automation
+  - devops
+  - sysadmin
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/signKey: |
+    fingerprint: ""
+    url: ""

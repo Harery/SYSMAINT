@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCTALUM-PULSE Dashboard</title>
+    <style>
+        :root {
+            --primary: #0A1628;
+            --secondary: #00D4FF;
+            --success: #00FF88;
+            --warning: #FFB800;
+            --error: #FF4757;
+            --bg: #0f1419;
+            --card: #1a1f2e;
+            --text: #e7e9ea;
+            --muted: #71767b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .logo-text span {
+            color: var(--secondary);
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border-radius: 9999px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 0.875rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .card-value.success { color: var(--success); }
+        .card-value.warning { color: var(--warning); }
+        .card-value.error { color: var(--error); }
+        
+        .metric-list {
+            list-style: none;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--bg);
+        }
+        
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            color: var(--muted);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+        
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--muted);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg);
+        }
+        
+        .heartbeat {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 40px;
+        }
+        
+        .heartbeat-bar {
+            width: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+            animation: heartbeat 1s ease-in-out infinite;
+        }
+        
+        .heartbeat-bar:nth-child(1) { animation-delay: 0s; height: 10px; }
+        .heartbeat-bar:nth-child(2) { animation-delay: 0.1s; height: 25px; }
+        .heartbeat-bar:nth-child(3) { animation-delay: 0.2s; height: 40px; }
+        .heartbeat-bar:nth-child(4) { animation-delay: 0.3s; height: 25px; }
+        .heartbeat-bar:nth-child(5) { animation-delay: 0.4s; height: 10px; }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="heartbeat">
+                    <div class="heartbeat-bar"></div>
+                    <div class="heartbeat-bar"></div>
+                    <div class="heartbeat-bar"></div>
+                    <div class="heartbeat-bar"></div>
+                    <div class="heartbeat-bar"></div>
+                </div>
+                <div class="logo-text">OCTALUM-<span>PULSE</span></div>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>All Systems Healthy</span>
+            </div>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">System Health</span>
+                </div>
+                <div class="card-value success">98%</div>
+                <ul class="metric-list">
+                    <li class="metric-item">
+                        <span class="metric-label">CPU Usage</span>
+                        <span>23%</span>
+                    </li>
+                    <li class="metric-item">
+                        <span class="metric-label">Memory</span>
+                        <span>4.2 GB / 16 GB</span>
+                    </li>
+                    <li class="metric-item">
+                        <span class="metric-label">Disk</span>
+                        <span>128 GB / 500 GB</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Security Status</span>
+                </div>
+                <div class="card-value success">Secure</div>
+                <ul class="metric-list">
+                    <li class="metric-item">
+                        <span class="metric-label">CVEs</span>
+                        <span>0 Critical</span>
+                    </li>
+                    <li class="metric-item">
+                        <span class="metric-label">Last Scan</span>
+                        <span>2 hours ago</span>
+                    </li>
+                    <li class="metric-item">
+                        <span class="metric-label">Compliance</span>
+                        <span>CIS ✓</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Last Maintenance</span>
+                </div>
+                <div class="card-value">Today</div>
+                <ul class="metric-list">
+                    <li class="metric-item">
+                        <span class="metric-label">Packages Updated</span>
+                        <span>12</span>
+                    </li>
+                    <li class="metric-item">
+                        <span class="metric-label">Cleaned</span>
+                        <span>1.2 GB</span>
+                    </li>
+                    <li class="metric-item">
+                        <span class="metric-label">Duration</span>
+                        <span>2m 34s</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Quick Actions</span>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="runDoctor()">Run Health Check</button>
+                <button class="btn btn-secondary" onclick="runUpdate()">Update Packages</button>
+                <button class="btn btn-secondary" onclick="runCleanup()">Clean System</button>
+                <button class="btn btn-secondary" onclick="runSecurityAudit()">Security Audit</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function runDoctor() {
+            alert('Running health check... (API not connected)');
+        }
+        
+        async function runUpdate() {
+            alert('Updating packages... (API not connected)');
+        }
+        
+        async function runCleanup() {
+            alert('Cleaning system... (API not connected)');
+        }
+        
+        async function runSecurityAudit() {
+            alert('Running security audit... (API not connected)');
+        }
+    </script>
+</body>
+</html>

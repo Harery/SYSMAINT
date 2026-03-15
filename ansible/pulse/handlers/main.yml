@@ -1,0 +1,10 @@
+---
+- name: reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: restart pulse
+  systemd:
+    name: pulse.service
+    state: restarted
+  when: ansible_service_mgr == 'systemd'

@@ -1,0 +1,55 @@
+image:
+  repository: ghcr.io/harery/octalum-pulse
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+cronjob:
+  enabled: true
+  schedule: "0 2 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+daemonset:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name: ""
+
+rbac:
+  create: true
+
+podSecurityContext:
+  runAsNonRoot: false
+
+securityContext:
+  privileged: true
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
+
+affinity: {}
+
+pulse:
+  logLevel: info
+  autoMode: true
+  dryRun: false
+  config: {}
+
+extraEnv: []
+extraVolumes: []
+extraVolumeMounts: []

@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly OCTALUM-PULSE Maintenance
+Documentation=https://docs.pulse.harery.com
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

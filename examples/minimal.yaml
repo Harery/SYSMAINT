@@ -1,0 +1,8 @@
+version: 1
+log_level: info
+
+plugins:
+  packages:
+    enabled: true
+  security:
+    enabled: true

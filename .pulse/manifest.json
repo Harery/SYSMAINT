@@ -1,0 +1,105 @@
+{
+  "name": "OCTALUM-PULSE",
+  "version": "2.0.0",
+  "description": "Your Infrastructure's Heartbeat — Always Alive, Always Optimized",
+  "tagline": "One command. All distros. Zero worries.",
+  "brand": {
+    "colors": {
+      "primary": "#0A1628",
+      "secondary": "#00D4FF",
+      "accent": {
+        "warning": "#FFB800",
+        "success": "#00FF88",
+        "error": "#FF4757",
+        "info": "#2ED573"
+      },
+      "gradients": {
+        "primary": "linear-gradient(135deg, #0A1628 0%, #1a365d 100%)",
+        "accent": "linear-gradient(135deg, #00D4FF 0%, #00FF88 100%)"
+      }
+    },
+    "typography": {
+      "heading": "Inter, system-ui, sans-serif",
+      "mono": "JetBrains Mono, Fira Code, monospace"
+    },
+    "icons": {
+      "logo": "heartbeat-line-with-gear",
+      "favicon": "pulse-icon.svg"
+    }
+  },
+  "author": {
+    "name": "OCTALUME Team",
+    "email": "pulse@harery.com",
+    "url": "https://harery.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Harery/OCTALUM-PULSE"
+  },
+  "homepage": "https://pulse.harery.com",
+  "documentation": "https://docs.pulse.harery.com",
+  "social": {
+    "discord": "https://discord.gg/pulse",
+    "twitter": "@OCTALUM_PULSE",
+    "github": "Harery/OCTALUM-PULSE"
+  },
+  "keywords": [
+    "linux",
+    "maintenance",
+    "system",
+    "automation",
+    "devops",
+    "sysadmin",
+    "security",
+    "compliance",
+    "package-manager",
+    "monitoring",
+    "enterprise",
+    "cross-platform",
+    "ubuntu",
+    "debian",
+    "fedora",
+    "rhel",
+    "arch",
+    "opensuse"
+  ],
+  "features": {
+    "core": [
+      "Multi-distro support (9+ distributions)",
+      "Package management abstraction",
+      "System cleanup and optimization",
+      "Security auditing",
+      "Compliance checking",
+      "AI-powered diagnostics",
+      "Predictive maintenance"
+    ],
+    "enterprise": [
+      "Fleet management",
+      "Cloud dashboard",
+      "SSO/SAML integration",
+      "SLA support",
+      "Custom plugins"
+    ]
+  },
+  "supportedPlatforms": [
+    {"name": "Ubuntu", "versions": ["20.04", "22.04", "24.04"], "manager": "apt", "status": "stable"},
+    {"name": "Debian", "versions": ["11", "12", "13"], "manager": "apt", "status": "stable"},
+    {"name": "Fedora", "versions": ["40", "41"], "manager": "dnf", "status": "stable"},
+    {"name": "RHEL", "versions": ["8", "9", "10"], "manager": "dnf", "status": "stable"},
+    {"name": "Rocky Linux", "versions": ["8", "9"], "manager": "dnf", "status": "stable"},
+    {"name": "AlmaLinux", "versions": ["8", "9"], "manager": "dnf", "status": "stable"},
+    {"name": "CentOS Stream", "versions": ["9"], "manager": "dnf", "status": "stable"},
+    {"name": "Arch Linux", "versions": ["rolling"], "manager": "pacman", "status": "stable"},
+    {"name": "openSUSE", "versions": ["Leap", "Tumbleweed"], "manager": "zypper", "status": "stable"},
+    {"name": "Alpine", "versions": ["3.19+"], "manager": "apk", "status": "beta"}
+  ],
+  "plugins": {
+    "official": [
+      "pulse-packages",
+      "pulse-security", 
+      "pulse-performance",
+      "pulse-compliance",
+      "pulse-observability"
+    ]
+  }
+}

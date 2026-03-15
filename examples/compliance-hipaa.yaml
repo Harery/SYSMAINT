@@ -1,0 +1,25 @@
+version: 1
+log_level: info
+
+plugins:
+  packages:
+    enabled: true
+    security_only: true
+  security:
+    enabled: true
+    standards: [cis]
+    cve_scan: true
+  compliance:
+    enabled: true
+    standards: [hipaa]
+  observability:
+    enabled: true
+    prometheus: true
+    endpoint: ":9090"
+
+ai:
+  enabled: true
+  mode: local
+
+paths:
+  log_dir: /var/log/pulse

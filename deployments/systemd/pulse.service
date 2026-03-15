@@ -1,0 +1,14 @@
+[Unit]
+Description=OCTALUM-PULSE - Your Infrastructure's Heartbeat
+Documentation=https://docs.pulse.harery.com
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pulse --auto
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

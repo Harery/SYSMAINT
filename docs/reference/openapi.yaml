@@ -1,0 +1,429 @@
+openapi: 3.0.3
+info:
+  title: OCTALUM-PULSE API
+  description: Your Infrastructure's Heartbeat - Linux System Maintenance API
+  version: 2.0.0
+  contact:
+    name: OCTALUME Team
+    email: pulse@harery.com
+    url: https://pulse.harery.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.pulse.harery.com
+    description: Production
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API
+      operationId: getHealth
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /ready:
+    get:
+      summary: Readiness check
+      description: Returns whether the service is ready to accept requests
+      operationId: getReady
+      responses:
+        '200':
+          description: Ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+        '503':
+          description: Not ready
+
+  /api/v1/version:
+    get:
+      summary: Get version information
+      operationId: getVersion
+      responses:
+        '200':
+          description: Version information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfo'
+
+  /api/v1/platform:
+    get:
+      summary: Get platform information
+      description: Returns detected platform information
+      operationId: getPlatform
+      responses:
+        '200':
+          description: Platform information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformInfo'
+
+  /api/v1/doctor:
+    post:
+      summary: Run system health check
+      description: Performs a comprehensive system health check
+      operationId: runDoctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+      responses:
+        '200':
+          description: Health check results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorResponse'
+
+  /api/v1/update:
+    post:
+      summary: Update system packages
+      description: Updates system packages
+      operationId: runUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequest'
+      responses:
+        '200':
+          description: Update results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResponse'
+
+  /api/v1/cleanup:
+    post:
+      summary: Clean up system
+      description: Removes unnecessary files
+      operationId: runCleanup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanupRequest'
+      responses:
+        '200':
+          description: Cleanup results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResponse'
+
+  /api/v1/security/audit:
+    post:
+      summary: Run security audit
+      description: Performs a security audit of the system
+      operationId: runSecurityAudit
+      responses:
+        '200':
+          description: Security audit results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityAuditResponse'
+
+  /api/v1/compliance/check:
+    post:
+      summary: Check compliance
+      description: Checks system compliance against specified standards
+      operationId: runComplianceCheck
+      parameters:
+        - name: standard
+          in: query
+          description: Compliance standard to check
+          schema:
+            type: string
+            enum: [hipaa, soc2, pci-dss, cis]
+            default: cis
+      responses:
+        '200':
+          description: Compliance check results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceResponse'
+
+  /api/v1/history:
+    get:
+      summary: Get operation history
+      description: Returns history of operations performed
+      operationId: getHistory
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+      responses:
+        '200':
+          description: Operation history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+
+  /api/v1/plugins:
+    get:
+      summary: List plugins
+      description: Returns list of installed plugins
+      operationId: listPlugins
+      responses:
+        '200':
+          description: Plugin list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginsResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    ReadyResponse:
+      type: object
+      properties:
+        ready:
+          type: boolean
+
+    VersionInfo:
+      type: object
+      properties:
+        version:
+          type: string
+        build_time:
+          type: string
+        git_commit:
+          type: string
+        go_version:
+          type: string
+        platform:
+          type: string
+        arch:
+          type: string
+
+    PlatformInfo:
+      type: object
+      properties:
+        os:
+          type: string
+        distribution:
+          type: string
+        version:
+          type: string
+        version_id:
+          type: string
+        package_manager:
+          type: string
+        init_system:
+          type: string
+        arch:
+          type: string
+        kernel:
+          type: string
+        containerized:
+          type: boolean
+        family:
+          type: string
+        supported:
+          type: boolean
+
+    DoctorRequest:
+      type: object
+      properties:
+        quick:
+          type: boolean
+          default: true
+        fix:
+          type: boolean
+          default: false
+
+    DoctorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        results:
+          type: object
+          additionalProperties: true
+
+    UpdateRequest:
+      type: object
+      properties:
+        security_only:
+          type: boolean
+          default: false
+        smart:
+          type: boolean
+          default: false
+        exclude:
+          type: array
+          items:
+            type: string
+        dry_run:
+          type: boolean
+          default: false
+
+    CleanupRequest:
+      type: object
+      properties:
+        all:
+          type: boolean
+        logs:
+          type: boolean
+        cache:
+          type: boolean
+        temp:
+          type: boolean
+        dry_run:
+          type: boolean
+          default: false
+
+    OperationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        output:
+          type: string
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Change'
+
+    Change:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        before:
+          type: string
+        after:
+          type: string
+
+    SecurityAuditResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityFinding'
+
+    SecurityFinding:
+      type: object
+      properties:
+        severity:
+          type: string
+          enum: [critical, high, medium, low, info]
+        type:
+          type: string
+        description:
+          type: string
+        remediation:
+          type: string
+
+    ComplianceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        standard:
+          type: string
+        compliant:
+          type: integer
+        non_compliant:
+          type: integer
+        skipped:
+          type: integer
+
+    HistoryResponse:
+      type: object
+      properties:
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Operation'
+
+    Operation:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        output:
+          type: string
+        duration_ms:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+    PluginsResponse:
+      type: object
+      properties:
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plugin'
+
+    Plugin:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        enabled:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer

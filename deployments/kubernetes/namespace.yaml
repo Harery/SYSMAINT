@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pulse
+  labels:
+    app.kubernetes.io/name: pulse
+    app.kubernetes.io/component: namespace

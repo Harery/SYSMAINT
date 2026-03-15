@@ -1,0 +1,191 @@
+version: 2
+
+project_name: octalum-pulse
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: pulse
+    main: ./cmd/pulse
+    binary: pulse
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/Harery/OCTALUM-PULSE/internal/version.Version={{.Version}}
+      - -X github.com/Harery/OCTALUM-PULSE/internal/version.BuildTime={{.Date}}
+      - -X github.com/Harery/OCTALUM-PULSE/internal/version.GitCommit={{.ShortCommit}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+  - id: pulse-agent
+    main: ./cmd/pulse-agent
+    binary: pulse-agent
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/Harery/OCTALUM-PULSE/internal/version.Version={{.Version}}
+      - -X github.com/Harery/OCTALUM-PULSE/internal/version.BuildTime={{.Date}}
+      - -X github.com/Harery/OCTALUM-PULSE/internal/version.GitCommit={{.ShortCommit}}
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: default
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - examples/*.yaml
+
+checksum:
+  name_template: "checksums.sha256"
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+  groups:
+    - title: "🚀 Features"
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: "🐛 Bug Fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: "🔧 Maintenance"
+      regexp: "^.*chore[(\\w)]*:+.*$"
+      order: 2
+    - title: "📚 Documentation"
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 3
+    - title: "Other"
+      order: 999
+
+release:
+  github:
+    owner: Harery
+    name: OCTALUM-PULSE
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## OCTALUM-PULSE {{ .Version }}
+    
+    Your Infrastructure's Heartbeat — Always Alive, Always Optimized
+  footer: |
+    **Full Changelog**: https://github.com/Harery/OCTALUM-PULSE/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+dockers:
+  - image_templates:
+      - "ghcr.io/harery/octalum-pulse:{{ .Version }}-amd64"
+      - "ghcr.io/harery/octalum-pulse:latest-amd64"
+    use: buildx
+    goarch: amd64
+    dockerfile: deployments/docker/Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+
+  - image_templates:
+      - "ghcr.io/harery/octalum-pulse:{{ .Version }}-arm64"
+      - "ghcr.io/harery/octalum-pulse:latest-arm64"
+    use: buildx
+    goarch: arm64
+    dockerfile: deployments/docker/Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+
+docker_manifests:
+  - name_template: "ghcr.io/harery/octalum-pulse:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/harery/octalum-pulse:{{ .Version }}-amd64"
+      - "ghcr.io/harery/octalum-pulse:{{ .Version }}-arm64"
+
+  - name_template: "ghcr.io/harery/octalum-pulse:latest"
+    image_templates:
+      - "ghcr.io/harery/octalum-pulse:latest-amd64"
+      - "ghcr.io/harery/octalum-pulse:latest-arm64"
+
+brews:
+  - name: pulse
+    repository:
+      owner: Harery
+      name: homebrew-tap
+      branch: main
+    directory: Formula
+    homepage: "https://pulse.harery.com"
+    description: "Your Infrastructure's Heartbeat - Linux system maintenance toolkit"
+    license: "MIT"
+    test: |
+      system "#{bin}/pulse", "version"
+    install: |
+      bin.install "pulse"
+
+scoops:
+  - repository:
+      owner: Harery
+      name: scoop-bucket
+    homepage: "https://pulse.harery.com"
+    description: "Your Infrastructure's Heartbeat - Linux system maintenance toolkit"
+    license: MIT
+
+nfpms:
+  - id: packages
+    package_name: octalum-pulse
+    vendor: OCTALUME
+    homepage: https://pulse.harery.com
+    maintainer: Mohamed Elharery <pulse@harery.com>
+    description: Your Infrastructure's Heartbeat - Linux system maintenance toolkit
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    contents:
+      - src: ./deployments/systemd/pulse.service
+        dst: /etc/systemd/system/pulse.service
+      - src: ./deployments/systemd/pulse.timer
+        dst: /etc/systemd/system/pulse.timer
+      - src: ./LICENSE
+        dst: /usr/share/doc/octalum-pulse/LICENSE
+      - src: ./README.md
+        dst: /usr/share/doc/octalum-pulse/README.md
