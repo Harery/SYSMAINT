@@ -1,4 +1,4 @@
-# SYSMAINT — Phase 2: Enterprise Requirements and Business Foundations
+# OCTALUM-PULSE — Phase 2: Enterprise Requirements and Business Foundations
 
 **Vibe Coding Enterprise Lifecycle — Phase 2 Document**
 
@@ -7,19 +7,19 @@
 ## ⭐ SECTION 0 — COVER PAGE & METADATA
 
 ```
-Document Title: SYSMAINT — Enterprise Requirements and Business Foundations
-Project: SYSMAINT - Enterprise-Grade System Maintenance Toolkit
+Document Title: OCTALUM-PULSE — Enterprise Requirements and Business Foundations
+Project: OCTALUM-PULSE - Enterprise-Grade System Maintenance Toolkit
 Version: 1.0.0
 Classification: Internal / Restricted
 Security Level: Moderate (CIA: 3.3/5)
 Document Type: Requirements Specification
-Traceability ID: SYSMAINT-P2-001
+Traceability ID: OCTALUM-PULSE-P2-001
 Phase: Phase 2 — Enterprise Requirements & Strategy
 Author: Harery
 Release Date: 2025-12-28
 Last Updated: 2025-12-28
 Status: Approved (v1.0.0 Released)
-Related Documents: SYSMAINT-P1-001 (Vision), SYSMAINT-P3-001 (Architecture)
+Related Documents: OCTALUM-PULSE-P1-001 (Vision), OCTALUM-PULSE-P3-001 (Architecture)
 ```
 
 ---
@@ -452,7 +452,7 @@ Related Documents: SYSMAINT-P1-001 (Vision), SYSMAINT-P3-001 (Architecture)
 
 | Component | Requirements Satisfied |
 |-----------|------------------------|
-| sysmaint (main) | BR-001, FR-007, FR-008 |
+| pulse (main) | BR-001, FR-007, FR-008 |
 | lib/core/init.sh | BR-001, NFR-003 |
 | lib/maintenance/packages.sh | FR-001, FR-002 |
 | lib/maintenance/cleanup.sh | FR-003, FR-004, FR-005 |

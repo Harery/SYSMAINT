@@ -254,7 +254,7 @@ arch_upgrade_finalize() {
   
   if [[ -n "$installed_kernel" ]] && ! echo "$running_kernel" | grep -q "$installed_kernel"; then
     log "WARNING: Kernel was updated, reboot recommended"
-    echo "reboot_recommended" >> "${STATE_FILE:-/tmp/sysmaint_state}"
+    echo "reboot_recommended" >> "${STATE_FILE:-/tmp/pulse_state}"
   fi
 }
 

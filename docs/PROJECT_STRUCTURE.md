@@ -1,4 +1,4 @@
-# SYSMAINT — Project Structure
+# OCTALUM-PULSE — Project Structure
 
 **Directory Organization & File Layout**
 
@@ -6,17 +6,17 @@
 
 ## Overview
 
-This document describes the complete directory structure of the SYSMAINT project, providing a clear reference for contributors, stakeholders, and users.
+This document describes the complete directory structure of the OCTALUM-PULSE project, providing a clear reference for contributors, stakeholders, and users.
 
 ---
 
 ## Root Directory Structure
 
 ```
-sysmaint/
+pulse/
 ├── README.md                    # Main project landing page
 ├── LICENSE                      # MIT License
-├── sysmaint                     # Main executable script (5,008 lines)
+├── pulse                     # Main executable script (5,008 lines)
 │
 ├── docs/                        # All documentation (centralized)
 ├── lib/                         # Library modules
@@ -63,8 +63,8 @@ docs/
 ├── Home.md                      # Wiki home page
 │
 ├── man/                         # Manual pages
-│   ├── sysmaint.1               # Main man page
-│   └── sysmaint.conf.5          # Config man page
+│   ├── pulse.1               # Main man page
+│   └── pulse.conf.5          # Config man page
 │
 ├── schema/                      # JSON schemas
 │   └── output-schema.json       # JSON output validation
@@ -134,17 +134,17 @@ scripts/
 ```
 packaging/
 ├── systemd/                     # Systemd service files
-│   ├── sysmaint.service
-│   └── sysmaint.timer
+│   ├── pulse.service
+│   └── pulse.timer
 │
 ├── rpm/                         # RPM packaging
-│   └── sysmaint.spec
+│   └── pulse.spec
 │
 └── completion/                  # Shell completion scripts
     ├── bash
-    │   └── sysmaint
+    │   └── pulse
     └── zsh
-        └── _sysmaint
+        └── _pulse
 ```
 
 ### `/debian/` — Debian Packaging
@@ -214,7 +214,7 @@ All documentation, markdown files, and writing are centralized under `/docs/` to
 | `docs/PRD.md` | Product Requirements | [View](PRD.md) |
 | `docs/ARCHITECTURE.md` | System design | [View](ARCHITECTURE.md) |
 | `docs/INSTALLATION.md` | Setup guide | [View](INSTALLATION.md) |
-| `sysmaint` | Main executable | [View](../sysmaint) |
+| `pulse` | Main executable | [View](../pulse) |
 
 ### Documentation Navigation
 

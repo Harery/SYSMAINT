@@ -1,6 +1,6 @@
 # ❓ Frequently Asked Questions
 
-**SYSMAINT v1.0.0 — Common Questions & Answers**
+**OCTALUM-PULSE v1.0.0 — Common Questions & Answers**
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## General Questions
 
-### What is SYSMAINT?
+### What is OCTALUM-PULSE?
 
-**SYSMAINT** is an **enterprise-grade Linux system maintenance toolkit** that provides automated package management, intelligent system cleanup, security auditing, and performance optimization across **nine major Linux distributions**.
+**OCTALUM-PULSE** is an **enterprise-grade Linux system maintenance toolkit** that provides automated package management, intelligent system cleanup, security auditing, and performance optimization across **nine major Linux distributions**.
 
 **Key Characteristics:**
 - 🛠️ **Unified Interface** — One tool for all supported distributions
@@ -44,13 +44,13 @@
 | **Arch Linux** | Rolling | `pacman` | ✅ Tested |
 | **openSUSE** | Tumbleweed | `zypper` | ✅ Tested |
 
-> **Note:** SYSMAINT may work on other distributions not listed here, but they are not officially tested or supported.
+> **Note:** OCTALUM-PULSE may work on other distributions not listed here, but they are not officially tested or supported.
 
 ---
 
-### Is SYSMAINT safe to use?
+### Is OCTALUM-PULSE safe to use?
 
-**Yes, SYSMAINT is designed with safety as a top priority:**
+**Yes, OCTALUM-PULSE is designed with safety as a top priority:**
 
 | Safety Feature | Description |
 |---------------|-------------|
@@ -60,13 +60,13 @@
 | **📝 Audit Trail** | JSON logging for compliance and debugging |
 | **🚫 No Telemetry** | Zero data collection or transmission |
 
-**Best Practice:** Always run `sudo ./sysmaint --dry-run` before executing to review planned changes.
+**Best Practice:** Always run `sudo ./pulse --dry-run` before executing to review planned changes.
 
 ---
 
-### Is SYSMAINT free to use?
+### Is OCTALUM-PULSE free to use?
 
-**Yes!** SYSMAINT is released under the **MIT License**, which means:
+**Yes!** OCTALUM-PULSE is released under the **MIT License**, which means:
 - ✅ Free to use for personal and commercial purposes
 - ✅ Free to modify and distribute
 - ✅ No licensing fees or restrictions
@@ -76,7 +76,7 @@
 
 ## Usage Questions
 
-### How often should I run SYSMAINT?
+### How often should I run OCTALUM-PULSE?
 
 Recommended frequency depends on your use case:
 
@@ -90,34 +90,34 @@ Recommended frequency depends on your use case:
 **Setting up automation:**
 ```bash
 # Systemd timer (recommended)
-sudo systemctl enable --now sysmaint.timer
+sudo systemctl enable --now pulse.timer
 
 # Cron job
-0 2 * * 0 /usr/local/sbin/sysmaint --auto --quiet
+0 2 * * 0 /usr/local/sbin/pulse --auto --quiet
 ```
 
 ---
 
-### Can I automate SYSMAINT?
+### Can I automate OCTALUM-PULSE?
 
-**Yes!** SYSMAINT is designed for automation:
+**Yes!** OCTALUM-PULSE is designed for automation:
 
 **Systemd Timer:**
 ```bash
-sudo systemctl enable sysmaint.timer
-sudo systemctl start sysmaint.timer
+sudo systemctl enable pulse.timer
+sudo systemctl start pulse.timer
 ```
 
 **Cron Job:**
 ```bash
 # Weekly (Sundays at 2 AM)
-0 2 * * 0 /usr/local/sbin/sysmaint --auto --quiet
+0 2 * * 0 /usr/local/sbin/pulse --auto --quiet
 ```
 
 **With JSON Logging:**
 ```bash
 # Log to file with timestamp
-/usr/local/sbin/sysmaint --auto --json > /var/log/sysmaint-$(date +%Y%m%d).json 2>&1
+/usr/local/sbin/pulse --auto --json > /var/log/pulse-$(date +%Y%m%d).json 2>&1
 ```
 
 ---
@@ -136,14 +136,14 @@ sudo systemctl start sysmaint.timer
 
 **Example:**
 ```bash
-sudo ./sysmaint --dry-run --verbose
+sudo ./pulse --dry-run --verbose
 ```
 
 ---
 
 ### Can I run specific operations only?
 
-**Yes!** SYSMAINT supports granular operation selection:
+**Yes!** OCTALUM-PULSE supports granular operation selection:
 
 | Option | Operation |
 |--------|-----------|
@@ -155,25 +155,25 @@ sudo ./sysmaint --dry-run --verbose
 **Combine options:**
 ```bash
 # Updates + cleanup (no security audit)
-sudo ./sysmaint --upgrade --cleanup
+sudo ./pulse --upgrade --cleanup
 
 # Cleanup + security (no package updates)
-sudo ./sysmaint --cleanup --security-audit
+sudo ./pulse --cleanup --security-audit
 ```
 
 ---
 
 ## Technical Questions
 
-### Does SYSMAINT modify system configurations?
+### Does OCTALUM-PULSE modify system configurations?
 
-**No.** SYSMAINT **does not modify** configuration files such as:
+**No.** OCTALUM-PULSE **does not modify** configuration files such as:
 - ❌ `/etc/fstab`
 - ❌ `/etc/ssh/sshd_config`
 - ❌ Systemd service files
 - ❌ Application configuration files
 
-**SYSMAINT only:**
+**OCTALUM-PULSE only:**
 - ✅ Updates software packages
 - ✅ Cleans caches and temporary files
 - ✅ Removes old kernel packages
@@ -181,7 +181,7 @@ sudo ./sysmaint --cleanup --security-audit
 
 ---
 
-### Can I run SYSMAINT without root/sudo?
+### Can I run OCTALUM-PULSE without root/sudo?
 
 **Some operations work without root, but most require elevated privileges:**
 
@@ -195,7 +195,7 @@ sudo ./sysmaint --cleanup --security-audit
 
 ---
 
-### How much disk space can SYSMAINT recover?
+### How much disk space can OCTALUM-PULSE recover?
 
 **Disk recovery varies by system and usage patterns:**
 
@@ -209,14 +209,14 @@ sudo ./sysmaint --cleanup --security-audit
 
 **Check your potential savings:**
 ```bash
-sudo ./sysmaint --dry-run --cleanup
+sudo ./pulse --dry-run --cleanup
 ```
 
 ---
 
-### Does SYSMAINT delete user files?
+### Does OCTALUM-PULSE delete user files?
 
-**No!** SYSMAINT **never deletes** user data:
+**No!** OCTALUM-PULSE **never deletes** user data:
 
 **Safe to clean:**
 | Location | Type | Example |
@@ -236,18 +236,18 @@ sudo ./sysmaint --dry-run --cleanup
 
 ## Error & Troubleshooting
 
-### What if SYSMAINT fails during execution?
+### What if OCTALUM-PULSE fails during execution?
 
 **Troubleshooting steps:**
 
 1. **Check the error message**
    ```bash
-   sudo ./sysmaint --verbose 2>&1 | tee sysmaint.log
+   sudo ./pulse --verbose 2>&1 | tee pulse.log
    ```
 
 2. **Run dry-run to identify issues**
    ```bash
-   sudo ./sysmaint --dry-run --verbose
+   sudo ./pulse --dry-run --verbose
    ```
 
 3. **Review specific platform issues**
@@ -255,11 +255,11 @@ sudo ./sysmaint --dry-run --cleanup
 
 4. **Report the issue**
    - Include: OS version, error message, and verbose log
-   - Report at: https://github.com/Harery/SYSMAINT/issues
+   - Report at: https://github.com/Harery/OCTALUM-PULSE/issues
 
 ---
 
-### Can I undo changes made by SYSMAINT?
+### Can I undo changes made by OCTALUM-PULSE?
 
 **Some operations can be undone:**
 
@@ -286,14 +286,14 @@ sudo downgrade package-name
 
 ---
 
-### What if SYSMAINT freezes or hangs?
+### What if OCTALUM-PULSE freezes or hangs?
 
-**If SYSMAINT appears frozen:**
+**If OCTALUM-PULSE appears frozen:**
 
 1. **Check if package manager is waiting for input**
    ```bash
    # Check process status
-   ps aux | grep sysmaint
+   ps aux | grep pulse
 
    # Check if apt/dnf/pacman is waiting
    ps aux | grep -E "apt|dnf|pacman|zypper"
@@ -306,7 +306,7 @@ sudo downgrade package-name
 3. **Kill frozen process (if necessary)**
    ```bash
    # Find process ID
-   pgrep -f sysmaint
+   pgrep -f pulse
 
    # Terminate gracefully
    sudo kill -15 <PID>
@@ -315,14 +315,14 @@ sudo downgrade package-name
    sudo kill -9 <PID>
 
    # Remove lock file
-   sudo rm /var/run/sysmaint.lock
+   sudo rm /var/run/pulse.lock
    ```
 
 ---
 
 ## Development & Contributing
 
-### How can I contribute to SYSMAINT?
+### How can I contribute to OCTALUM-PULSE?
 
 **We welcome contributions!** See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
@@ -344,7 +344,7 @@ sudo downgrade package-name
 
 ---
 
-### What tools were used to build SYSMAINT?
+### What tools were used to build OCTALUM-PULSE?
 
 | Tool/Stack | Purpose |
 |------------|---------|
@@ -365,8 +365,8 @@ sudo downgrade package-name
 |----------|----------|------|
 | **Documentation** | General information, usage | [docs/](docs/) |
 | **Troubleshooting Guide** | Common issues & solutions | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
-| **GitHub Issues** | Bug reports, feature requests | [github.com/Harery/SYSMAINT/issues](https://github.com/Harery/SYSMAINT/issues) |
-| **GitHub Discussions** | Questions, community help | [github.com/Harery/SYSMAINT/discussions](https://github.com/Harery/SYSMAINT/discussions) |
+| **GitHub Issues** | Bug reports, feature requests | [github.com/Harery/OCTALUM-PULSE/issues](https://github.com/Harery/OCTALUM-PULSE/issues) |
+| **GitHub Discussions** | Questions, community help | [github.com/Harery/OCTALUM-PULSE/discussions](https://github.com/Harery/OCTALUM-PULSE/discussions) |
 | **Email** | Private inquiries | [Mohamed@Harery.com](mailto:Mohamed@Harery.com) |
 
 ---
@@ -375,28 +375,28 @@ sudo downgrade package-name
 
 ```bash
 # Preview all changes (safe, read-only)
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Fully automated mode
-sudo ./sysmaint --auto
+sudo ./pulse --auto
 
 # Package updates only
-sudo ./sysmaint --upgrade
+sudo ./pulse --upgrade
 
 # System cleanup only
-sudo ./sysmaint --cleanup
+sudo ./pulse --cleanup
 
 # Security audit only
-sudo ./sysmaint --security-audit
+sudo ./pulse --security-audit
 
 # JSON output for monitoring/automation
-sudo ./sysmaint --json-summary | jq .
+sudo ./pulse --json-summary | jq .
 
 # Verbose mode for debugging
-sudo ./sysmaint --verbose
+sudo ./pulse --verbose
 
 # Quiet mode for cron
-sudo ./sysmaint --auto --quiet
+sudo ./pulse --auto --quiet
 ```
 
 ---
@@ -409,10 +409,10 @@ sudo ./sysmaint --auto --quiet
    - [Troubleshooting](TROUBLESHOOTING.md)
 
 2. **Search existing issues:**
-   - [GitHub Issues](https://github.com/Harery/SYSMAINT/issues)
+   - [GitHub Issues](https://github.com/Harery/OCTALUM-PULSE/issues)
 
 3. **Ask the community:**
-   - [GitHub Discussions](https://github.com/Harery/SYSMAINT/discussions)
+   - [GitHub Discussions](https://github.com/Harery/OCTALUM-PULSE/discussions)
 
 4. **Contact directly:**
    - [Email: Mohamed@Harery.com](mailto:Mohamed@Harery.com)
@@ -421,4 +421,4 @@ sudo ./sysmaint --auto --quiet
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

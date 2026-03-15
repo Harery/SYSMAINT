@@ -1,18 +1,18 @@
 # Security Policy
 
-**SYSMAINT v1.0.0 - Last Updated: December 27, 2025**
+**OCTALUM-PULSE v1.0.0 - Last Updated: December 27, 2025**
 
 ---
 
 ## 📋 Executive Summary
 
-This Security Policy outlines the security practices, vulnerability reporting procedures, and commitment to maintaining the security of SYSMAINT, an enterprise-grade system maintenance toolkit for Linux environments.
+This Security Policy outlines the security practices, vulnerability reporting procedures, and commitment to maintaining the security of OCTALUM-PULSE, an enterprise-grade system maintenance toolkit for Linux environments.
 
 ---
 
 ## 🔒 Security Commitment
 
-We are committed to maintaining the security and integrity of SYSMAINT. This includes:
+We are committed to maintaining the security and integrity of OCTALUM-PULSE. This includes:
 
 - **Proactive Security Measures** - Regular security audits and code reviews
 - **Responsible Disclosure** - Coordinated vulnerability disclosure process
@@ -46,7 +46,7 @@ We are committed to maintaining the security and integrity of SYSMAINT. This inc
 
 **Preferred Channel:**
 ```
-GitHub Private Vulnerability Reporting: https://github.com/Harery/SYSMAINT/security/advisories/new
+GitHub Private Vulnerability Reporting: https://github.com/Harery/OCTALUM-PULSE/security/advisories/new
 ```
 
 **Alternative Channels:**
@@ -81,7 +81,7 @@ Please include the following information in your report:
 [Critical/High/Medium/Low]
 
 ## Affected Versions
-- SYSMAINT v1.0.0
+- OCTALUM-PULSE v1.0.0
 - All versions prior to v1.0.0
 
 ## Description
@@ -180,30 +180,30 @@ We use the **CVSS v3.1** scoring system for severity classification:
 
 1. **Always use dry-run mode first**
    \`\`\`bash
-   sudo ./sysmaint --dry-run
+   sudo ./pulse --dry-run
    \`\`\`
 
 2. **Verify script integrity before execution**
    \`\`\`bash
-   sha256sum sysmaint
+   sha256sum pulse
    \`\`\`
 
 3. **Run with least privilege necessary**
    \`\`\`bash
    # Avoid running as full root when possible
-   sudo ./sysmaint --non-interactive
+   sudo ./pulse --non-interactive
    \`\`\`
 
 4. **Review logs for suspicious activity**
    \`\`\`bash
    # JSON output for automated monitoring
-   sudo ./sysmaint --json | jq .
+   sudo ./pulse --json | jq .
    \`\`\`
 
 5. **Keep systems updated**
    \`\`\`bash
    # Regular security updates
-   sudo ./sysmaint --update-only
+   sudo ./pulse --update-only
    \`\`\`
 
 ### For Developers
@@ -240,7 +240,7 @@ We use the **CVSS v3.1** scoring system for severity classification:
 
 ### Data Privacy
 
-- **No Personal Data Collection:** SYSMAINT does not collect, transmit, or store personal data
+- **No Personal Data Collection:** OCTALUM-PULSE does not collect, transmit, or store personal data
 - **No Telemetry:** Zero telemetry or analytics transmission
 - **Local Processing:** All operations occur locally on the host system
 - **Audit Logs:** JSON output can be used for local audit purposes only
@@ -251,10 +251,10 @@ We use the **CVSS v3.1** scoring system for severity classification:
 
 | Document | Description | URL |
 |----------|-------------|-----|
-| **Security Advisories** | Published security vulnerabilities | https://github.com/Harery/SYSMAINT/security/advisories |
-| **Code of Conduct** | Community guidelines | https://github.com/Harery/SYSMAINT/blob/main/CODE_OF_CONDUCT.md |
-| **Contributing** | Development guidelines | https://github.com/Harery/SYSMAINT/blob/main/CONTRIBUTING.md |
-| **License** | MIT License terms | https://github.com/Harery/SYSMAINT/blob/main/LICENSE |
+| **Security Advisories** | Published security vulnerabilities | https://github.com/Harery/OCTALUM-PULSE/security/advisories |
+| **Code of Conduct** | Community guidelines | https://github.com/Harery/OCTALUM-PULSE/blob/main/CODE_OF_CONDUCT.md |
+| **Contributing** | Development guidelines | https://github.com/Harery/OCTALUM-PULSE/blob/main/CONTRIBUTING.md |
+| **License** | MIT License terms | https://github.com/Harery/OCTALUM-PULSE/blob/main/LICENSE |
 
 ---
 
@@ -274,8 +274,8 @@ We thank the security community for responsible vulnerability disclosure:
 |---------|---------|
 | **Vulnerability Reports** | security@harery.com |
 | **Security Questions** | [Mohamed@Harery.com](mailto:Mohamed@Harery.com) |
-| **Security Advisories** | https://github.com/Harery/SYSMAINT/security/advisories |
-| **General Issues** | https://github.com/Harery/SYSMAINT/issues |
+| **Security Advisories** | https://github.com/Harery/OCTALUM-PULSE/security/advisories |
+| **General Issues** | https://github.com/Harery/OCTALUM-PULSE/issues |
 
 ### Emergency Contact
 
@@ -296,10 +296,10 @@ For **critical security issues** requiring immediate attention:
 
 ## 🔗 Quick Links
 
-- **Repository:** https://github.com/Harery/SYSMAINT
-- **Security Policy:** https://github.com/Harery/SYSMAINT/security/policy
-- **Security Advisories:** https://github.com/Harery/SYSMAINT/security/advisories
-- **Report Vulnerability:** https://github.com/Harery/SYSMAINT/security/advisories/new
+- **Repository:** https://github.com/Harery/OCTALUM-PULSE
+- **Security Policy:** https://github.com/Harery/OCTALUM-PULSE/security/policy
+- **Security Advisories:** https://github.com/Harery/OCTALUM-PULSE/security/advisories
+- **Report Vulnerability:** https://github.com/Harery/OCTALUM-PULSE/security/advisories/new
 
 ---
 

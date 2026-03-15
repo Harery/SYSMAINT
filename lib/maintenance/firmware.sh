@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/firmware.sh - Firmware updates via fwupd
-# sysmaint library
+# pulse library
 
 firmware_maintenance() {
   # fwupd handles firmware updates for many devices (BIOS, Thunderbolt, etc.)

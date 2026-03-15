@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/kernel.sh - Kernel management and purging
-# sysmaint library
+# pulse library
 
 kernel_purge_phase() {
   if [[ "${PURGE_OLD_KERNELS:-false}" != "true" ]]; then

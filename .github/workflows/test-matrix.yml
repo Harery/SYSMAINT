@@ -1,4 +1,4 @@
-# SYSMAINT Comprehensive Test Matrix Workflow
+# OCTALUM-PULSE Comprehensive Test Matrix Workflow
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
 #
@@ -27,14 +27,14 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'sysmaint'
+      - 'pulse'
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/test-matrix.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - 'sysmaint'
+      - 'pulse'
       - 'lib/**'
       - 'tests/**'
   workflow_dispatch:
@@ -94,22 +94,22 @@ jobs:
           useradd -m -s /bin/bash testuser
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-      - name: Copy SYSMAINT
+      - name: Copy OCTALUM-PULSE
         run: |
-          cp sysmaint /usr/local/sbin/sysmaint
-          chmod +x /usr/local/sbin/sysmaint
-          mkdir -p /sysmaint/tests /sysmaint/lib
-          cp -r tests/* /sysmaint/tests/
-          cp -r lib/* /sysmaint/lib/
-          chmod +x /sysmaint/tests/*.sh
+          cp pulse /usr/local/sbin/pulse
+          chmod +x /usr/local/sbin/pulse
+          mkdir -p /pulse/tests /pulse/lib
+          cp -r tests/* /pulse/tests/
+          cp -r lib/* /pulse/lib/
+          chmod +x /pulse/tests/*.sh
 
       - name: Run smoke tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
       - name: Run environment tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_environment.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_environment.sh"
 
       - name: Upload test results
         if: always()
@@ -117,7 +117,7 @@ jobs:
         with:
           name: test-results-ubuntu-${{ matrix.version }}
           path: |
-            /sysmaint/tests/*.log
+            /pulse/tests/*.log
             /tmp/system-maintenance/
 
   # =========================================================================
@@ -148,22 +148,22 @@ jobs:
           useradd -m -s /bin/bash testuser
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-      - name: Copy SYSMAINT
+      - name: Copy OCTALUM-PULSE
         run: |
-          cp sysmaint /usr/local/sbin/sysmaint
-          chmod +x /usr/local/sbin/sysmaint
-          mkdir -p /sysmaint/tests /sysmaint/lib
-          cp -r tests/* /sysmaint/tests/
-          cp -r lib/* /sysmaint/lib/
-          chmod +x /sysmaint/tests/*.sh
+          cp pulse /usr/local/sbin/pulse
+          chmod +x /usr/local/sbin/pulse
+          mkdir -p /pulse/tests /pulse/lib
+          cp -r tests/* /pulse/tests/
+          cp -r lib/* /pulse/lib/
+          chmod +x /pulse/tests/*.sh
 
       - name: Run smoke tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
       - name: Run OS families test
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_os_families.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_os_families.sh"
 
       - name: Upload test results
         if: always()
@@ -171,7 +171,7 @@ jobs:
         with:
           name: test-results-debian-${{ matrix.version }}
           path: |
-            /sysmaint/tests/*.log
+            /pulse/tests/*.log
             /tmp/system-maintenance/
 
   # =========================================================================
@@ -201,18 +201,18 @@ jobs:
           useradd -m -s /bin/bash testuser
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-      - name: Copy SYSMAINT
+      - name: Copy OCTALUM-PULSE
         run: |
-          cp sysmaint /usr/local/sbin/sysmaint
-          chmod +x /usr/local/sbin/sysmaint
-          mkdir -p /sysmaint/tests /sysmaint/lib
-          cp -r tests/* /sysmaint/tests/
-          cp -r lib/* /sysmaint/lib/
-          chmod +x /sysmaint/tests/*.sh
+          cp pulse /usr/local/sbin/pulse
+          chmod +x /usr/local/sbin/pulse
+          mkdir -p /pulse/tests /pulse/lib
+          cp -r tests/* /pulse/tests/
+          cp -r lib/* /pulse/lib/
+          chmod +x /pulse/tests/*.sh
 
       - name: Run smoke tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
       - name: Upload test results
         if: always()
@@ -220,7 +220,7 @@ jobs:
         with:
           name: test-results-fedora-${{ matrix.version }}
           path: |
-            /sysmaint/tests/*.log
+            /pulse/tests/*.log
             /tmp/system-maintenance/
 
   # =========================================================================
@@ -275,22 +275,22 @@ jobs:
           useradd -m -s /bin/bash testuser
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-      - name: Copy SYSMAINT
+      - name: Copy OCTALUM-PULSE
         run: |
-          cp sysmaint /usr/local/sbin/sysmaint
-          chmod +x /usr/local/sbin/sysmaint
-          mkdir -p /sysmaint/tests /sysmaint/lib
-          cp -r tests/* /sysmaint/tests/
-          cp -r lib/* /sysmaint/lib/
-          chmod +x /sysmaint/tests/*.sh
+          cp pulse /usr/local/sbin/pulse
+          chmod +x /usr/local/sbin/pulse
+          mkdir -p /pulse/tests /pulse/lib
+          cp -r tests/* /pulse/tests/
+          cp -r lib/* /pulse/lib/
+          chmod +x /pulse/tests/*.sh
 
       - name: Run smoke tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
       - name: Run OS families test
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_os_families.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_os_families.sh"
 
       - name: Upload test results
         if: always()
@@ -298,7 +298,7 @@ jobs:
         with:
           name: test-results-${{ matrix.distro }}-${{ matrix.version }}
           path: |
-            /sysmaint/tests/*.log
+            /pulse/tests/*.log
             /tmp/system-maintenance/
 
   # =========================================================================
@@ -324,22 +324,22 @@ jobs:
           useradd -m -s /bin/bash testuser
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-      - name: Copy SYSMAINT
+      - name: Copy OCTALUM-PULSE
         run: |
-          cp sysmaint /usr/local/sbin/sysmaint
-          chmod +x /usr/local/sbin/sysmaint
-          mkdir -p /sysmaint/tests /sysmaint/lib
-          cp -r tests/* /sysmaint/tests/
-          cp -r lib/* /sysmaint/lib/
-          chmod +x /sysmaint/tests/*.sh
+          cp pulse /usr/local/sbin/pulse
+          chmod +x /usr/local/sbin/pulse
+          mkdir -p /pulse/tests /pulse/lib
+          cp -r tests/* /pulse/tests/
+          cp -r lib/* /pulse/lib/
+          chmod +x /pulse/tests/*.sh
 
       - name: Run smoke tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
       - name: Run Arch family tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_os_families.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_os_families.sh"
 
       - name: Upload test results
         if: always()
@@ -347,7 +347,7 @@ jobs:
         with:
           name: test-results-arch
           path: |
-            /sysmaint/tests/*.log
+            /pulse/tests/*.log
             /tmp/system-maintenance/
 
   # =========================================================================
@@ -374,18 +374,18 @@ jobs:
           useradd -m -s /bin/bash testuser
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-      - name: Copy SYSMAINT
+      - name: Copy OCTALUM-PULSE
         run: |
-          cp sysmaint /usr/local/sbin/sysmaint
-          chmod +x /usr/local/sbin/sysmaint
-          mkdir -p /sysmaint/tests /sysmaint/lib
-          cp -r tests/* /sysmaint/tests/
-          cp -r lib/* /sysmaint/lib/
-          chmod +x /sysmaint/tests/*.sh
+          cp pulse /usr/local/sbin/pulse
+          chmod +x /usr/local/sbin/pulse
+          mkdir -p /pulse/tests /pulse/lib
+          cp -r tests/* /pulse/tests/
+          cp -r lib/* /pulse/lib/
+          chmod +x /pulse/tests/*.sh
 
       - name: Run smoke tests
         run: |
-          su - testuser -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+          su - testuser -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
       - name: Upload test results
         if: always()
@@ -393,7 +393,7 @@ jobs:
         with:
           name: test-results-opensuse
           path: |
-            /sysmaint/tests/*.log
+            /pulse/tests/*.log
             /tmp/system-maintenance/
 
   # =========================================================================

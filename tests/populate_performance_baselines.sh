@@ -66,7 +66,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "========================================"
-echo "SYSMAINT Performance Baseline Collection"
+echo "OCTALUM-PULSE Performance Baseline Collection"
 echo "========================================"
 echo ""
 

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://example.com/sysmaint-summary.schema.json",
-  "title": "sysmaint JSON summary",
+  "$id": "https://example.com/pulse-summary.schema.json",
+  "title": "pulse JSON summary",
   "type": "object",
   "additionalProperties": true,
   "required": [

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Package Manager Abstraction Layer for sysmaint
-# sysmaint library
+# Package Manager Abstraction Layer for pulse
+# pulse library
 # Purpose: Unified interface for APT, DNF, Pacman, and Zypper package managers
 #
 # This abstraction layer provides distro-agnostic functions for package management
-# operations, allowing sysmaint to run on multiple Linux distributions.
+# operations, allowing pulse to run on multiple Linux distributions.
 
 # Global variable to store detected package manager
 PKG_MANAGER=""

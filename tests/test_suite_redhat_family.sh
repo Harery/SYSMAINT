@@ -175,7 +175,7 @@ test_redhat_logging() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT RedHat Family Test Suite"
+    echo "OCTALUM-PULSE RedHat Family Test Suite"
     echo "========================================"
     echo ""
 

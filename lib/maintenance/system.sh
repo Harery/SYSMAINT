@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/system.sh - System-level maintenance tasks
-# sysmaint library
+# pulse library
 
 clean_tmp() {
   # Conservative, configurable cleanup of temporary directory before running.

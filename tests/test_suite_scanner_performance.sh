@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # test_suite_scanner_performance.sh - Performance and health checks for external scanners orchestrator
-# Focus: basic timing expectations and artifact sanity for sysmaint_scanners.sh
+# Focus: basic timing expectations and artifact sanity for pulse_scanners.sh
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-SYSMAINT="$REPO_ROOT/sysmaint"
+OCTALUM-PULSE="$REPO_ROOT/pulse"
 ART_DIR="$REPO_ROOT/scanner_artifacts"
 
 PASSED=0 FAILED=0 TOTAL=0
@@ -28,17 +28,17 @@ run_and_time() {
   fi
 }
 
-if [[ ! -f "$SYSMAINT" ]]; then
-  echo "sysmaint missing at $SYSMAINT" >&2; exit 1;
+if [[ ! -f "$OCTALUM-PULSE" ]]; then
+  echo "pulse missing at $OCTALUM-PULSE" >&2; exit 1;
 fi
 
 mkdir -p "$ART_DIR" 2>/dev/null || true
 
 # Test 1: Baseline run completes within generous bound
-run_and_time "scanners-baseline-runtime" 300 env LYNIS_MIN_SCORE=0 bash "$SYSMAINT" scanners
+run_and_time "scanners-baseline-runtime" 300 env LYNIS_MIN_SCORE=0 bash "$OCTALUM-PULSE" scanners
 
 # Test 2: Disabled scanners complete quickly
-run_and_time "scanners-disabled-fast" 10 env SCAN_LYNIS=false SCAN_RKHUNTER=false bash "$SYSMAINT" scanners
+run_and_time "scanners-disabled-fast" 10 env SCAN_LYNIS=false SCAN_RKHUNTER=false bash "$OCTALUM-PULSE" scanners
 
 # Test 3: Summary JSON exists and reasonable size
 LATEST_SUMMARY=$(ls -1t "$ART_DIR"/summary_*.json 2>/dev/null | head -n1 || true)
@@ -69,7 +69,7 @@ fi
 OLD_FILE="$ART_DIR/summary_20000101T000000Z.json"
 echo '{}' > "$OLD_FILE"
 touch -t 202001010000 "$OLD_FILE" 2>/dev/null || touch "$OLD_FILE"
-if env RETENTION_DAYS=30 SCAN_LYNIS=false SCAN_RKHUNTER=false bash "$SYSMAINT" scanners >/dev/null 2>&1; then
+if env RETENTION_DAYS=30 SCAN_LYNIS=false SCAN_RKHUNTER=false bash "$OCTALUM-PULSE" scanners >/dev/null 2>&1; then
   if [[ ! -f "$OLD_FILE" ]]; then
     pass "retention-cleanup (old file removed)"
   else
@@ -97,7 +97,7 @@ echo "
 [Test $((TOTAL+1))] scanners-missing-tools-fast (max 30s)"
 SECONDS=0
 set +e
-PATH=/nonexistent SCAN_LYNIS=true SCAN_RKHUNTER=true bash "$SYSMAINT" scanners >/dev/null 2>&1
+PATH=/nonexistent SCAN_LYNIS=true SCAN_RKHUNTER=true bash "$OCTALUM-PULSE" scanners >/dev/null 2>&1
 rc=$?
 set -e
 dur=$SECONDS

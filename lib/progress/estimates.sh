@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/progress/estimates.sh - Phase timing estimation and EMA calculations
-# sysmaint library
+# pulse library
 
 _fmt_hms() {
   # formats seconds -> H:MM:SS or M:SS

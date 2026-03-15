@@ -27,7 +27,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 # Logging functions
 log_test() {
@@ -74,7 +74,7 @@ test_feature_available() {
 # Example: Test that a command works
 test_command_works() {
     # Replace with actual test
-    bash "$SYSMAINT" --help &>/dev/null
+    bash "$OCTALUM-PULSE" --help &>/dev/null
 }
 
 # Example: Test file exists
@@ -111,7 +111,7 @@ test_temp_file_operation() {
 
 main() {
     echo "========================================"
-    echo "SYSMAINT <Test Suite Name>"
+    echo "OCTALUM-PULSE <Test Suite Name>"
     echo "========================================"
     echo ""
 

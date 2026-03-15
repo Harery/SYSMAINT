@@ -1,4 +1,4 @@
-# SYSMAINT Test Infrastructure Troubleshooting Guide
+# OCTALUM-PULSE Test Infrastructure Troubleshooting Guide
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -123,15 +123,15 @@ sudo systemctl status docker
 
 **Error:** `Systemd access denied in container`
 
-**Cause:** SYSMAINT requires privileged mode for full functionality
+**Cause:** OCTALUM-PULSE requires privileged mode for full functionality
 
 **Solution:**
 ```bash
 # Add --privileged flag
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 
 # For testing
-docker run --rm --privileged -v /:/host:ro sysmaint-test:ubuntu-24
+docker run --rm --privileged -v /:/host:ro pulse-test:ubuntu-24
 ```
 
 ---
@@ -154,10 +154,10 @@ docker pull ubuntu:24.04
 # Rebuild image
 docker build -f tests/docker/Dockerfile.ubuntu.test \
     --build-arg BASE_IMAGE=ubuntu:24.04 \
-    -t sysmaint-test:ubuntu-24 .
+    -t pulse-test:ubuntu-24 .
 
 # Clean build
-docker rmi sysmaint-test:*
+docker rmi pulse-test:*
 docker system prune -f
 ```
 
@@ -182,7 +182,7 @@ docker network inspect bridge
 sudo systemctl restart docker
 
 # Use host networking (if needed)
-docker run --rm --network host sysmaint-test:ubuntu-24
+docker run --rm --network host pulse-test:ubuntu-24
 ```
 
 ---
@@ -297,7 +297,7 @@ grep -r "while true" tests/
 timeout 300 bash tests/test_suite_smoke.sh
 
 # Use --dry-run to identify slow tests
-bash sysmaint --dry-run
+bash pulse --dry-run
 ```
 
 ---

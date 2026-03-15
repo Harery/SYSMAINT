@@ -141,7 +141,7 @@ cat > "$REPORT_FILE" << EOF
     </div>
 
     <div class="footer">
-        <p>Generated on $(date -R) | sysmaint v$(grep '^VERSION=' "$PROJECT_ROOT/sysmaint" | cut -d= -f2 | tr -d '"')</p>
+        <p>Generated on $(date -R) | pulse v$(grep '^VERSION=' "$PROJECT_ROOT/pulse" | cut -d= -f2 | tr -d '"')</p>
     </div>
 
     <script>

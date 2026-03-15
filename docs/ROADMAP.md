@@ -1,6 +1,6 @@
 # 🗺️ Roadmap
 
-**SYSMAINT Development Roadmap — Future Plans & Vision**
+**OCTALUM-PULSE Development Roadmap — Future Plans & Vision**
 
 ---
 
@@ -87,7 +87,7 @@ The initial stable release with core maintenance capabilities.
 | Log analysis & anomaly detection | Medium | ⏳ Planned |
 | Scheduled maintenance mode | High | ⏳ Planned |
 | Email notification system | Medium | ⏳ Planned |
-| Configuration file support (`/etc/sysmaint.conf`) | High | ⏳ Planned |
+| Configuration file support (`/etc/pulse.conf`) | High | ⏳ Planned |
 | Pre/post maintenance hooks | Low | ⏳ Planned |
 
 ---
@@ -255,7 +255,7 @@ New platforms are evaluated based on:
 - Testing infrastructure requirements
 - Security considerations
 
-> **Vote on platforms:** [GitHub Discussions](https://github.com/Harery/SYSMAINT/discussions)
+> **Vote on platforms:** [GitHub Discussions](https://github.com/Harery/OCTALUM-PULSE/discussions)
 
 ---
 
@@ -288,11 +288,11 @@ New platforms are evaluated based on:
 We value community input! Here's how you can influence the roadmap:
 
 1. **Vote on existing feature requests**
-   - Browse [GitHub Issues](https://github.com/Harery/SYSMAINT/issues)
+   - Browse [GitHub Issues](https://github.com/Harery/OCTALUM-PULSE/issues)
    - React with 👍 on features you want
 
 2. **Propose new features**
-   - Start a discussion on [GitHub Discussions](https://github.com/Harery/SYSMAINT/discussions)
+   - Start a discussion on [GitHub Discussions](https://github.com/Harery/OCTALUM-PULSE/discussions)
    - Gather community support
 
 3. **Contribute code**
@@ -347,5 +347,5 @@ We value community input! Here's how you can influence the roadmap:
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE
 **License:** MIT License

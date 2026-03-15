@@ -1,6 +1,6 @@
 # Code of Conduct
 
-**SYSMAINT v1.0.0**
+**OCTALUM-PULSE v1.0.0**
 
 ---
 
@@ -65,4 +65,4 @@ Project maintainers may:
 
 **Together, we create a welcoming community**
 
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

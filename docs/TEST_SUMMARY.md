@@ -1,4 +1,4 @@
-# SYSMAINT Test Infrastructure Summary
+# OCTALUM-PULSE Test Infrastructure Summary
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document provides a complete summary of the SYSMAINT test infrastructure, including all test suites, automation scripts, CI/CD workflows, and documentation.
+This document provides a complete summary of the OCTALUM-PULSE test infrastructure, including all test suites, automation scripts, CI/CD workflows, and documentation.
 
 ---
 
@@ -282,7 +282,7 @@ When comparing local Docker vs GitHub Actions results:
 ### 1. Quick Local Test
 
 ```bash
-cd /path/to/sysmaint
+cd /path/to/pulse
 bash tests/quick_test.sh
 ```
 
@@ -333,7 +333,7 @@ docker info
 docker run --rm --privileged alpine:latest uptime
 
 # Rebuild images
-docker rmi sysmaint-test:*
+docker rmi pulse-test:*
 bash tests/run_local_docker_tests.sh --rebuild
 ```
 

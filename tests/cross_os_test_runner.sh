@@ -97,16 +97,16 @@ run_test_on_platform() {
     local setup_cmd=$(get_platform_setup "$image")
 
     # Run test in Docker container
-    local container_name="sysmaint_test_${safe_name}__$$"
+    local container_name="pulse_test_${safe_name}__$$"
 
     # Create container, setup environment, run test, capture output
     docker run --rm \
         --name "$container_name" \
-        -v "$PROJECT_ROOT:/sysmaint:ro" \
+        -v "$PROJECT_ROOT:/pulse:ro" \
         -e DRY_RUN=true \
         -e JSON_SUMMARY=true \
         "$image" \
-        /bin/bash -c "$setup_cmd && cd /sysmaint && bash tests/$test_suite" \
+        /bin/bash -c "$setup_cmd && cd /pulse && bash tests/$test_suite" \
         > "$results_file" 2>&1
     local docker_exit=$?
 

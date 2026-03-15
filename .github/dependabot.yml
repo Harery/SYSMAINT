@@ -26,5 +26,5 @@ updates:
       prefix: "docker"
       include: "scope"
 
-  # Note: SYSMAINT uses Bash/shell scripts with minimal external dependencies
+  # Note: OCTALUM-PULSE uses Bash/shell scripts with minimal external dependencies
   # Additional package ecosystems can be added here as the project evolves

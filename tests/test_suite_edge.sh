@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SCRIPT="./sysmaint"
+SCRIPT="./pulse"
 PASSED=0
 FAILED=0
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/progress/parallel.sh - DAG-based parallel execution engine
-# sysmaint library
+# pulse library
 
 _deps_satisfied() {
   local phase="$1"

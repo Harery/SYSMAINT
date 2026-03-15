@@ -1,4 +1,4 @@
-# Contributing to SYSMAINT Tests
+# Contributing to OCTALUM-PULSE Tests
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This guide explains how to contribute new tests to the SYSMAINT test infrastructure.
+This guide explains how to contribute new tests to the OCTALUM-PULSE test infrastructure.
 
 ---
 
@@ -100,7 +100,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 # Logging functions
 log_test() {
@@ -159,7 +159,7 @@ test_example_feature() {
 
 main() {
     echo "========================================"
-    echo "SYSMAINT <Test Suite Name>"
+    echo "OCTALUM-PULSE <Test Suite Name>"
     echo "========================================"
     echo ""
 
@@ -292,12 +292,12 @@ main "$@"
 **Runtime:** < 30 seconds each
 
 ```bash
-test_sysmaint_executable() {
-    [[ -f "$SYSMAINT" ]]
+test_pulse_executable() {
+    [[ -f "$OCTALUM-PULSE" ]]
 }
 
 test_help_command() {
-    bash "$SYSMAINT" --help &>/dev/null
+    bash "$OCTALUM-PULSE" --help &>/dev/null
 }
 ```
 
@@ -327,11 +327,11 @@ test_redhat_package_manager() {
 
 ```bash
 test_package_upgrade() {
-    bash "$SYSMAINT" --upgrade --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --upgrade --dry-run &>/dev/null
 }
 
 test_system_cleanup() {
-    bash "$SYSMAINT" --cleanup --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --cleanup --dry-run &>/dev/null
 }
 ```
 
@@ -342,12 +342,12 @@ test_system_cleanup() {
 ```bash
 test_file_permissions() {
     local perms
-    perms=$(stat -c %a "$SYSMAINT" 2>/dev/null || stat -f %A "$SYSMAINT")
+    perms=$(stat -c %a "$OCTALUM-PULSE" 2>/dev/null || stat -f %A "$OCTALUM-PULSE")
     [[ "$perms" =~ ^[0-7]+[575]$ ]]
 }
 
 test_root_ownership() {
-    [[ "$(stat -c %U "$SYSMAINT")" == "root" ]] || return 0
+    [[ "$(stat -c %U "$OCTALUM-PULSE")" == "root" ]] || return 0
 }
 ```
 
@@ -357,7 +357,7 @@ test_root_ownership() {
 
 ```bash
 test_systemd_timer_exists() {
-    [[ -f "/etc/systemd/system/sysmaint.timer" ]] || return 0
+    [[ -f "/etc/systemd/system/pulse.timer" ]] || return 0
 }
 
 test_crontab_syntax() {
@@ -406,7 +406,7 @@ test_new_feature() {
 ```bash
 main() {
     echo "========================================"
-    echo "SYSMAINT <Suite Name>"
+    echo "OCTALUM-PULSE <Suite Name>"
     echo "========================================"
     
     # Add your test
@@ -516,12 +516,12 @@ test_feature() {
 ```bash
 # Good for potentially slow tests
 test_with_timeout() {
-    timeout 30 bash "$SYSMAINT" --operation &>/dev/null
+    timeout 30 bash "$OCTALUM-PULSE" --operation &>/dev/null
 }
 
 # Bad
 test_without_timeout() {
-    bash "$SYSMAINT" --operation  # May hang forever
+    bash "$OCTALUM-PULSE" --operation  # May hang forever
 }
 ```
 
@@ -593,14 +593,14 @@ Before submitting, verify:
 ```bash
 test_backup_command() {
     # Test backup functionality
-    bash "$SYSMAINT" --backup --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --backup --dry-run &>/dev/null
 }
 
 test_backup_creates_file() {
     local backup_dir="/var/backups/system-maintenance"
     
     # Run backup
-    bash "$SYSMAINT" --backup --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --backup --dry-run &>/dev/null
     
     # Verify directory would be created
     # (In dry-run mode, just check the command runs)
@@ -732,7 +732,7 @@ test_package_manager() {
 # Common setup/teardown
 setup_test_environment() {
     export TEST_MODE=1
-    export TEST_DIR="/tmp/sysmaint-test-$$"
+    export TEST_DIR="/tmp/pulse-test-$$"
     mkdir -p "$TEST_DIR"
 }
 
@@ -790,8 +790,8 @@ test_file_creation() {
 
 ### Ask Questions
 
-- GitHub Discussions: https://github.com/Harery/SYSMAINT/discussions
-- GitHub Issues: https://github.com/Harery/SYSMAINT/issues
+- GitHub Discussions: https://github.com/Harery/OCTALUM-PULSE/discussions
+- GitHub Issues: https://github.com/Harery/OCTALUM-PULSE/issues
 
 ### Example Tests
 

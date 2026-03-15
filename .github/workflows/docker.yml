@@ -1,4 +1,4 @@
-# SYSMAINT Multi-Variant Docker Build Workflow
+# OCTALUM-PULSE Multi-Variant Docker Build Workflow
 # Builds and pushes container images for Ubuntu, Debian, and Fedora variants
 #
 # SPDX-License-Identifier: MIT
@@ -32,7 +32,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/harery/sysmaint
+  IMAGE_NAME: ghcr.io/harery/pulse
 
 jobs:
   # Build Ubuntu variant
@@ -260,7 +260,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Available Images" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/harery/sysmaint:latest\` (Ubuntu-based)" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/harery/sysmaint:ubuntu\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/harery/sysmaint:debian\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/harery/sysmaint:fedora\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/pulse:latest\` (Ubuntu-based)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/pulse:ubuntu\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/pulse:debian\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/harery/pulse:fedora\`" >> $GITHUB_STEP_SUMMARY

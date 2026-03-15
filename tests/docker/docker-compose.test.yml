@@ -1,4 +1,4 @@
-# SYSMAINT Test Docker Compose
+# OCTALUM-PULSE Test Docker Compose
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
 #
@@ -20,14 +20,14 @@ services:
       dockerfile: tests/docker/Dockerfile.ubuntu.test
       args:
         BASE_IMAGE: ubuntu:22.04
-    image: sysmaint-test:ubuntu-22.04
-    container_name: sysmaint-test-ubuntu-22
+    image: pulse-test:ubuntu-22.04
+    container_name: pulse-test-ubuntu-22
     hostname: ubuntu-22-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=ubuntu
@@ -40,14 +40,14 @@ services:
       dockerfile: tests/docker/Dockerfile.ubuntu.test
       args:
         BASE_IMAGE: ubuntu:24.04
-    image: sysmaint-test:ubuntu-24.04
-    container_name: sysmaint-test-ubuntu-24
+    image: pulse-test:ubuntu-24.04
+    container_name: pulse-test-ubuntu-24
     hostname: ubuntu-24-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=ubuntu
@@ -60,14 +60,14 @@ services:
       dockerfile: tests/docker/Dockerfile.debian.test
       args:
         BASE_IMAGE: debian:12
-    image: sysmaint-test:debian-12
-    container_name: sysmaint-test-debian-12
+    image: pulse-test:debian-12
+    container_name: pulse-test-debian-12
     hostname: debian-12-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=debian
@@ -80,14 +80,14 @@ services:
       dockerfile: tests/docker/Dockerfile.debian.test
       args:
         BASE_IMAGE=debian:13
-    image: sysmaint-test:debian-13
-    container_name: sysmaint-test-debian-13
+    image: pulse-test:debian-13
+    container_name: pulse-test-debian-13
     hostname: debian-13-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=debian
@@ -100,14 +100,14 @@ services:
       dockerfile: tests/docker/Dockerfile.fedora.test
       args:
         BASE_IMAGE=fedora:41
-    image: sysmaint-test:fedora-41
-    container_name: sysmaint-test-fedora-41
+    image: pulse-test:fedora-41
+    container_name: pulse-test-fedora-41
     hostname: fedora-41-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=fedora
@@ -121,14 +121,14 @@ services:
       args:
         BASE_IMAGE: registry.access.redhat.com/ubi9
         UBI_INIT: registry.access.redhat.com/ubi9-init
-    image: sysmaint-test:rhel-9
-    container_name: sysmaint-test-rhel-9
+    image: pulse-test:rhel-9
+    container_name: pulse-test-rhel-9
     hostname: rhel-9-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=rhel
@@ -142,14 +142,14 @@ services:
       args:
         BASE_IMAGE: registry.access.redhat.com/ubi10
         UBI_INIT: registry.access.redhat.com/ubi10-init
-    image: sysmaint-test:rhel-10
-    container_name: sysmaint-test-rhel-10
+    image: pulse-test:rhel-10
+    container_name: pulse-test-rhel-10
     hostname: rhel-10-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=rhel
@@ -162,14 +162,14 @@ services:
       dockerfile: tests/docker/Dockerfile.rocky.test
       args:
         BASE_IMAGE=rockylinux:9
-    image: sysmaint-test:rocky-9
-    container_name: sysmaint-test-rocky-9
+    image: pulse-test:rocky-9
+    container_name: pulse-test-rocky-9
     hostname: rocky-9-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=rocky
@@ -182,14 +182,14 @@ services:
       dockerfile: tests/docker/Dockerfile.rocky.test
       args:
         BASE_IMAGE=rockylinux:10
-    image: sysmaint-test:rocky-10
-    container_name: sysmaint-test-rocky-10
+    image: pulse-test:rocky-10
+    container_name: pulse-test-rocky-10
     hostname: rocky-10-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=rocky
@@ -202,14 +202,14 @@ services:
       dockerfile: tests/docker/Dockerfile.almalinux.test
       args:
         BASE_IMAGE=almalinux:9
-    image: sysmaint-test:almalinux-9
-    container_name: sysmaint-test-almalinux-9
+    image: pulse-test:almalinux-9
+    container_name: pulse-test-almalinux-9
     hostname: almalinux-9-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=almalinux
@@ -222,14 +222,14 @@ services:
       dockerfile: tests/docker/Dockerfile.centos.test
       args:
         BASE_IMAGE=quay.io/centos/centos:stream9
-    image: sysmaint-test:centos-9
-    container_name: sysmaint-test-centos-9
+    image: pulse-test:centos-9
+    container_name: pulse-test-centos-9
     hostname: centos-9-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=centos
@@ -242,14 +242,14 @@ services:
       dockerfile: tests/docker/Dockerfile.arch.test
       args:
         BASE_IMAGE=archlinux:base
-    image: sysmaint-test:arch
-    container_name: sysmaint-test-arch
+    image: pulse-test:arch
+    container_name: pulse-test-arch
     hostname: arch-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=arch
@@ -262,14 +262,14 @@ services:
       dockerfile: tests/docker/Dockerfile.opensuse.test
       args:
         BASE_IMAGE=opensuse/tumbleweed
-    image: sysmaint-test:opensuse
-    container_name: sysmaint-test-opensuse
+    image: pulse-test:opensuse
+    container_name: pulse-test-opensuse
     hostname: opensuse-test
     privileged: true
     volumes:
-      - ../../sysmaint:/usr/local/sbin/sysmaint:ro
-      - ../../tests:/sysmaint/tests:ro
-      - ../../lib:/sysmaint/lib:ro
+      - ../../pulse:/usr/local/sbin/pulse:ro
+      - ../../tests:/pulse/tests:ro
+      - ../../lib:/pulse/lib:ro
     environment:
       - TEST_PROFILE=smoke
       - OS_NAME=opensuse

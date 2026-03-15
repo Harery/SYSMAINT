@@ -5,7 +5,7 @@
 # Copyright (c) 2025 Harery
 #
 # Official Images: ghcr.io/harery/sysmaint:latest
-# Documentation: https://github.com/Harery/SYSMAINT/wiki
+# Documentation: https://github.com/Harery/OCTALUM-PULSE/wiki
 
 # Build Arguments
 ARG BASE_IMAGE=ubuntu:24.04
@@ -20,9 +20,9 @@ LABEL org.opencontainers.image.version="${SYSMAINT_VERSION}"
 LABEL org.opencontainers.image.vendor="Harery"
 LABEL org.opencontainers.image.authors="Mohamed Elharery <Mohamed@Harery.com>"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.url="https://github.com/Harery/SYSMAINT"
-LABEL org.opencontainers.image.source="https://github.com/Harery/SYSMAINT"
-LABEL org.opencontainers.image.documentation="https://github.com/Harery/SYSMAINT/wiki"
+LABEL org.opencontainers.image.url="https://github.com/Harery/OCTALUM-PULSE"
+LABEL org.opencontainers.image.source="https://github.com/Harery/OCTALUM-PULSE"
+LABEL org.opencontainers.image.documentation="https://github.com/Harery/OCTALUM-PULSE/wiki"
 LABEL org.opencontainers.image.revision="${VCS_REF:-main}"
 LABEL org.opencontainers.image.created="${BUILD_DATE:-2025-12-27}"
 LABEL org.opencontainers.image.base.name="${BASE_IMAGE}"

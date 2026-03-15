@@ -6,7 +6,7 @@
 # Copyright (c) 2025 Harery
 #
 # DESCRIPTION:
-#   Run SYSMAINT tests in local Docker containers for all supported OS
+#   Run OCTALUM-PULSE tests in local Docker containers for all supported OS
 #   Can run single OS or multiple OS in parallel
 #
 # USAGE:
@@ -52,19 +52,19 @@ BUILD_ONLY=false
 
 # Available OS images
 declare -A OS_IMAGES=(
-    ["ubuntu-22"]="sysmaint-test:ubuntu-22.04"
-    ["ubuntu-24"]="sysmaint-test:ubuntu-24.04"
-    ["debian-12"]="sysmaint-test:debian-12"
-    ["debian-13"]="sysmaint-test:debian-13"
-    ["fedora-41"]="sysmaint-test:fedora-41"
-    ["rhel-9"]="sysmaint-test:rhel-9"
-    ["rhel-10"]="sysmaint-test:rhel-10"
-    ["rocky-9"]="sysmaint-test:rocky-9"
-    ["rocky-10"]="sysmaint-test:rocky-10"
-    ["almalinux-9"]="sysmaint-test:almalinux-9"
-    ["centos-9"]="sysmaint-test:centos-9"
-    ["arch"]="sysmaint-test:arch"
-    ["opensuse"]="sysmaint-test:opensuse"
+    ["ubuntu-22"]="pulse-test:ubuntu-22.04"
+    ["ubuntu-24"]="pulse-test:ubuntu-24.04"
+    ["debian-12"]="pulse-test:debian-12"
+    ["debian-13"]="pulse-test:debian-13"
+    ["fedora-41"]="pulse-test:fedora-41"
+    ["rhel-9"]="pulse-test:rhel-9"
+    ["rhel-10"]="pulse-test:rhel-10"
+    ["rocky-9"]="pulse-test:rocky-9"
+    ["rocky-10"]="pulse-test:rocky-10"
+    ["almalinux-9"]="pulse-test:almalinux-9"
+    ["centos-9"]="pulse-test:centos-9"
+    ["arch"]="pulse-test:arch"
+    ["opensuse"]="pulse-test:opensuse"
 )
 
 # All OS keys
@@ -94,7 +94,7 @@ show_help() {
     cat << 'EOF'
 Usage: run_local_docker_tests.sh [OPTIONS] [OS...]
 
-Run SYSMAINT tests in local Docker containers.
+Run OCTALUM-PULSE tests in local Docker containers.
 
 OPTIONS:
     --os LIST       Comma-separated list of OS (ubuntu-24,debian-12,fedora-41,etc)
@@ -207,11 +207,11 @@ build_image() {
 run_test() {
     local os="$1"
     local image="${OS_IMAGES[$os]}"
-    local container="sysmaint-test-$os"
+    local container="pulse-test-$os"
 
     log_test "Running tests on $os..."
 
-    local test_cmd="cd /sysmaint/tests && bash test_suite_smoke.sh"
+    local test_cmd="cd /pulse/tests && bash test_suite_smoke.sh"
 
     if [[ "$DRY_RUN" == true ]]; then
         echo "  Would run: docker run --rm --privileged $image $test_cmd"

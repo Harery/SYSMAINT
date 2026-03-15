@@ -123,31 +123,31 @@ test_os() {
     local image
     case "$os" in
         ubuntu)
-            image="sysmaint-test:ubuntu-${version}"
+            image="pulse-test:ubuntu-${version}"
             ;;
         debian)
-            image="sysmaint-test:debian-${version}"
+            image="pulse-test:debian-${version}"
             ;;
         fedora)
-            image="sysmaint-test:fedora-${version}"
+            image="pulse-test:fedora-${version}"
             ;;
         rhel)
-            image="sysmaint-test:rhel-${version}"
+            image="pulse-test:rhel-${version}"
             ;;
         rocky)
-            image="sysmaint-test:rocky-${version}"
+            image="pulse-test:rocky-${version}"
             ;;
         almalinux)
-            image="sysmaint-test:almalinux-${version}"
+            image="pulse-test:almalinux-${version}"
             ;;
         centos)
-            image="sysmaint-test:centos-${version}"
+            image="pulse-test:centos-${version}"
             ;;
         arch)
-            image="sysmaint-test:arch"
+            image="pulse-test:arch"
             ;;
         opensuse)
-            image="sysmaint-test:opensuse"
+            image="pulse-test:opensuse"
             ;;
         *)
             log_error "Unknown OS: $os"
@@ -156,7 +156,7 @@ test_os() {
     esac
 
     echo "========================================"
-    echo "SYSMAINT Single OS Test"
+    echo "OCTALUM-PULSE Single OS Test"
     echo "========================================"
     echo "OS:    $os"
     echo "Version: $version"
@@ -176,13 +176,13 @@ test_os() {
     log_test "Running tests in $os $version..."
 
     docker run --rm \
-        --name "sysmaint-test-$os" \
+        --name "pulse-test-$os" \
         --privileged \
         -e TEST_PROFILE=smoke \
         -e OS_NAME="$os" \
         -e OS_VERSION="$version" \
         "$image" \
-        bash -c "cd /sysmaint/tests && bash test_suite_smoke.sh"
+        bash -c "cd /pulse/tests && bash test_suite_smoke.sh"
 
     local exit_code=$?
 

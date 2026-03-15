@@ -1,4 +1,4 @@
-# SYSMAINT Helm Chart Values
+# OCTALUM-PULSE Helm Chart Values
 #
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
@@ -6,7 +6,7 @@
 # -- Image configuration
 image:
   # -- Image repository
-  repository: ghcr.io/harery/sysmaint
+  repository: ghcr.io/harery/pulse
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Image tag (defaults to Chart appVersion)
@@ -20,8 +20,8 @@ nameOverride: ""
 # -- Override the full chart name
 fullnameOverride: ""
 
-# -- SYSMAINT configuration
-sysmaint:
+# -- OCTALUM-PULSE configuration
+pulse:
   # -- Log level: debug, info, warn, error
   logLevel: "info"
   # -- Version

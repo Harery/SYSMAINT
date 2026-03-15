@@ -86,19 +86,19 @@ test_container_isolation() {
 
 test_host_filesystem_access() {
     # Test that we can access host filesystem mounts
-    ls -la /sysmaint > /dev/null 2>&1 || return 1
+    ls -la /pulse > /dev/null 2>&1 || return 1
     return 0
 }
 
-test_sysmaint_accessible() {
-    which sysmaint > /dev/null 2>&1 || return 1
-    sysmaint --help > /dev/null 2>&1 || return 1
+test_pulse_accessible() {
+    which pulse > /dev/null 2>&1 || return 1
+    pulse --help > /dev/null 2>&1 || return 1
     return 0
 }
 
 test_test_files_accessible() {
-    [[ -f /sysmaint/tests/test_suite_smoke.sh ]] || return 1
-    [[ -f /sysmaint/lib/core/init.sh ]] || return 1
+    [[ -f /pulse/tests/test_suite_smoke.sh ]] || return 1
+    [[ -f /pulse/lib/core/init.sh ]] || return 1
     return 0
 }
 
@@ -110,7 +110,7 @@ test_sudo_available() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Docker Test Suite"
+    echo "OCTALUM-PULSE Docker Test Suite"
     echo "========================================"
     echo ""
 
@@ -119,7 +119,7 @@ main() {
     run_test "Privileged mode available" test_privileged_mode
     run_test "Container isolation verified" test_container_isolation
     run_test "Host filesystem accessible" test_host_filesystem_access
-    run_test "SYSMAINT executable accessible" test_sysmaint_accessible
+    run_test "OCTALUM-PULSE executable accessible" test_pulse_accessible
     run_test "Test files accessible" test_test_files_accessible
     run_test "Sudo available for tests" test_sudo_available
 

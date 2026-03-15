@@ -1,6 +1,6 @@
 # Troubleshooting
 
-**SYSMAINT v1.0.0**
+**OCTALUM-PULSE v1.0.0**
 
 ---
 
@@ -8,12 +8,12 @@
 
 ### "Permission denied"
 
-**Problem:** Cannot execute sysmaint script
+**Problem:** Cannot execute pulse script
 
 **Solution:**
 ```bash
-chmod +x sysmaint
-sudo ./sysmaint
+chmod +x pulse
+sudo ./pulse
 ```
 
 ---
@@ -132,10 +132,10 @@ Enable debug output:
 
 ```bash
 # Run with debug mode
-./sysmaint --debug
+./pulse --debug
 
 # Or with bash debug
-bash -x sysmaint
+bash -x pulse
 ```
 
 ---
@@ -145,11 +145,11 @@ bash -x sysmaint
 If you encounter issues not covered here:
 
 1. Check [FAQ](FAQ)
-2. [Open an issue](https://github.com/Harery/SYSMAINT/issues)
+2. [Open an issue](https://github.com/Harery/OCTALUM-PULSE/issues)
 3. Email: [Mohamed@Harery.com](mailto:Mohamed@Harery.com)
 
 ---
 
 ## Project
 
-https://github.com/Harery/SYSMAINT
+https://github.com/Harery/OCTALUM-PULSE

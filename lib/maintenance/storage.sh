@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/storage.sh - Disk and storage management
-# sysmaint library
+# pulse library
 
 crash_dump_purge() {
   if [[ "${CLEAR_CRASH_DUMPS:-true}" != "true" ]]; then

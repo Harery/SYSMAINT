@@ -6,7 +6,7 @@
 # Copyright (c) 2025 Harery
 #
 # DESCRIPTION:
-#   Master test runner for SYSMAINT
+#   Master test runner for OCTALUM-PULSE
 #   Orchestrates all test suites with configurable profiles
 #
 # USAGE:
@@ -67,7 +67,7 @@ log_header() {
 # Show help
 show_help() {
     cat << HELPTEXT
-SYSMAINT Master Test Runner
+OCTALUM-PULSE Master Test Runner
 
 USAGE:
     bash $0 [OPTIONS]
@@ -243,7 +243,7 @@ run_environment_tests() {
 main() {
     parse_args "$@"
 
-    log_header "SYSMAINT Test Runner"
+    log_header "OCTALUM-PULSE Test Runner"
     log_info "Profile: $PROFILE"
     log_info "OS Filter: $OS_FILTER"
     log_info "Parallel: $PARALLEL"

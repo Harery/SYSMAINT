@@ -6,7 +6,7 @@
 # Copyright (c) 2025 Harery
 #
 # DESCRIPTION:
-#   GitHub Actions-specific test suite for SYSMAINT
+#   GitHub Actions-specific test suite for OCTALUM-PULSE
 #   Tests CI environment variables, artifacts, matrix builds, cache, secrets
 #
 # USAGE:
@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 log_test() {
     echo -e "${GREEN}[TEST]${NC} $*"
@@ -417,7 +417,7 @@ test_summary_output() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT GitHub Actions Test Suite"
+    echo "OCTALUM-PULSE GitHub Actions Test Suite"
     echo "========================================"
     echo ""
 

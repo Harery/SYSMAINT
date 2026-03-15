@@ -1,4 +1,4 @@
-# SYSMAINT Governance
+# OCTALUM-PULSE Governance
 
 **Vibe Coding Enterprise Lifecycle — Governance Document**
 
@@ -10,13 +10,13 @@
 ## ⭐ SECTION 0 — METADATA
 
 ```
-Document Title: SYSMAINT — Governance Framework
-Project: SYSMAINT - Enterprise-Grade System Maintenance Toolkit
+Document Title: OCTALUM-PULSE — Governance Framework
+Project: OCTALUM-PULSE - Enterprise-Grade System Maintenance Toolkit
 Version: 1.0.0
 Classification: Internal / Restricted
 Security Level: Moderate (CIA: 3.3/5)
 Document Type: Governance and RACI Framework
-Traceability ID: SYSMAINT-GOV-001
+Traceability ID: OCTALUM-PULSE-GOV-001
 Phase: Cross-Phase (All Phases)
 ```
 
@@ -204,5 +204,5 @@ MIT License - See [LICENSE](LICENSE)
 
 ---
 
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE
 **Maintainer:** [Harery](https://github.com/Harery)

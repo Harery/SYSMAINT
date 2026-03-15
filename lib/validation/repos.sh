@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/validation/repos.sh - Repository validation and management
-# sysmaint library
+# pulse library
 
 validate_repos() {
   log "=== Repository validation start ==="

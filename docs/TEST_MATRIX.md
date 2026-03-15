@@ -1,4 +1,4 @@
-# SYSMAINT Test Matrix
+# OCTALUM-PULSE Test Matrix
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -17,7 +17,7 @@
 
 ## Overview
 
-The SYSMAINT test matrix provides comprehensive coverage across all supported Linux distributions, execution modes, and features.
+The OCTALUM-PULSE test matrix provides comprehensive coverage across all supported Linux distributions, execution modes, and features.
 
 ### Total Test Count
 
@@ -45,7 +45,7 @@ The SYSMAINT test matrix provides comprehensive coverage across all supported Li
 
 | Test ID | Test Name | Description |
 |---------|-----------|-------------|
-| SMOKE-001 | SYSMAINT executable accessible | Verifies sysmaint command exists |
+| SMOKE-001 | OCTALUM-PULSE executable accessible | Verifies pulse command exists |
 | SMOKE-002 | Help command works | Tests --help output |
 | SMOKE-003 | Version command works | Tests --version output |
 | SMOKE-004 | OS detection works | Verifies correct OS detection |
@@ -148,7 +148,7 @@ The SYSMAINT test matrix provides comprehensive coverage across all supported Li
 
 | Test ID | Test Name | Description |
 |---------|-----------|-------------|
-| CROSS-001 | sysmaint executable | Works on all OS |
+| CROSS-001 | pulse executable | Works on all OS |
 | CROSS-002 | --dry-run mode | Works on all OS |
 | CROSS-003 | systemd detection | Detects systemd |
 | CROSS-004 | package manager auto-detect | Detects correct PM |
@@ -290,14 +290,14 @@ The SYSMAINT test matrix provides comprehensive coverage across all supported Li
 | INT-003 | Systemd service file exists | Service unit |
 | INT-004 | Systemd timer syntax valid | Timer validation |
 | INT-005 | Systemd service syntax valid | Service validation |
-| INT-006 | SYSMAINT in PATH | PATH installation |
+| INT-006 | OCTALUM-PULSE in PATH | PATH installation |
 | INT-007 | Crontab syntax valid | Cron validation |
 | INT-008 | Cron environment | Cron env vars |
 | INT-009 | Weekly cron schedule | Cron syntax |
 | INT-010 | Docker available | Docker presence |
 | INT-011 | Docker daemon running | Docker status |
 | INT-012 | Privileged mode check | Privileged detection |
-| INT-013 | SYSMAINT in Docker image | Docker image |
+| INT-013 | OCTALUM-PULSE in Docker image | Docker image |
 | INT-014 | DEB package structure | Debian packaging |
 | INT-015 | RPM package structure | RPM packaging |
 | INT-016 | Install script exists | Install script |
@@ -305,7 +305,7 @@ The SYSMAINT test matrix provides comprehensive coverage across all supported Li
 | INT-018 | journald available | journald support |
 | INT-019 | syslog available | syslog support |
 | INT-020 | Log rotation configured | logrotate |
-| INT-021 | SYSMAINT log directory | Log directory |
+| INT-021 | OCTALUM-PULSE log directory | Log directory |
 | INT-022 | Config directory exists | /etc/system-maintenance |
 | INT-023 | Config file handling | Config loading |
 | INT-024 | Default config works | No config behavior |
@@ -326,8 +326,8 @@ The SYSMAINT test matrix provides comprehensive coverage across all supported Li
 | DOCK-002 | Docker daemon running | Docker status |
 | DOCK-003 | Docker can run bash | Container execution |
 | DOCK-004 | Docker privileged access | Privileged mode |
-| DOCK-005 | SYSMAINT Docker image exists | Image built |
-| DOCK-006 | SYSMAINT Docker image executable | Image works |
+| DOCK-005 | OCTALUM-PULSE Docker image exists | Image built |
+| DOCK-006 | OCTALUM-PULSE Docker image executable | Image works |
 | DOCK-007 | Docker container cleanup | No orphans |
 | DOCK-008 | Privileged mode required | Privilege check |
 | DOCK-009 | Systemd access in container | systemd in container |
@@ -341,7 +341,7 @@ The SYSMAINT test matrix provides comprehensive coverage across all supported Li
 | DOCK-017 | Dockerfile syntax valid | Dockerfile valid |
 | DOCK-018 | Dockerfile has base image | FROM directive |
 | DOCK-019 | Dockerfile installs dependencies | RUN install |
-| DOCK-020 | Dockerfile copies SYSMAINT | COPY directive |
+| DOCK-020 | Dockerfile copies OCTALUM-PULSE | COPY directive |
 | DOCK-021 | Docker manifest support | Multi-arch |
 | DOCK-022 | Multi-arch images available | amd64/arm64 |
 | DOCK-023 | Docker Compose installed | compose binary |

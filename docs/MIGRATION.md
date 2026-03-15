@@ -1,10 +1,10 @@
-# Migration Guide: SYSMAINT → OCTALUM-PULSE
+# Migration Guide: OCTALUM-PULSE → OCTALUM-PULSE
 
-This guide helps you migrate from SYSMAINT (v1.x) to OCTALUM-PULSE (v2.0).
+This guide helps you migrate from OCTALUM-PULSE (v1.x) to OCTALUM-PULSE (v2.0).
 
 ## Overview
 
-| Aspect | SYSMAINT (v1.x) | OCTALUM-PULSE (v2.0) |
+| Aspect | OCTALUM-PULSE (v1.x) | OCTALUM-PULSE (v2.0) |
 |--------|-----------------|----------------------|
 | **Language** | Bash | Go |
 | **Architecture** | Monolithic script | Modular plugin system |
@@ -14,18 +14,18 @@ This guide helps you migrate from SYSMAINT (v1.x) to OCTALUM-PULSE (v2.0).
 
 ## Command Mapping
 
-| SYSMAINT Command | OCTALUM-PULSE Command |
+| OCTALUM-PULSE Command | OCTALUM-PULSE Command |
 |------------------|----------------------|
-| `./sysmaint` | `pulse --auto` |
-| `./sysmaint --dry-run` | `pulse --dry-run` |
-| `./sysmaint --auto` | `pulse --auto` |
-| `./sysmaint --gui` | `pulse tui` |
-| `./sysmaint --upgrade` | `pulse update` |
-| `./sysmaint --cleanup` | `pulse cleanup` |
-| `./sysmaint --purge-kernels` | `pulse cleanup --kernels` |
-| `./sysmaint --security-audit` | `pulse security audit` |
-| `./sysmaint --json-summary` | `pulse --json` |
-| `./sysmaint --detect` | `pulse doctor` |
+| `./pulse` | `pulse --auto` |
+| `./pulse --dry-run` | `pulse --dry-run` |
+| `./pulse --auto` | `pulse --auto` |
+| `./pulse --gui` | `pulse tui` |
+| `./pulse --upgrade` | `pulse update` |
+| `./pulse --cleanup` | `pulse cleanup` |
+| `./pulse --purge-kernels` | `pulse cleanup --kernels` |
+| `./pulse --security-audit` | `pulse security audit` |
+| `./pulse --json-summary` | `pulse --json` |
+| `./pulse --detect` | `pulse doctor` |
 
 ## New Commands in v2.0
 
@@ -41,11 +41,11 @@ This guide helps you migrate from SYSMAINT (v1.x) to OCTALUM-PULSE (v2.0).
 
 ## Configuration Migration
 
-### Old (SYSMAINT)
+### Old (OCTALUM-PULSE)
 ```bash
-export LOG_DIR=/var/log/sysmaint
+export LOG_DIR=/var/log/pulse
 export AUTO_REBOOT=true
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 ### New (OCTALUM-PULSE)
@@ -65,12 +65,12 @@ paths:
 
 ## Installation Migration
 
-### Step 1: Remove SYSMAINT
+### Step 1: Remove OCTALUM-PULSE
 
 ```bash
-sudo rm -f /usr/local/sbin/sysmaint
+sudo rm -f /usr/local/sbin/pulse
 sudo rm -rf /tmp/system-maintenance
-sudo systemctl disable sysmaint.timer 2>/dev/null || true
+sudo systemctl disable pulse.timer 2>/dev/null || true
 ```
 
 ### Step 2: Install OCTALUM-PULSE
@@ -109,8 +109,8 @@ pulse doctor
 
 ### Old
 ```
-/etc/systemd/system/sysmaint.service
-/etc/systemd/system/sysmaint.timer
+/etc/systemd/system/pulse.service
+/etc/systemd/system/pulse.timer
 ```
 
 ### New
@@ -128,7 +128,7 @@ sudo systemctl enable --now pulse.timer
 
 ### Old
 ```bash
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 ```
 
 ### New
@@ -140,7 +140,7 @@ docker run --rm --privileged ghcr.io/harery/octalum-pulse:latest
 
 ### Old
 ```yaml
-image: ghcr.io/harery/sysmaint:latest
+image: ghcr.io/harery/pulse:latest
 ```
 
 ### New
@@ -150,7 +150,7 @@ image: ghcr.io/harery/octalum-pulse:latest
 
 ## Data Migration
 
-SYSMAINT doesn't store persistent data, so no data migration is needed. OCTALUM-PULSE will create a new SQLite database at:
+OCTALUM-PULSE doesn't store persistent data, so no data migration is needed. OCTALUM-PULSE will create a new SQLite database at:
 - `~/.local/share/pulse/pulse.db`
 
 ## Feature Parity

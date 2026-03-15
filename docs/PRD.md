@@ -1,4 +1,4 @@
-# SYSMAINT — Product Requirements Document (PRD)
+# OCTALUM-PULSE — Product Requirements Document (PRD)
 
 **Vibe Coding Enterprise Lifecycle — Product Requirements Document**
 
@@ -7,13 +7,13 @@
 ## ⭐ SECTION 0 — COVER PAGE & METADATA
 
 ```
-Document Title: SYSMAINT — Product Requirements Document (PRD)
-Project: SYSMAINT - Enterprise-Grade System Maintenance Toolkit
+Document Title: OCTALUM-PULSE — Product Requirements Document (PRD)
+Project: OCTALUM-PULSE - Enterprise-Grade System Maintenance Toolkit
 Version: 1.0.0
 Classification: Internal / Restricted
 Security Level: Moderate (CIA: 3.3/5)
 Document Type: Product Requirements Document
-Traceability ID: SYSMAINT-PRD-001
+Traceability ID: OCTALUM-PULSE-PRD-001
 Phase: Product Management
 Author: Harery
 Release Date: 2025-12-28
@@ -28,7 +28,7 @@ Related Documents: VISION.md, REQUIREMENTS.md, ARCHITECTURE.md
 
 ### Product Vision
 
-> **"SYSMAINT is a unified, enterprise-grade Linux system maintenance toolkit that automates package management, system cleanup, security auditing, and performance optimization across nine major Linux distributions."**
+> **"OCTALUM-PULSE is a unified, enterprise-grade Linux system maintenance toolkit that automates package management, system cleanup, security auditing, and performance optimization across nine major Linux distributions."**
 
 ### Product Mission
 
@@ -36,7 +36,7 @@ Related Documents: VISION.md, REQUIREMENTS.md, ARCHITECTURE.md
 
 ### Product Positioning
 
-SYSMAINT positions itself as the **single source of truth** for Linux system maintenance, replacing fragmented, distribution-specific scripts with a unified, production-ready automation toolkit.
+OCTALUM-PULSE positions itself as the **single source of truth** for Linux system maintenance, replacing fragmented, distribution-specific scripts with a unified, production-ready automation toolkit.
 
 ---
 
@@ -55,7 +55,7 @@ SYSMAINT positions itself as the **single source of truth** for Linux system mai
 
 ### Target Users
 
-| Segment | Primary Need | SYSMAINT Solution |
+| Segment | Primary Need | OCTALUM-PULSE Solution |
 |----------|--------------|-------------------|
 | **System Administrators** | Automate repetitive maintenance | One-command execution |
 | **DevOps Engineers** | Standardize across environments | Multi-distro support |
@@ -71,7 +71,7 @@ SYSMAINT positions itself as the **single source of truth** for Linux system mai
 
 ```
 +----------------------------------------------------------------+
-| SYSMAINT VALUE DELIVERY                                        |
+| OCTALUM-PULSE VALUE DELIVERY                                        |
 +----------------------------------------------------------------+
 | ONE TOOL → 9 DISTRIBUTIONS → UNIFIED MAINTENANCE               |
 |                                                                 |
@@ -217,9 +217,9 @@ SYSMAINT positions itself as the **single source of truth** for Linux system mai
 ### D1: Direct Execution
 
 ```bash
-chmod +x sysmaint
-sudo ./sysmaint --dry-run
-sudo ./sysmaint
+chmod +x pulse
+sudo ./pulse --dry-run
+sudo ./pulse
 ```
 
 **Status:** ✅ Fully Supported
@@ -227,7 +227,7 @@ sudo ./sysmaint
 ### D2: Docker Container
 
 ```bash
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 ```
 
 **Status:** ✅ Fully Supported | Multi-arch (amd64/arm64)
@@ -235,9 +235,9 @@ docker run --rm --privileged ghcr.io/harery/sysmaint:latest
 ### D3: Systemd Timer
 
 ```bash
-sudo install -Dm755 sysmaint /usr/local/sbin/sysmaint
-sudo install -Dm644 packaging/systemd/sysmaint.{service,timer} /etc/systemd/system/
-sudo systemctl enable --now sysmaint.timer
+sudo install -Dm755 pulse /usr/local/sbin/pulse
+sudo install -Dm644 packaging/systemd/pulse.{service,timer} /etc/systemd/system/
+sudo systemctl enable --now pulse.timer
 ```
 
 **Status:** ✅ Supported (Planned enhancement v1.1.0)
@@ -256,8 +256,8 @@ sudo systemctl enable --now sysmaint.timer
 ### W1: First-Time User (Interactive)
 
 ```
-1. Clone/download sysmaint
-2. Run: sudo ./sysmaint --gui
+1. Clone/download pulse
+2. Run: sudo ./pulse --gui
 3. Select maintenance modules via TUI
 4. Review changes
 5. Confirm execution
@@ -267,9 +267,9 @@ sudo systemctl enable --now sysmaint.timer
 ### W2: Automation (DevOps/SRE)
 
 ```
-1. Install sysmaint to /usr/local/sbin/
+1. Install pulse to /usr/local/sbin/
 2. Configure systemd timer or cron
-3. Run: sudo sysmaint --auto --quiet --json-summary
+3. Run: sudo pulse --auto --quiet --json-summary
 4. Parse JSON output for monitoring
 5. Alert on failures
 ```
@@ -277,7 +277,7 @@ sudo systemctl enable --now sysmaint.timer
 ### W3: Docker Environment
 
 ```
-1. Pull image: docker pull ghcr.io/harery/sysmaint:latest
+1. Pull image: docker pull ghcr.io/harery/pulse:latest
 2. Run with privileged mode
 3. Mount host root filesystem
 4. Review JSON output
@@ -287,7 +287,7 @@ sudo systemctl enable --now sysmaint.timer
 ### W4: Enterprise Compliance
 
 ```
-1. Run: sudo sysmaint --security-audit --json-summary
+1. Run: sudo pulse --security-audit --json-summary
 2. Collect JSON output
 3. Import into SIEM/log aggregation
 4. Review security findings
@@ -373,7 +373,7 @@ sudo systemctl enable --now sysmaint.timer
 | Scheduled Tasks | Native cron/scheduler integration |
 | Email Notifications | Alert on completion/failure |
 | Advanced Security | Enhanced security monitoring |
-| Config Files | /etc/sysmaint.conf support |
+| Config Files | /etc/pulse.conf support |
 
 ### v1.2.0 (Planned)
 
@@ -465,10 +465,10 @@ sudo systemctl enable --now sysmaint.timer
 
 | Document | ID | Status |
 |----------|-----|--------|
-| PRD (this document) | SYSMAINT-PRD-001 | ✅ Complete |
-| Vision | SYSMAINT-P1-001 | ✅ Complete |
-| Requirements | SYSMAINT-P2-001 | ✅ Complete |
-| Architecture | SYSMAINT-P3-001 | ✅ Complete |
+| PRD (this document) | OCTALUM-PULSE-PRD-001 | ✅ Complete |
+| Vision | OCTALUM-PULSE-P1-001 | ✅ Complete |
+| Requirements | OCTALUM-PULSE-P2-001 | ✅ Complete |
+| Architecture | OCTALUM-PULSE-P3-001 | ✅ Complete |
 
 ### Requirements Traceability
 

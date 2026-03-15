@@ -169,7 +169,7 @@ test_debian_release_info() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Debian Family Test Suite"
+    echo "OCTALUM-PULSE Debian Family Test Suite"
     echo "========================================"
     echo ""
 

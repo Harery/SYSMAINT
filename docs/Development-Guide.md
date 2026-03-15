@@ -1,6 +1,6 @@
 # Development Guide
 
-**SYSMAINT v1.0.0**
+**OCTALUM-PULSE v1.0.0**
 
 ---
 
@@ -18,8 +18,8 @@
 ## Project Structure
 
 ```
-SYSMAINT/
-├── sysmaint              # Main script
+OCTALUM-PULSE/
+├── pulse              # Main script
 ├── Dockerfile            # Container definition
 ├── README.md             # Main documentation
 ├── CONTRIBUTING.md       # Contribution guidelines
@@ -38,8 +38,8 @@ SYSMAINT/
 
 ```bash
 # Fork on GitHub, then clone
-git clone https://github.com/YOUR_USERNAME/SYSMAINT.git
-cd SYSMAINT
+git clone https://github.com/YOUR_USERNAME/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
 ```
 
 ### 2. Create a Feature Branch
@@ -50,7 +50,7 @@ git checkout -b feature/your-feature-name
 
 ### 3. Make Changes
 
-- Edit `sysmaint` script
+- Edit `pulse` script
 - Follow coding standards
 - Add comments for complex logic
 
@@ -58,19 +58,19 @@ git checkout -b feature/your-feature-name
 
 ```bash
 # Lint with ShellCheck
-shellcheck sysmaint
+shellcheck pulse
 
 # Test with dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Test on actual system
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 ### 5. Commit
 
 ```bash
-git add sysmaint
+git add pulse
 git commit -m "Add feature: description of changes"
 ```
 
@@ -194,21 +194,21 @@ Types:
 
 | Tool | Purpose | How to Use |
 |------|---------|------------|
-| **ShellCheck** | Linting | `shellcheck sysmaint` |
+| **ShellCheck** | Linting | `shellcheck pulse` |
 | **VS Code** | IDE | Open project folder |
-| **Docker** | Testing | `docker build -t sysmaint .` |
+| **Docker** | Testing | `docker build -t pulse .` |
 | **jq** | JSON validation | `jq . output.json` |
 
 ---
 
 ## Getting Help
 
-- **CONTRIBUTING.md:** https://github.com/Harery/SYSMAINT/blob/main/CONTRIBUTING.md
-- **Issues:** https://github.com/Harery/SYSMAINT/issues
+- **CONTRIBUTING.md:** https://github.com/Harery/OCTALUM-PULSE/blob/main/CONTRIBUTING.md
+- **Issues:** https://github.com/Harery/OCTALUM-PULSE/issues
 - **Email:** [Mohamed@Harery.com](mailto:Mohamed@Harery.com)
 
 ---
 
 ## Project
 
-https://github.com/Harery/SYSMAINT
+https://github.com/Harery/OCTALUM-PULSE

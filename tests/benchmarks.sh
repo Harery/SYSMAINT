@@ -25,8 +25,8 @@ Compare Options:
 
 Examples:
   $0 quick
-  $0 compare /tmp/sysmaint-benchmarks/benchmark_20251115_120000.csv \\
-             /tmp/sysmaint-benchmarks/benchmark_20251115_130000.csv
+  $0 compare /tmp/pulse-benchmarks/benchmark_20251115_120000.csv \\
+             /tmp/pulse-benchmarks/benchmark_20251115_130000.csv
 EOF
     exit 0
 }
@@ -39,7 +39,7 @@ quick_benchmark() {
     echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
 
-    local SCRIPT="../sysmaint"
+    local SCRIPT="../pulse"
     time_test() {
         local name="$1"
         shift

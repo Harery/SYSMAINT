@@ -6,18 +6,18 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SCHEMA="docs/schema/sysmaint-summary.schema.json"
+SCHEMA="docs/schema/pulse-summary.schema.json"
 PASSED=0
 FAILED=0
 
 echo "=== JSON Schema Validation Suite ==="
 
-# Test 1: Positive validation (valid JSON from sysmaint)
-echo "[Test 1/4] Validating real sysmaint JSON output..."
+# Test 1: Positive validation (valid JSON from pulse)
+echo "[Test 1/4] Validating real pulse JSON output..."
 set +e
-DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run --json-summary >/dev/null 2>&1
+DRY_RUN=true JSON_SUMMARY=true bash pulse --dry-run --json-summary >/dev/null 2>&1
 set -e
-JSON_FILE=$(ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -n1 || true)
+JSON_FILE=$(ls -1t /tmp/system-maintenance/pulse_*.json 2>/dev/null | head -n1 || true)
 
 if [[ -z "${JSON_FILE:-}" ]]; then
   echo "❌ FAIL: No JSON found to validate"

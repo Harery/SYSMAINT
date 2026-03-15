@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GUI mode test suite for sysmaint v2.5.0
+# GUI mode test suite for pulse v2.5.0
 # Tests the interactive TUI interface components
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
@@ -8,13 +8,13 @@ set -uo pipefail  # Removed -e to allow tests to fail without exiting
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-SYSMAINT="$REPO_ROOT/sysmaint"
+OCTALUM-PULSE="$REPO_ROOT/pulse"
 
 # Disable pipefail for color output
 set +o pipefail
 
 echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║          SYSMAINT v2.5.0 - GUI Mode Test Suite                  ║"
+echo "║          OCTALUM-PULSE v2.5.0 - GUI Mode Test Suite                  ║"
 echo "╚══════════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -124,7 +124,7 @@ fi
 
 # Test main script integration
 test_start "Main script has GUI module loading"
-if grep -q "lib/gui/interface.sh" "$SYSMAINT"; then
+if grep -q "lib/gui/interface.sh" "$OCTALUM-PULSE"; then
   test_pass
 else
   test_fail "Main script doesn't load GUI module"
@@ -132,7 +132,7 @@ fi
 
 # Test --gui flag in help
 test_start "--gui flag documented in usage"
-if "$SYSMAINT" --help 2>&1 | grep -q "\-\-gui"; then
+if "$OCTALUM-PULSE" --help 2>&1 | grep -q "\-\-gui"; then
   test_pass
 else
   test_fail "--gui flag not in help text"
@@ -140,7 +140,7 @@ fi
 
 # Test --gui flag early detection
 test_start "--gui flag early dispatch check"
-if grep -q "if \[\[ \"\$arg\" == \"--gui\"" "$SYSMAINT"; then
+if grep -q "if \[\[ \"\$arg\" == \"--gui\"" "$OCTALUM-PULSE"; then
   test_pass
 else
   test_fail "--gui flag early dispatch not implemented"

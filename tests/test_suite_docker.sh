@@ -6,7 +6,7 @@
 # Copyright (c) 2025 Harery
 #
 # DESCRIPTION:
-#   Docker-specific test suite for SYSMAINT
+#   Docker-specific test suite for OCTALUM-PULSE
 #   Tests Docker container execution, privileged mode, volumes, networking
 #
 # USAGE:
@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 log_test() {
     echo -e "${GREEN}[TEST]${NC} $*"
@@ -79,30 +79,30 @@ test_docker_has_privileged_access() {
 }
 
 # Docker Container Tests
-test_sysmaint_docker_image_exists() {
-    if [[ -n "$SYSMAINT_DOCKER_IMAGE" ]]; then
-        docker image inspect "$SYSMAINT_DOCKER_IMAGE" &>/dev/null || return 1
+test_pulse_docker_image_exists() {
+    if [[ -n "$OCTALUM-PULSE_DOCKER_IMAGE" ]]; then
+        docker image inspect "$OCTALUM-PULSE_DOCKER_IMAGE" &>/dev/null || return 1
     fi
     return 0
 }
 
-test_sysmaint_docker_image_executable() {
-    if [[ -n "$SYSMAINT_DOCKER_IMAGE" ]]; then
-        docker run --rm "$SYSMAINT_DOCKER_IMAGE" sysmaint --help &>/dev/null
+test_pulse_docker_image_executable() {
+    if [[ -n "$OCTALUM-PULSE_DOCKER_IMAGE" ]]; then
+        docker run --rm "$OCTALUM-PULSE_DOCKER_IMAGE" pulse --help &>/dev/null
     fi
     return 0
 }
 
 test_docker_container_cleanup() {
-    # Verify no orphaned sysmaint containers
+    # Verify no orphaned pulse containers
     local orphaned
-    orphaned=$(docker ps -a --filter "name=sysmaint" --format "{{.Names}}" 2>/dev/null | wc -l)
+    orphaned=$(docker ps -a --filter "name=pulse" --format "{{.Names}}" 2>/dev/null | wc -l)
     [[ "$orphaned" -lt 5 ]]  # Allow some containers during testing
 }
 
 # Privileged Mode Tests
 test_privileged_mode_required() {
-    # SYSMAINT needs privileged mode for full functionality
+    # OCTALUM-PULSE needs privileged mode for full functionality
     [[ -f /.dockerenv ]] || grep -qa docker /proc/1/cgroup 2>/dev/null
     return 0
 }
@@ -126,7 +126,7 @@ test_host_filesystem_access() {
 # Volume Mount Tests
 test_volume_mount_readonly() {
     # Test read-only volume mount
-    local test_volume="/tmp/sysmaint-vol-test-$$"
+    local test_volume="/tmp/pulse-vol-test-$$"
     mkdir -p "$test_volume"
     echo "test" > "$test_volume/test.txt"
 
@@ -139,7 +139,7 @@ test_volume_mount_readonly() {
 
 test_volume_mount_readwrite() {
     # Test read-write volume mount
-    local test_volume="/tmp/sysmaint-vol-rw-$$"
+    local test_volume="/tmp/pulse-vol-rw-$$"
     mkdir -p "$test_volume"
 
     docker run --rm -v "$test_volume:/data" alpine:latest sh -c "echo 'test' > /data/test.txt" &>/dev/null
@@ -194,7 +194,7 @@ test_dockerfile_installs_dependencies() {
     fi
 }
 
-test_dockerfile_copies_sysmaint() {
+test_dockerfile_copies_pulse() {
     if [[ -f "$PROJECT_DIR/tests/docker/Dockerfile.ubuntu.test" ]]; then
         grep -q "COPY" "$PROJECT_DIR/tests/docker/Dockerfile.ubuntu.test"
     fi
@@ -208,8 +208,8 @@ test_docker_manifest_support() {
 
 test_multi_arch_images_available() {
     # Verify multi-arch images exist (if applicable)
-    if [[ -n "$SYSMAINT_DOCKER_IMAGE" ]]; then
-        docker manifest inspect "$SYSMAINT_DOCKER_IMAGE" &>/dev/null || return 0
+    if [[ -n "$OCTALUM-PULSE_DOCKER_IMAGE" ]]; then
+        docker manifest inspect "$OCTALUM-PULSE_DOCKER_IMAGE" &>/dev/null || return 0
     fi
     return 0
 }
@@ -332,7 +332,7 @@ test_container_healthcheck() {
 
 # Docker Volume Tests
 test_docker_volume_creation() {
-    local test_vol="sysmaint-test-$$"
+    local test_vol="pulse-test-$$"
     docker volume create "$test_vol" &>/dev/null
     local result=$?
     docker volume rm "$test_vol" &>/dev/null 2>&1 || true
@@ -340,7 +340,7 @@ test_docker_volume_creation() {
 }
 
 test_docker_volume_inspect() {
-    local test_vol="sysmaint-inspect-$$"
+    local test_vol="pulse-inspect-$$"
     docker volume create "$test_vol" &>/dev/null
     docker volume inspect "$test_vol" &>/dev/null
     local result=$?
@@ -350,7 +350,7 @@ test_docker_volume_inspect() {
 
 # Docker Network Tests
 test_docker_network_creation() {
-    local test_net="sysmaint-test-$$"
+    local test_net="pulse-test-$$"
     docker network create "$test_net" &>/dev/null
     local result=$?
     docker network rm "$test_net" &>/dev/null 2>&1 || true
@@ -358,7 +358,7 @@ test_docker_network_creation() {
 }
 
 test_docker_network_connect() {
-    local test_net="sysmaint-connect-$$"
+    local test_net="pulse-connect-$$"
     docker network create "$test_net" &>/dev/null
     local id
     id=$(docker run -d --network "$test_net" alpine:latest sleep 10)
@@ -371,7 +371,7 @@ test_docker_network_connect() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Docker Test Suite"
+    echo "OCTALUM-PULSE Docker Test Suite"
     echo "========================================"
     echo ""
 
@@ -385,8 +385,8 @@ main() {
 
     # Docker container tests
     echo "Testing Docker Containers..."
-    run_test "SYSMAINT Docker image exists" test_sysmaint_docker_image_exists
-    run_test "SYSMAINT Docker image executable" test_sysmaint_docker_image_executable
+    run_test "OCTALUM-PULSE Docker image exists" test_pulse_docker_image_exists
+    run_test "OCTALUM-PULSE Docker image executable" test_pulse_docker_image_executable
     run_test "Docker container cleanup" test_docker_container_cleanup
     echo ""
 
@@ -416,7 +416,7 @@ main() {
     run_test "Dockerfile syntax valid" test_dockerfile_syntax_valid
     run_test "Dockerfile has base image" test_dockerfile_has_base_image
     run_test "Dockerfile installs dependencies" test_dockerfile_installs_dependencies
-    run_test "Dockerfile copies SYSMAINT" test_dockerfile_copies_sysmaint
+    run_test "Dockerfile copies OCTALUM-PULSE" test_dockerfile_copies_pulse
     echo ""
 
     # Multi-architecture tests

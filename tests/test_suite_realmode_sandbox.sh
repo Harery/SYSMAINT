@@ -13,11 +13,11 @@ if [[ ! -d "$SANDBOX_BIN" ]]; then
 fi
 
 export PATH="$SANDBOX_BIN:$PATH"
-export SYSMAINT_FAKE_ROOT=1
+export OCTALUM-PULSE_FAKE_ROOT=1
 export JSON_SUMMARY=true
 unset DRY_RUN
 
-SCRIPT="$ROOT_DIR/sysmaint"
+SCRIPT="$ROOT_DIR/pulse"
 LOG_DIR="${LOG_DIR:-/tmp/system-maintenance}"
 export LOG_DIR
 mkdir -p "$LOG_DIR"
@@ -115,8 +115,8 @@ run_case() {
   shift 2
   local run_id="sandbox_${name}_$(date +%s)_$RANDOM"
   echo "[SANDBOX] Running $name"
-  if RUN_ID="$run_id" "$SCRIPT" "$@" >/tmp/sysmaint_sandbox_${name}.log 2>&1; then
-    local json_file="$LOG_DIR/sysmaint_${run_id}.json"
+  if RUN_ID="$run_id" "$SCRIPT" "$@" >/tmp/pulse_sandbox_${name}.log 2>&1; then
+    local json_file="$LOG_DIR/pulse_${run_id}.json"
     if [[ ! -s "$json_file" ]]; then
       fail "$name — JSON summary missing (expected $json_file)"
       return
@@ -128,8 +128,8 @@ run_case() {
       fail "$name — verifier reported failure"
     fi
   else
-    tail -n 50 /tmp/sysmaint_sandbox_${name}.log >&2 || true
-    fail "$name — sysmaint exited with code $?"
+    tail -n 50 /tmp/pulse_sandbox_${name}.log >&2 || true
+    fail "$name — pulse exited with code $?"
   fi
 }
 

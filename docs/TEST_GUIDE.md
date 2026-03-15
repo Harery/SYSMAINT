@@ -1,4 +1,4 @@
-# SYSMAINT Test Guide
+# OCTALUM-PULSE Test Guide
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -19,7 +19,7 @@
 
 ## Overview
 
-SYSMAINT provides comprehensive testing infrastructure supporting:
+OCTALUM-PULSE provides comprehensive testing infrastructure supporting:
 - **9 Linux distributions** across 14 versions
 - **Local Docker testing** for fast feedback
 - **GitHub Actions CI/CD** for continuous integration
@@ -217,17 +217,17 @@ docker-compose -f tests/docker/docker-compose.test.yml up -d
 # Ubuntu
 docker build -f tests/docker/Dockerfile.ubuntu.test \
     --build-arg BASE_IMAGE=ubuntu:24.04 \
-    -t sysmaint-test:ubuntu-24.04 .
+    -t pulse-test:ubuntu-24.04 .
 
 # Debian
 docker build -f tests/docker/Dockerfile.debian.test \
     --build-arg BASE_IMAGE=debian:12 \
-    -t sysmaint-test:debian-12 .
+    -t pulse-test:debian-12 .
 
 # Fedora
 docker build -f tests/docker/Dockerfile.fedora.test \
     --build-arg BASE_IMAGE=fedora:41 \
-    -t sysmaint-test:fedora-41 .
+    -t pulse-test:fedora-41 .
 ```
 
 ---
@@ -387,7 +387,7 @@ shellcheck tests/test_suite_smoke.sh
 **Issue:** Tests fail with permission denied
 ```bash
 # Ensure container runs in privileged mode
-docker run --privileged sysmaint-test:ubuntu-24.04
+docker run --privileged pulse-test:ubuntu-24.04
 ```
 
 ---
@@ -398,7 +398,7 @@ docker run --privileged sysmaint-test:ubuntu-24.04
 
 ```
 ========================================
-SYSMAINT Test Suite
+OCTALUM-PULSE Test Suite
 ========================================
 
 [TEST] Test name here

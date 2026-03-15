@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# lib/utils.sh — Core utility functions for sysmaint
-# sysmaint library
+# lib/utils.sh — Core utility functions for pulse
+# pulse library
 # License: MIT (see LICENSE file in repository root)
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
@@ -17,9 +17,9 @@ _init_state_dir() {
   if [[ -n "$STATE_DIR" ]]; then
     :
   elif _is_root_user; then
-    STATE_DIR="/var/lib/sysmaint"
+    STATE_DIR="/var/lib/pulse"
   else
-    STATE_DIR="$HOME/.local/state/sysmaint"
+    STATE_DIR="$HOME/.local/state/pulse"
   fi
   mkdir -p "$STATE_DIR" 2>/dev/null || true
 }

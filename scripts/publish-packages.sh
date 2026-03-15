@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# SYSMAINT Container Image Publisher
+# OCTALUM-PULSE Container Image Publisher
 # Publishes Docker images to GitHub Container Registry
 #
 # Usage: ./publish-packages.sh [TOKEN]
@@ -20,7 +20,7 @@ readonly NC='\033[0m' # No Color
 # Configuration
 readonly REGISTRY="ghcr.io"
 readonly OWNER="harery"
-readonly IMAGE_NAME="sysmaint"
+readonly IMAGE_NAME="pulse"
 readonly VERSION="1.0.0"
 
 # Tags to push
@@ -131,7 +131,7 @@ main() {
     local token="$1"
 
     echo "╔════════════════════════════════════════════════════════════╗"
-    echo "║     SYSMAINT Container Image Publisher v${VERSION}           ║"
+    echo "║     OCTALUM-PULSE Container Image Publisher v${VERSION}           ║"
     echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/core/capabilities.sh - System capability detection
-# sysmaint library
+# pulse library
 # Copyright (c) 2025 Mohamed Elharery
 
 # Functions:

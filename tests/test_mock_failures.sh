@@ -7,9 +7,9 @@ LIST="${REALMODE_FAIL_LIST:-apt,dpkg,snap}"
 echo "Fail list: $LIST"
 export REALMODE_FAIL_LIST="$LIST"
 
-DRY_RUN=false JSON_SUMMARY=true bash sysmaint --dry-run --json-summary >/dev/null 2>&1 || true
+DRY_RUN=false JSON_SUMMARY=true bash pulse --dry-run --json-summary >/dev/null 2>&1 || true
 
-JSON_FILE=$(ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -n1 || true)
+JSON_FILE=$(ls -1t /tmp/system-maintenance/pulse_*.json 2>/dev/null | head -n1 || true)
 if [[ -z "$JSON_FILE" ]]; then
   echo "❌ FAIL: No JSON summary generated"; exit 1
 fi

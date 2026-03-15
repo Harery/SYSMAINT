@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 # Logging functions
 log_test() {
@@ -114,9 +114,9 @@ test_os_specific_feature() {
 # COMMAND VALIDATION TESTS
 # ============================================================================
 
-test_sysmaint_os_detection() {
-    # Verify SYSMAINT correctly detects this OS family
-    bash "$SYSMAINT" --help 2>&1 | grep -qi "<os_family>" || return 0
+test_pulse_os_detection() {
+    # Verify OCTALUM-PULSE correctly detects this OS family
+    bash "$OCTALUM-PULSE" --help 2>&1 | grep -qi "<os_family>" || return 0
 }
 
 # ============================================================================
@@ -125,7 +125,7 @@ test_sysmaint_os_detection() {
 
 main() {
     echo "========================================"
-    echo "SYSMAINT <OS Family> Family Tests"
+    echo "OCTALUM-PULSE <OS Family> Family Tests"
     echo "========================================"
     echo ""
 
@@ -149,7 +149,7 @@ main() {
 
     # Command validation tests
     echo "Testing Command Validation..."
-    run_test "SYSMAINT OS detection" test_sysmaint_os_detection
+    run_test "OCTALUM-PULSE OS detection" test_pulse_os_detection
     echo ""
 
     # Summary

@@ -17,7 +17,7 @@ A clear and concise description of the bug.
 | Item | Value |
 |:-----|:------|
 | **OS** | Ubuntu/Debian version (e.g., Ubuntu 24.04) |
-| **sysmaint version** | (run `./sysmaint --version`) |
+| **pulse version** | (run `./pulse --version`) |
 | **Shell** | (e.g., bash 5.x) |
 | **Installation method** | .deb package / git clone |
 
@@ -49,7 +49,7 @@ What actually happened.
 <summary>Click to expand logs</summary>
 
 ```
-Paste relevant log output from /tmp/system-maintenance/sysmaint_*.log
+Paste relevant log output from /tmp/system-maintenance/pulse_*.log
 ```
 
 </details>
@@ -68,4 +68,4 @@ Add any other context about the problem here.
 
 ---
 
-> 📖 **Documentation:** [README.md](https://github.com/Harery/SYSMAINT/blob/master/README.md) | [FEATURES.md](https://github.com/Harery/SYSMAINT/blob/master/FEATURES.md)
+> 📖 **Documentation:** [README.md](https://github.com/Harery/OCTALUM-PULSE/blob/master/README.md) | [FEATURES.md](https://github.com/Harery/OCTALUM-PULSE/blob/master/FEATURES.md)

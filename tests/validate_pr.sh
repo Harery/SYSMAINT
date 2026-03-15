@@ -77,7 +77,7 @@ OPTIONS:
     --help           Show this help
 
 VALIDATION CHECKS:
-    1. File existence (sysmaint, lib, tests)
+    1. File existence (pulse, lib, tests)
     2. ShellCheck linting
     3. Script syntax validation
     4. Smoke tests (local Docker)
@@ -103,11 +103,11 @@ check_file_existence() {
     local missing=0
 
     # Main files
-    if [[ ! -f "$PROJECT_DIR/sysmaint" ]]; then
-        log_fail "sysmaint not found"
+    if [[ ! -f "$PROJECT_DIR/pulse" ]]; then
+        log_fail "pulse not found"
         missing=1
     else
-        log_success "sysmaint exists"
+        log_success "pulse exists"
     fi
 
     # Lib directory
@@ -165,10 +165,10 @@ run_shellcheck() {
     local errors=0
 
     # Check main script
-    if shellcheck -S error "$PROJECT_DIR/sysmaint" 2>/dev/null; then
-        log_success "sysmaint passes ShellCheck"
+    if shellcheck -S error "$PROJECT_DIR/pulse" 2>/dev/null; then
+        log_success "pulse passes ShellCheck"
     else
-        log_fail "sysmaint has ShellCheck errors"
+        log_fail "pulse has ShellCheck errors"
         errors=1
     fi
 
@@ -201,10 +201,10 @@ validate_syntax() {
     local errors=0
 
     # Check main script syntax
-    if bash -n "$PROJECT_DIR/sysmaint" 2>/dev/null; then
-        log_success "sysmaint syntax valid"
+    if bash -n "$PROJECT_DIR/pulse" 2>/dev/null; then
+        log_success "pulse syntax valid"
     else
-        log_fail "sysmaint has syntax errors"
+        log_fail "pulse has syntax errors"
         errors=1
     fi
 
@@ -305,7 +305,7 @@ done
 
 # Header
 echo "========================================"
-echo "SYSMAINT PR Validation"
+echo "OCTALUM-PULSE PR Validation"
 echo "========================================"
 echo "Type: $VALIDATION_TYPE"
 echo ""

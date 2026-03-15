@@ -1,5 +1,5 @@
-# SYSMAINT Kubernetes DaemonSet
-# Runs sysmaint on every node in the cluster
+# OCTALUM-PULSE Kubernetes DaemonSet
+# Runs pulse on every node in the cluster
 # Use with caution - this will run maintenance on ALL nodes
 #
 # SPDX-License-Identifier: MIT
@@ -8,24 +8,24 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: sysmaint
-  namespace: sysmaint
+  name: pulse
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: sysmaint
+      app.kubernetes.io/name: pulse
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: sysmaint
+        app.kubernetes.io/name: pulse
         app.kubernetes.io/component: system-maintenance
     spec:
-      serviceAccountName: sysmaint
+      serviceAccountName: pulse
       restartPolicy: Always
       hostPID: true
       tolerations:
@@ -36,23 +36,23 @@ spec:
       # Allow running on tainted nodes
       - operator: Exists
       containers:
-      - name: sysmaint
-        image: ghcr.io/harery/sysmaint:latest
+      - name: pulse
+        image: ghcr.io/harery/pulse:latest
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: ["-c", "sleep infinity"]  # Keep alive for on-demand execution
         securityContext:
           privileged: true
         env:
-        - name: SYSMAINT_LOG_LEVEL
+        - name: OCTALUM-PULSE_LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: sysmaint-config
-              key: SYSMAINT_LOG_LEVEL
+              name: pulse-config
+              key: OCTALUM-PULSE_LOG_LEVEL
         - name: TZ
           valueFrom:
             configMapKeyRef:
-              name: sysmaint-config
+              name: pulse-config
               key: TZ
         volumeMounts:
         - name: host-root

@@ -1,4 +1,4 @@
-# SYSMAINT Helm Chart - RBAC Template
+# OCTALUM-PULSE Helm Chart - RBAC Template
 #
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
@@ -10,10 +10,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "sysmaint.labels" . | nindent 4 }}
+    {{- include "pulse.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["pods", "pods/log"]
@@ -27,17 +27,17 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "sysmaint.labels" . | nindent 4 }}
+    {{- include "pulse.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "sysmaint.serviceAccountName" . }}
+    name: {{ include "pulse.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -45,9 +45,9 @@ roleRef:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   labels:
-    {{- include "sysmaint.labels" . | nindent 4 }}
+    {{- include "pulse.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["nodes"]
@@ -58,16 +58,16 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   labels:
-    {{- include "sysmaint.labels" . | nindent 4 }}
+    {{- include "pulse.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "sysmaint.serviceAccountName" . }}
+    name: {{ include "pulse.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 
 {{- end }}

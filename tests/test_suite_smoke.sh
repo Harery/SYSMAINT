@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."  # repo root
 
-SCRIPT="./sysmaint"
+SCRIPT="./pulse"
 PASSED=0
 FAILED=0
 
@@ -23,7 +23,7 @@ run_test() {
     if [[ $exit_code -eq 0 || $exit_code -eq 1 || $exit_code -eq 2 || $exit_code -eq 30 || $exit_code -eq 100 ]]; then
         echo "✅ PASS"
         # Verify JSON summary
-        local json_file=$(ls -t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -1)
+        local json_file=$(ls -t /tmp/system-maintenance/pulse_*.json 2>/dev/null | head -1)
         if [ -f "$json_file" ] && grep -q '"script_version"' "$json_file"; then
             PASSED=$((PASSED + 1))
         else

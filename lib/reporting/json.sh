@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# lib/json.sh — JSON generation and output functions for sysmaint
-# sysmaint library
+# lib/json.sh — JSON generation and output functions for pulse
+# pulse library
 # License: MIT (see LICENSE file in repository root)
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
@@ -28,7 +28,7 @@ array_to_json() {
 }
 
 write_json_summary() {
-  # Stub: JSON generation now handled in main script (sysmaint)
+  # Stub: JSON generation now handled in main script (pulse)
   # This function is preserved for backward compatibility but does nothing
   return 0
 }

@@ -7,7 +7,7 @@
 #
 # DESCRIPTION:
 #   Cross-OS compatibility test suite
-#   Tests SYSMAINT behavior consistency across all supported OS
+#   Tests OCTALUM-PULSE behavior consistency across all supported OS
 #
 # USAGE:
 #   bash tests/test_suite_cross_os_compatibility.sh
@@ -89,16 +89,16 @@ detect_os_family() {
     esac
 }
 
-test_sysmaint_executable_accessible() {
-    which sysmaint &>/dev/null || [[ -f "$PROJECT_DIR/sysmaint" ]]
+test_pulse_executable_accessible() {
+    which pulse &>/dev/null || [[ -f "$PROJECT_DIR/pulse" ]]
 }
 
-test_sysmaint_help_works() {
-    sysmaint --help &>/dev/null || bash "$PROJECT_DIR/sysmaint" --help &>/dev/null
+test_pulse_help_works() {
+    pulse --help &>/dev/null || bash "$PROJECT_DIR/pulse" --help &>/dev/null
 }
 
-test_sysmaint_version_works() {
-    sysmaint --version &>/dev/null || bash "$PROJECT_DIR/sysmaint" --version &>/dev/null
+test_pulse_version_works() {
+    pulse --version &>/dev/null || bash "$PROJECT_DIR/pulse" --version &>/dev/null
 }
 
 test_common_commands_exist() {
@@ -124,7 +124,7 @@ test_common_paths_accessible() {
 
 test_root_write_permissions() {
     # Test if we can write to /tmp (everyone should be able to)
-    touch /tmp/sysmaint-test-$$ && rm -f /tmp/sysmaint-test-$$
+    touch /tmp/pulse-test-$$ && rm -f /tmp/pulse-test-$$
 }
 
 test_package_manager_detected() {
@@ -138,18 +138,18 @@ test_os_release_file_exists() {
     [[ -f /etc/os-release ]]
 }
 
-test_sysmaint_config_dir() {
-    # SYSMAINT config directory should be accessible
+test_pulse_config_dir() {
+    # OCTALUM-PULSE config directory should be accessible
     [[ -d /etc/system-maintenance ]] || mkdir -p /etc/system-maintenance 2>/dev/null
 }
 
-test_sysmaint_log_dir() {
-    # SYSMAINT log directory should be accessible
+test_pulse_log_dir() {
+    # OCTALUM-PULSE log directory should be accessible
     [[ -d /var/log/system-maintenance ]] || mkdir -p /var/log/system-maintenance 2>/dev/null
 }
 
 test_common_utils_available() {
-    # Common utilities that SYSMAINT might use
+    # Common utilities that OCTALUM-PULSE might use
     command -v jq &>/dev/null || command -v python3 &>/dev/null || command -v python &>/dev/null
 }
 
@@ -196,7 +196,7 @@ test_sudo_available() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Cross-OS Compatibility Tests"
+    echo "OCTALUM-PULSE Cross-OS Compatibility Tests"
     echo "========================================"
     echo ""
 
@@ -212,9 +212,9 @@ main() {
     fi
 
     # Run all tests
-    run_test "sysmaint executable accessible" test_sysmaint_executable_accessible
-    run_test "sysmaint --help works" test_sysmaint_help_works
-    run_test "sysmaint --version works" test_sysmaint_version_works
+    run_test "pulse executable accessible" test_pulse_executable_accessible
+    run_test "pulse --help works" test_pulse_help_works
+    run_test "pulse --version works" test_pulse_version_works
     run_test "Common commands exist" test_common_commands_exist
     run_test "systemd available" test_systemd_available
     run_test "journalctl available" test_journalctl_available
@@ -222,8 +222,8 @@ main() {
     run_test "Root write permissions" test_root_write_permissions
     run_test "Package manager detected" test_package_manager_detected
     run_test "os-release file exists" test_os_release_file_exists
-    run_test "SYSMAINT config directory" test_sysmaint_config_dir
-    run_test "SYSMAINT log directory" test_sysmaint_log_dir
+    run_test "OCTALUM-PULSE config directory" test_pulse_config_dir
+    run_test "OCTALUM-PULSE log directory" test_pulse_log_dir
     run_test "Common utilities available" test_common_utils_available
     run_test "GPG available" test_gpg_available
     run_test "curl or wget available" test_curl_or_wget_available

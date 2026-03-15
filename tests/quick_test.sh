@@ -147,7 +147,7 @@ if [[ -z "$OS_ID" ]]; then
 fi
 
 echo "========================================"
-echo "SYSMAINT Quick Test"
+echo "OCTALUM-PULSE Quick Test"
 echo "========================================"
 echo "OS: $OS_ID"
 echo ""

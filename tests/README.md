@@ -1,4 +1,4 @@
-# SYSMAINT Test Infrastructure
+# OCTALUM-PULSE Test Infrastructure
 
 Comprehensive test infrastructure with 500+ tests across 9 Linux distributions and 14 OS versions.
 
@@ -197,8 +197,8 @@ Test results are automatically uploaded as GitHub Actions artifacts.
 
 ## 📞 Support
 
-- **Issues:** https://github.com/Harery/SYSMAINT/issues
-- **Discussions:** https://github.com/Harery/SYSMAINT/discussions
+- **Issues:** https://github.com/Harery/OCTALUM-PULSE/issues
+- **Discussions:** https://github.com/Harery/OCTALUM-PULSE/discussions
 - **Documentation:** See docs/TEST_*.md
 
 ---

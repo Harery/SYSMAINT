@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/core/init.sh - System initialization and OS detection
-# sysmaint library
+# pulse library
 # Copyright (c) 2025 Mohamed Elharery
 
 # Functions:
@@ -141,7 +141,7 @@ require_root() {
 
   if is_effective_root; then
     if [[ "$FAKE_ROOT_ACTIVE" == "true" && "$FAKE_ROOT_NOTICE_SHOWN" != "true" ]]; then
-      log "SYSMAINT_FAKE_ROOT=1 detected: bypassing sudo for sandbox validation. Do not enable this mode on production systems."
+      log "OCTALUM-PULSE_FAKE_ROOT=1 detected: bypassing sudo for sandbox validation. Do not enable this mode on production systems."
       FAKE_ROOT_NOTICE_SHOWN=true
     fi
     return 0
@@ -193,9 +193,9 @@ _init_state_dir() {
   if [[ -n "$STATE_DIR" ]]; then
     :
   elif _is_root_user; then
-    STATE_DIR="/var/lib/sysmaint"
+    STATE_DIR="/var/lib/pulse"
   else
-    STATE_DIR="$HOME/.local/state/sysmaint"
+    STATE_DIR="$HOME/.local/state/pulse"
   fi
   mkdir -p "$STATE_DIR" 2>/dev/null || true
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/core/error_handling.sh - Error handling and cleanup
-# sysmaint library
+# pulse library
 # Copyright (c) 2025 Mohamed Elharery
 
 # Functions:

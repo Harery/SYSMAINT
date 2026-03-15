@@ -30,14 +30,14 @@ EOF
 
 # ===== Combo Test Runner =====
 run_combo_tests() {
-    local SYSMAINT="$REPO_ROOT/sysmaint"
+    local OCTALUM-PULSE="$REPO_ROOT/pulse"
     export DRY_RUN=true JSON_SUMMARY=true
 
     local PASSED=0 FAILED=0 TOTAL=0
-    latest_json(){ ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -n1 || true; }
+    latest_json(){ ls -1t /tmp/system-maintenance/pulse_*.json 2>/dev/null | head -n1 || true; }
 
     run_case(){ local name="$1"; shift; TOTAL=$((TOTAL+1)); echo -n "[COMBO $TOTAL] $name: ";
-      set +e; bash "$SYSMAINT" "$@" >/dev/null 2>&1; rc=$?; set -e;
+      set +e; bash "$OCTALUM-PULSE" "$@" >/dev/null 2>&1; rc=$?; set -e;
       # Accept exit codes: 0 (success), 1 (GUI), 2 (edge case), 30 (failed services), or 100 (reboot required)
       if [[ $rc -eq 0 || $rc -eq 30 || $rc -eq 100 ]]; then echo "✅"; PASSED=$((PASSED+1)); else echo "❌ ($rc)"; FAILED=$((FAILED+1)); fi; }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/validation/services.sh - Service and process health checks
-# sysmaint library
+# pulse library
 
 check_failed_services() {
   if ! command -v systemctl >/dev/null 2>&1; then

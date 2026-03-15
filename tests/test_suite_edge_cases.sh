@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 log_test() {
     echo -e "${GREEN}[TEST]${NC} $*"
@@ -64,24 +64,24 @@ run_test() {
 test_handles_no_network() {
     # Simulate no network by using invalid gateway
     # Should not crash, should gracefully handle offline mode
-    timeout 5 bash "$SYSMAINT" --dry-run &>/dev/null || return 1
+    timeout 5 bash "$OCTALUM-PULSE" --dry-run &>/dev/null || return 1
 }
 
 test_dns_failure_handling() {
     # Test behavior when DNS resolution fails
     # Should use cached data or skip network-dependent operations
-    timeout 5 bash "$SYSMAINT" --dry-run 2>&1 | grep -qiE "network|dns|resolve" || return 0
+    timeout 5 bash "$OCTALUM-PULSE" --dry-run 2>&1 | grep -qiE "network|dns|resolve" || return 0
 }
 
 test_package_repo_unavailable() {
     # Gracefully handle when package repos are unreachable
     # In dry-run mode, this should not cause crashes
-    timeout 5 bash "$SYSMAINT" --dry-run &>/dev/null
+    timeout 5 bash "$OCTALUM-PULSE" --dry-run &>/dev/null
 }
 
 # Disk Space Tests
 test_low_disk_space_detection() {
-    # Check if SYSMAINT detects low disk space
+    # Check if OCTALUM-PULSE detects low disk space
     local disk_free
     disk_free=$(df / | awk 'NR==2 {print $4}')
     [[ "$disk_free" -gt 0 ]]
@@ -89,7 +89,7 @@ test_low_disk_space_detection() {
 
 test_temp_dir_cleanup() {
     # Verify temp directory can be cleaned
-    local test_temp="/tmp/sysmaint-edge-test-$$"
+    local test_temp="/tmp/pulse-edge-test-$$"
     mkdir -p "$test_temp"
     touch "$test_temp/test-file"
     rm -f "$test_temp/test-file"
@@ -110,13 +110,13 @@ test_var_log_space() {
 test_read_only_filesystem_handling() {
     # Should handle read-only filesystems gracefully
     # Create a read-only test directory
-    local test_dir="/tmp/sysmaint-ro-test-$$"
+    local test_dir="/tmp/pulse-ro-test-$$"
     mkdir -p "$test_dir"
     touch "$test_dir/test-file"
     chmod 444 "$test_dir/test-file"
 
     # Should not crash when encountering read-only files
-    bash "$SYSMAINT" --help &>/dev/null
+    bash "$OCTALUM-PULSE" --help &>/dev/null
 
     # Cleanup
     chmod 644 "$test_dir/test-file"
@@ -128,7 +128,7 @@ test_no_root_privileges() {
     # Most operations should warn or skip gracefully
     if [[ $EUID -ne 0 ]]; then
         # Running as non-root - should not crash
-        bash "$SYSMAINT" --help &>/dev/null
+        bash "$OCTALUM-PULSE" --help &>/dev/null
     fi
 }
 
@@ -141,7 +141,7 @@ test_sudo_configuration() {
 
 test_log_file_permissions() {
     # Verify log files can be created with correct permissions
-    local test_log="/tmp/sysmaint-perm-test-$$"
+    local test_log="/tmp/pulse-perm-test-$$"
     touch "$test_log" || return 1
     chmod 644 "$test_log"
     rm -f "$test_log"
@@ -175,7 +175,7 @@ test_package_lock_handling() {
 test_broken_package_cache() {
     # Should handle corrupted package cache
     # In dry-run mode, cache operations are simulated
-    timeout 5 bash "$SYSMAINT" --dry-run &>/dev/null
+    timeout 5 bash "$OCTALUM-PULSE" --dry-run &>/dev/null
 }
 
 # Interruption Tests
@@ -184,23 +184,23 @@ test_sigint_handling() {
     # This is a basic test - full testing would require more complex setup
 
     # Verify trap handlers exist in script
-    grep -q "trap.*SIGINT\|trap.*INT" "$SYSMAINT" 2>/dev/null || return 0
+    grep -q "trap.*SIGINT\|trap.*INT" "$OCTALUM-PULSE" 2>/dev/null || return 0
 }
 
 test_sigterm_handling() {
     # Test that SIGTERM is handled gracefully
-    grep -q "trap.*SIGTERM\|trap.*TERM" "$SYSMAINT" 2>/dev/null || return 0
+    grep -q "trap.*SIGTERM\|trap.*TERM" "$OCTALUM-PULSE" 2>/dev/null || return 0
 }
 
 test_cleanup_on_interrupt() {
     # Verify cleanup functions exist
-    grep -q "cleanup\|clean_up" "$SYSMAINT" 2>/dev/null || return 0
+    grep -q "cleanup\|clean_up" "$OCTALUM-PULSE" 2>/dev/null || return 0
 }
 
 # Corruption Tests
 test_config_file_corruption() {
     # Should handle corrupted config files
-    local test_config="/tmp/sysmaint-corrupt-test-$$"
+    local test_config="/tmp/pulse-corrupt-test-$$"
 
     # Create invalid config
     echo "invalid { config" > "$test_config"
@@ -219,7 +219,7 @@ test_json_parsing_errors() {
 
 test_log_file_corruption() {
     # Handle corrupted log files
-    local test_log="/tmp/sysmaint-log-test-$$"
+    local test_log="/tmp/pulse-log-test-$$"
 
     # Create binary/corrupted log
     dd if=/dev/urandom of="$test_log" bs=1024 count=1 2>/dev/null
@@ -245,7 +245,7 @@ test_parallel_execution_safe() {
 test_pid_file_handling() {
     # Check for PID file handling
     local pid_files=(
-        "/var/run/sysmaint.pid"
+        "/var/run/pulse.pid"
         "/var/run/system-maintenance.pid"
     )
 
@@ -265,7 +265,7 @@ test_pid_file_handling() {
 # Invalid Input Tests
 test_invalid_command_line_args() {
     # Should handle invalid arguments gracefully
-    bash "$SYSMAINT" --invalid-arg-12345 &>/dev/null
+    bash "$OCTALUM-PULSE" --invalid-arg-12345 &>/dev/null
     # Non-zero exit is expected
     local exit_code=$?
     [[ $exit_code -ne 0 ]]
@@ -273,12 +273,12 @@ test_invalid_command_line_args() {
 
 test_empty_string_arguments() {
     # Handle empty string arguments if applicable
-    bash "$SYSMAINT" --help "" &>/dev/null || true
+    bash "$OCTALUM-PULSE" --help "" &>/dev/null || true
 }
 
 test_special_characters_in_args() {
     # Handle special characters in arguments
-    bash "$SYSMAINT" --help 2>&1 | head -n1 &>/dev/null
+    bash "$OCTALUM-PULSE" --help 2>&1 | head -n1 &>/dev/null
 }
 
 # Resource Limit Tests
@@ -306,13 +306,13 @@ test_process_limits() {
 # Environment Edge Cases
 test_missing_environment_variables() {
     # Should work with minimal environment
-    env -i bash "$SYSMAINT" --help &>/dev/null
+    env -i bash "$OCTALUM-PULSE" --help &>/dev/null
 }
 
 test_path_not_set() {
     # Should handle missing PATH gracefully
     local old_path="$PATH"
-    PATH="" bash "$SYSMAINT" --help &>/dev/null || true
+    PATH="" bash "$OCTALUM-PULSE" --help &>/dev/null || true
     PATH="$old_path"
 }
 
@@ -320,14 +320,14 @@ test_home_not_set() {
     # Handle missing HOME directory
     local old_home="$HOME"
     unset HOME
-    bash "$SYSMAINT" --help &>/dev/null || true
+    bash "$OCTALUM-PULSE" --help &>/dev/null || true
     export HOME="$old_home"
 }
 
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Edge Cases Test Suite"
+    echo "OCTALUM-PULSE Edge Cases Test Suite"
     echo "========================================"
     echo ""
 

@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 # Logging functions
 log_test() {
@@ -68,12 +68,12 @@ run_test() {
 
 test_feature_flag_exists() {
     # Test that the feature flag is recognized
-    bash "$SYSMAINT" --<feature-flag> --help &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --help &>/dev/null
 }
 
 test_feature_flag_dry_run() {
     # Test feature in dry-run mode
-    bash "$SYSMAINT" --<feature-flag> --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --dry-run &>/dev/null
 }
 
 # ============================================================================
@@ -82,17 +82,17 @@ test_feature_flag_dry_run() {
 
 test_feature_basic_operation() {
     # Test basic operation of the feature
-    bash "$SYSMAINT" --<feature-flag> --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --dry-run &>/dev/null
 }
 
 test_feature_with_options() {
     # Test feature with additional options
-    bash "$SYSMAINT" --<feature-flag> --<other-option> --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --<other-option> --dry-run &>/dev/null
 }
 
 test_feature_combination() {
     # Test feature combined with other features
-    bash "$SYSMAINT" --<feature-flag> --<another-feature> --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --<another-feature> --dry-run &>/dev/null
 }
 
 # ============================================================================
@@ -102,18 +102,18 @@ test_feature_combination() {
 test_feature_standard_output() {
     # Test that feature produces output
     local output
-    output=$(bash "$SYSMAINT" --<feature-flag> --dry-run 2>&1)
+    output=$(bash "$OCTALUM-PULSE" --<feature-flag> --dry-run 2>&1)
     [[ -n "$output" ]]
 }
 
 test_feature_json_output() {
     # Test JSON output if supported
-    bash "$SYSMAINT" --<feature-flag> --json-summary --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --json-summary --dry-run &>/dev/null
 }
 
 test_feature_quiet_output() {
     # Test quiet mode
-    bash "$SYSMAINT" --<feature-flag> --quiet --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --quiet --dry-run &>/dev/null
 }
 
 # ============================================================================
@@ -123,13 +123,13 @@ test_feature_quiet_output() {
 test_feature_validates_input() {
     # Test that feature validates input
     # Should fail gracefully with invalid input
-    ! bash "$SYSMAINT" --<feature-flag> --invalid-option &>/dev/null
+    ! bash "$OCTALUM-PULSE" --<feature-flag> --invalid-option &>/dev/null
 }
 
 test_feature_handles_errors() {
     # Test error handling
     # Should not crash on errors
-    bash "$SYSMAINT" --<feature-flag> --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --<feature-flag> --dry-run &>/dev/null
 }
 
 # ============================================================================
@@ -140,7 +140,7 @@ test_feature_requires_privileges() {
     # Test if feature requires root privileges
     if [[ $EUID -ne 0 ]]; then
         # Running as non-root - should warn or handle gracefully
-        bash "$SYSMAINT" --<feature-flag> --dry-run &>/dev/null
+        bash "$OCTALUM-PULSE" --<feature-flag> --dry-run &>/dev/null
     fi
 }
 
@@ -156,7 +156,7 @@ test_feature_respects_config() {
 
 main() {
     echo "========================================"
-    echo "SYSMAINT <Feature> Tests"
+    echo "OCTALUM-PULSE <Feature> Tests"
     echo "========================================"
     echo ""
 

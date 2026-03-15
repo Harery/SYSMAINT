@@ -8,7 +8,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Platform configurations: distro:tag:expected_family:expected_pm:expected_init
 # Note: Docker containers may show "unknown" for init system
-# Alpine requires bash installation for sysmaint to run
+# Alpine requires bash installation for pulse to run
 PLATFORMS=(
   "ubuntu:24.04:debian:apt:unknown"
   "ubuntu:22.04:debian:apt:unknown"
@@ -25,7 +25,7 @@ FAILED=0
 TOTAL=${#PLATFORMS[@]}
 
 echo "════════════════════════════════════════════════════════════════"
-echo "  SYSMAINT v2.4.0 - Phase 3 Docker Detection Test Suite"
+echo "  OCTALUM-PULSE v2.4.0 - Phase 3 Docker Detection Test Suite"
 echo "════════════════════════════════════════════════════════════════"
 echo ""
 echo "Testing auto-detection on ${TOTAL} platforms..."
@@ -40,8 +40,8 @@ for platform_config in "${PLATFORMS[@]}"; do
   echo ""
   
   # Run detection in Docker container
-  if docker run --rm -v "${PROJECT_ROOT}:/sysmaint:ro" "${distro}:${tag}" \
-    /bin/bash -c "cd /sysmaint && ./sysmaint --detect" > /tmp/detect_output_${distro//\//_}_${tag}.txt 2>&1; then
+  if docker run --rm -v "${PROJECT_ROOT}:/pulse:ro" "${distro}:${tag}" \
+    /bin/bash -c "cd /pulse && ./pulse --detect" > /tmp/detect_output_${distro//\//_}_${tag}.txt 2>&1; then
     
     # Extract detected values from the formatted output (handle multiple spaces)
     detected_family=$(grep "• Family:" /tmp/detect_output_${distro//\//_}_${tag}.txt | sed 's/.*Family:[[:space:]]*\([^[:space:]]*\).*/\1/')

@@ -1,4 +1,4 @@
-# SYSMAINT Test Architecture
+# OCTALUM-PULSE Test Architecture
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -18,7 +18,7 @@
 
 ## Overview
 
-The SYSMAINT test architecture is designed to provide comprehensive coverage across all supported Linux distributions while maintaining fast feedback and accurate result comparison.
+The OCTALUM-PULSE test architecture is designed to provide comprehensive coverage across all supported Linux distributions while maintaining fast feedback and accurate result comparison.
 
 ### Design Principles
 
@@ -32,7 +32,7 @@ The SYSMAINT test architecture is designed to provide comprehensive coverage acr
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                           SYSMAINT TEST ARCHITECTURE                 │
+│                           OCTALUM-PULSE TEST ARCHITECTURE                 │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐    │
@@ -70,7 +70,7 @@ The SYSMAINT test architecture is designed to provide comprehensive coverage acr
 ### Directory Layout
 
 ```
-sysmaint/
+pulse/
 ├── tests/
 │   ├── docker/                      # Docker infrastructure
 │   │   ├── Dockerfile.ubuntu.test
@@ -177,7 +177,7 @@ test_example() {
 # Main execution
 main() {
     echo "========================================"
-    echo "SYSMAINT <Test Suite Name>"
+    echo "OCTALUM-PULSE <Test Suite Name>"
     echo "========================================"
     echo ""
 
@@ -226,7 +226,7 @@ log_warning() # Warning messages (YELLOW)
 **Purpose:** Fast basic functionality validation
 
 **Tests:**
-- SYSMAINT executable accessible
+- OCTALUM-PULSE executable accessible
 - Help command works
 - Version command works
 - OS detection works
@@ -492,7 +492,7 @@ strategy:
 1. Checkout code
 2. Install dependencies
 3. Setup test user
-4. Copy SYSMAINT
+4. Copy OCTALUM-PULSE
 5. Run test suite
 6. Upload artifacts
 7. Generate summary

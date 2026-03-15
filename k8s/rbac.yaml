@@ -1,5 +1,5 @@
-# SYSMAINT Kubernetes RBAC
-# ServiceAccount, Role, and RoleBinding for sysmaint
+# OCTALUM-PULSE Kubernetes RBAC
+# ServiceAccount, Role, and RoleBinding for pulse
 #
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
@@ -7,26 +7,26 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: sysmaint
-  namespace: sysmaint
+  name: pulse
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: sysmaint
-  namespace: sysmaint
+  name: pulse
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
 rules:
-  # Allow reading pods and jobs in sysmaint namespace
+  # Allow reading pods and jobs in pulse namespace
   - apiGroups: [""]
     resources: ["pods", "pods/log"]
     verbs: ["get", "list", "watch"]
@@ -38,19 +38,19 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: sysmaint
-  namespace: sysmaint
+  name: pulse
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
 subjects:
   - kind: ServiceAccount
-    name: sysmaint
-    namespace: sysmaint
+    name: pulse
+    namespace: pulse
 roleRef:
   kind: Role
-  name: sysmaint
+  name: pulse
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -58,11 +58,11 @@ roleRef:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: sysmaint-privileged
+  name: pulse-privileged
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
 rules:
   # Allow listing nodes for cluster-wide operations
   - apiGroups: [""]
@@ -73,16 +73,16 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: sysmaint-privileged
+  name: pulse-privileged
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
 subjects:
   - kind: ServiceAccount
-    name: sysmaint
-    namespace: sysmaint
+    name: pulse
+    namespace: pulse
 roleRef:
   kind: ClusterRole
-  name: sysmaint-privileged
+  name: pulse-privileged
   apiGroup: rbac.authorization.k8s.io

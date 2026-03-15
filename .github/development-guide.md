@@ -1,4 +1,4 @@
-# SYSMAINT — Development Guide
+# OCTALUM-PULSE — Development Guide
 
 Multi-distro Linux system maintenance toolkit. Bash 5.x, modular architecture.
 
@@ -7,7 +7,7 @@ Multi-distro Linux system maintenance toolkit. Bash 5.x, modular architecture.
 ## Architecture
 
 ```
-sysmaint                    # Entry point
+pulse                    # Entry point
 lib/
 ├── core/                   # init, logging, detection, errors
 ├── maintenance/            # packages, kernel, snap, flatpak, storage
@@ -76,7 +76,7 @@ done
 
 - All tests use `DRY_RUN=true` — no system changes
 - Mocks in `tests/mocks/realmodesandbox/bin/` via `_shim`
-- JSON validation: `python3 tests/validate_json.py docs/schema/sysmaint-summary.schema.json`
+- JSON validation: `python3 tests/validate_json.py docs/schema/pulse-summary.schema.json`
 
 ---
 
@@ -84,7 +84,7 @@ done
 
 ### New Module
 1. Create `lib/maintenance/feature.sh`
-2. Source in `sysmaint` (lines 100-140)
+2. Source in `pulse` (lines 100-140)
 3. Add capability check in `lib/core/capabilities.sh`
 4. Add CLI flag parsing
 5. Add tests in `tests/test_suite_*.sh`
@@ -108,8 +108,8 @@ debian_family_init() {
 
 ## JSON Telemetry
 
-Output: `/tmp/system-maintenance/sysmaint_*.json`  
-Schema: `docs/schema/sysmaint-summary.schema.json`
+Output: `/tmp/system-maintenance/pulse_*.json`  
+Schema: `docs/schema/pulse-summary.schema.json`
 
 ```json
 {

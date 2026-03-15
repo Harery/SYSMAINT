@@ -20,7 +20,7 @@ Brief description of the changes in this PR.
 | Test | Status |
 |:-----|:------:|
 | All existing tests pass (`bash tests/test_suite_smoke.sh`) | ⬜ |
-| ShellCheck passes (`shellcheck -x sysmaint`) | ⬜ |
+| ShellCheck passes (`shellcheck -x pulse`) | ⬜ |
 | New tests added for new functionality | ⬜ |
 | Tested on target OS family (Debian/Red Hat/Arch/SUSE) | ⬜ |
 
@@ -49,4 +49,4 @@ Closes #(issue number)
 
 ---
 
-> 📖 **Contributing Guide:** [README.md](https://github.com/Harery/SYSMAINT#-contributing)
+> 📖 **Contributing Guide:** [README.md](https://github.com/Harery/OCTALUM-PULSE#-contributing)

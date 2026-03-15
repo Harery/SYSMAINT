@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/validation/security.sh - Security audits and system health
-# sysmaint library
+# pulse library
 
 security_audit() {
   if [[ "${SECURITY_AUDIT_ENABLED:-false}" != "true" ]]; then

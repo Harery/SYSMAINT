@@ -243,7 +243,7 @@ suse_upgrade_finalize() {
   # Check if reboot is needed
   if [[ -f /var/run/reboot-required ]] || zypper ps -s 2>/dev/null | grep -q "^kernel"; then
     log "WARNING: System reboot recommended"
-    echo "reboot_recommended" >> "${STATE_FILE:-/tmp/sysmaint_state}"
+    echo "reboot_recommended" >> "${STATE_FILE:-/tmp/pulse_state}"
   fi
 }
 

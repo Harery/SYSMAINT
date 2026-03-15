@@ -1,6 +1,6 @@
 # 🔧 Troubleshooting Guide
 
-**SYSMAINT v1.0.0 — Common Issues & Solutions**
+**OCTALUM-PULSE v1.0.0 — Common Issues & Solutions**
 
 ---
 
@@ -23,13 +23,13 @@ Before diving into specific issues, run these diagnostic commands:
 
 ```bash
 # Check version and basic info
-./sysmaint --version
+./pulse --version
 
 # Run in verbose mode to see detailed output
-sudo ./sysmaint --dry-run --verbose
+sudo ./pulse --dry-run --verbose
 
 # Check for script errors
-bash -n sysmaint
+bash -n pulse
 
 # Verify dependencies
 which bash git curl dialog
@@ -43,8 +43,8 @@ which bash git curl dialog
 
 **Symptom:**
 ```bash
-$ ./sysmaint
-bash: ./sysmaint: Permission denied
+$ ./pulse
+bash: ./pulse: Permission denied
 ```
 
 **Cause:** The script doesn't have execute permissions.
@@ -52,10 +52,10 @@ bash: ./sysmaint: Permission denied
 **Solution:**
 ```bash
 # Make the script executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Run with sudo
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 ---
@@ -109,8 +109,8 @@ git config --list
 
 **Symptom:**
 ```bash
-ERROR: Another instance of sysmaint is already running
-Lock file: /var/run/sysmaint.lock
+ERROR: Another instance of pulse is already running
+Lock file: /var/run/pulse.lock
 ```
 
 **Cause:** Another instance is running, or a previous run crashed leaving a lock file.
@@ -118,13 +118,13 @@ Lock file: /var/run/sysmaint.lock
 **Solution:**
 ```bash
 # Check if another instance is actually running
-ps aux | grep sysmaint
+ps aux | grep pulse
 
 # If no instance is running, remove the lock file
-sudo rm /var/run/sysmaint.lock
+sudo rm /var/run/pulse.lock
 
 # Retry
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 ---
@@ -151,7 +151,7 @@ sudo fuser /var/lib/dpkg/lock-frontend
 sudo kill -9 <PID>
 
 # Then retry
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 #### Issue: "Unable to locate package"
@@ -168,8 +168,8 @@ E: Unable to locate package <package-name>
 # Update package lists
 sudo apt update
 
-# Retry sysmaint
-sudo ./sysmaint --upgrade
+# Retry pulse
+sudo ./pulse --upgrade
 ```
 
 ---
@@ -191,8 +191,8 @@ Error: Cache expired
 sudo dnf clean all
 sudo dnf makecache
 
-# Retry sysmaint
-sudo ./sysmaint --upgrade
+# Retry pulse
+sudo ./pulse --upgrade
 ```
 
 #### Issue: "This system is not registered with RHSM"
@@ -313,10 +313,10 @@ ERROR: This operation requires root privileges
 **Solution:**
 ```bash
 # Always run with sudo for full operations
-sudo ./sysmaint
+sudo ./pulse
 
 # Or use dry-run mode (no root needed)
-./sysmaint --dry-run
+./pulse --dry-run
 ```
 
 ---
@@ -327,7 +327,7 @@ sudo ./sysmaint
 
 **Symptom:**
 ```bash
-$ echo "Y" | sudo ./sysmaint --gui
+$ echo "Y" | sudo ./pulse --gui
 ERROR: GUI mode requires an interactive terminal
 ```
 
@@ -336,10 +336,10 @@ ERROR: GUI mode requires an interactive terminal
 **Solution:**
 ```bash
 # Use --auto mode instead for non-interactive
-sudo ./sysmaint --auto
+sudo ./pulse --auto
 
 # Or run GUI in actual terminal
-sudo ./sysmaint --gui
+sudo ./pulse --gui
 ```
 
 ---
@@ -354,7 +354,7 @@ sudo ./sysmaint --gui
 ```bash
 # Resize terminal to at least 80x24 characters
 # Or use CLI mode instead
-sudo ./sysmaint --upgrade --cleanup
+sudo ./pulse --upgrade --cleanup
 
 # Check current size
 echo $COLUMNS $LINES
@@ -371,7 +371,7 @@ echo $COLUMNS $LINES
 **Solution:**
 ```bash
 # Disable colors
-TERM=dumb sudo ./sysmaint --auto
+TERM=dumb sudo ./pulse --auto
 
 # Or use a terminal that supports colors
 # (most modern terminals do)
@@ -434,7 +434,7 @@ ping -c 3 github.com
 nslookup github.com
 
 # Try using SSH instead of HTTPS
-git clone git@github.com:Harery/SYSMAINT.git
+git clone git@github.com:Harery/OCTALUM-PULSE.git
 
 # Or check if behind a proxy
 export https_proxy=http://your-proxy:port
@@ -520,10 +520,10 @@ docker ps
 **Solution:**
 ```bash
 # Ensure privileged mode is used
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 
 # Or try with explicit host mount
-docker run --rm --privileged -v /:/host:ro ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged -v /:/host:ro ghcr.io/harery/pulse:latest
 
 # Check container logs for detailed errors
 docker logs <container-id>
@@ -543,14 +543,14 @@ no matching manifest for linux/arm64 in the manifest list entries
 **Solution:**
 ```bash
 # Check available architectures
-docker manifest inspect ghcr.io/harery/sysmaint:latest
+docker manifest inspect ghcr.io/harery/pulse:latest
 
-# SYSMAINT supports multi-architecture (amd64/arm64)
+# OCTALUM-PULSE supports multi-architecture (amd64/arm64)
 # Pull the correct image for your platform
-docker pull ghcr.io/harery/sysmaint:latest
+docker pull ghcr.io/harery/pulse:latest
 
 # If issue persists, try platform-specific image
-docker pull ghcr.io/harery/sysmaint:ubuntu
+docker pull ghcr.io/harery/pulse:ubuntu
 ```
 
 ---
@@ -559,7 +559,7 @@ docker pull ghcr.io/harery/sysmaint:ubuntu
 
 **Symptom:** Container health status shows `unhealthy`.
 
-**Cause:** The sysmaint command is not functioning correctly inside container.
+**Cause:** The pulse command is not functioning correctly inside container.
 
 **Solution:**
 ```bash
@@ -570,7 +570,7 @@ docker ps --format "table {{.Names}}\t{{.Status}}"
 docker inspect --format='{{json .State.Health}}' <container-id> | jq
 
 # Run manual health check
-docker exec <container-id> sysmaint --version
+docker exec <container-id> pulse --version
 
 # Restart container
 docker restart <container-id>
@@ -593,7 +593,7 @@ permission denied while trying to connect to the Docker daemon
 # For SELinux systems (Fedora/RHEL)
 docker run --rm --privileged \
   -v /:/host:ro,Z \
-  ghcr.io/harery/sysmaint:latest
+  ghcr.io/harery/pulse:latest
 
 # Disable SELinux temporarily (not recommended for production)
 sudo setenforce 0
@@ -606,7 +606,7 @@ dmesg | grep -i apparmor
 docker run --rm --privileged \
   --security-opt apparmor=unconfined \
   -v /:/host:ro \
-  ghcr.io/harery/sysmaint:latest
+  ghcr.io/harery/pulse:latest
 ```
 
 ---
@@ -615,7 +615,7 @@ docker run --rm --privileged \
 
 **Symptom:**
 ```bash
-Error response from daemon: manifest for ghcr.io/harery/sysmaint:latest not found
+Error response from daemon: manifest for ghcr.io/harery/pulse:latest not found
 ```
 
 **Cause:** Image tag doesn't exist or registry is inaccessible.
@@ -623,10 +623,10 @@ Error response from daemon: manifest for ghcr.io/harery/sysmaint:latest not foun
 **Solution:**
 ```bash
 # Check available tags
-# Visit: https://github.com/Harery/SYSMAINT/pkgs/container/sysmaint
+# Visit: https://github.com/Harery/OCTALUM-PULSE/pkgs/container/pulse
 
 # Pull specific version
-docker pull ghcr.io/harery/sysmaint:v1.0.0
+docker pull ghcr.io/harery/pulse:v1.0.0
 
 # Check if you're authenticated (for private images)
 docker login ghcr.io
@@ -641,7 +641,7 @@ curl -I https://ghcr.io/v2/
 
 **Symptom:**
 ```bash
-ERROR: for sysmaint  Cannot create container for service sysmaint:
+ERROR: for pulse  Cannot create container for service pulse:
 OCI runtime create failed
 ```
 
@@ -681,12 +681,12 @@ docker network inspect bridge
 
 # Run with host network
 docker run --rm --privileged --network host \
-  ghcr.io/harery/sysmaint:latest
+  ghcr.io/harery/pulse:latest
 
 # Specify custom DNS
 docker run --rm --privileged \
   --dns 8.8.8.8 --dns 8.8.4.4 \
-  ghcr.io/harery/sysmaint:latest
+  ghcr.io/harery/pulse:latest
 
 # Check firewall rules
 sudo iptables -L DOCKER -n -v
@@ -711,13 +711,13 @@ docker buildx create --name multiarch --use
 # Build and push multi-architecture image
 docker buildx build --platform linux/amd64,linux/arm64 \
   -f Dockerfile.ubuntu \
-  -t ghcr.io/harery/sysmaint:ubuntu \
+  -t ghcr.io/harery/pulse:ubuntu \
   --push .
 
 # Or build for specific platform only
 docker buildx build --platform linux/amd64 \
   -f Dockerfile.ubuntu \
-  -t ghcr.io/harery/sysmaint:ubuntu .
+  -t ghcr.io/harery/pulse:ubuntu .
 ```
 
 ---
@@ -730,15 +730,15 @@ docker buildx build --platform linux/amd64 \
 
 **Solution:**
 ```bash
-# SYSMAINT Docker images use non-root user by default
+# OCTALUM-PULSE Docker images use non-root user by default
 # The --privileged flag is required for system maintenance
 
 # Correct usage:
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 
 # If you need to run as root inside container:
 docker run --rm --privileged --user root \
-  ghcr.io/harery/sysmaint:latest
+  ghcr.io/harery/pulse:latest
 
 # Note: Running as root inside container is safe when
 # the container itself is isolated and temporary
@@ -748,23 +748,23 @@ docker run --rm --privileged --user root \
 
 ### Issue: "Docker image is outdated"
 
-**Symptom:** New features in latest sysmaint version aren't available.
+**Symptom:** New features in latest pulse version aren't available.
 
 **Cause:** Using cached or outdated image.
 
 **Solution:**
 ```bash
 # Pull latest image
-docker pull ghcr.io/harery/sysmaint:latest
+docker pull ghcr.io/harery/pulse:latest
 
 # Remove old images
 docker image prune -a
 
 # Verify version
-docker run --rm ghcr.io/harery/sysmaint:latest --version
+docker run --rm ghcr.io/harery/pulse:latest --version
 
 # Use specific version for reproducibility
-docker pull ghcr.io/harery/sysmaint:v1.0.0
+docker pull ghcr.io/harery/pulse:v1.0.0
 ```
 
 ---
@@ -775,10 +775,10 @@ docker pull ghcr.io/harery/sysmaint:v1.0.0
 
 ```bash
 # Run with verbose output
-sudo ./sysmaint --verbose --dry-run | tee sysmaint.log
+sudo ./pulse --verbose --dry-run | tee pulse.log
 
 # Check the log file
-cat sysmaint.log
+cat pulse.log
 ```
 
 ### Check System Information
@@ -814,7 +814,7 @@ When reporting issues, please include:
 
 2. **Error Message:**
    ```bash
-   sudo ./sysmaint --dry-run --verbose 2>&1 | tee issue.log
+   sudo ./pulse --dry-run --verbose 2>&1 | tee issue.log
    ```
 
 3. **Steps to Reproduce:**
@@ -840,12 +840,12 @@ When reporting issues, please include:
 
    ## Environment
    - OS: [e.g., Ubuntu 24.04]
-   - SYSMAINT Version: [e.g., v1.0.0]
+   - OCTALUM-PULSE Version: [e.g., v1.0.0]
    - Bash Version: [e.g., 5.1.16]
 
    ## Logs
    ```
-   sudo ./sysmaint --dry-run --verbose
+   sudo ./pulse --dry-run --verbose
    ```
 
    [Paste output here]
@@ -863,23 +863,23 @@ When reporting issues, please include:
 
 ## FAQ: Quick Answers
 
-### Q: Is sysmaint safe to run?
+### Q: Is pulse safe to run?
 
 **A:** Yes! Always run `--dry-run` first to preview changes without making any.
 
-### Q: How often should I run sysmaint?
+### Q: How often should I run pulse?
 
 **A:** Weekly is recommended for most systems. Use the systemd timer for automation.
 
-### Q: Will sysmaint delete my files?
+### Q: Will pulse delete my files?
 
 **A:** No. It only cleans system caches, logs, and old kernels. Your personal files are safe.
 
-### Q: Can I undo changes made by sysmaint?
+### Q: Can I undo changes made by pulse?
 
 **A:** Most operations are reversible (except package removals). Check package manager logs for details.
 
-### Q: Does sysmaint work on WSL?
+### Q: Does pulse work on WSL?
 
 **A:** Partially. Some operations may fail due to WSL limitations. Use `--dry-run` to test.
 
@@ -891,4 +891,4 @@ When reporting issues, please include:
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

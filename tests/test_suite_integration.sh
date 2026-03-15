@@ -6,7 +6,7 @@
 # Copyright (c) 2025 Harery
 #
 # DESCRIPTION:
-#   Integration test suite for SYSMAINT
+#   Integration test suite for OCTALUM-PULSE
 #   Tests systemd timers, cron, Docker, and other integrations
 #
 # USAGE:
@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 log_test() {
     echo -e "${GREEN}[TEST]${NC} $*"
@@ -66,29 +66,29 @@ test_systemd_available() {
 }
 
 test_systemd_timer_file_exists() {
-    [[ -f "$PROJECT_DIR/packaging/systemd/sysmaint.timer" ]] || return 0
+    [[ -f "$PROJECT_DIR/packaging/systemd/pulse.timer" ]] || return 0
 }
 
 test_systemd_service_file_exists() {
-    [[ -f "$PROJECT_DIR/packaging/systemd/sysmaint.service" ]] || return 0
+    [[ -f "$PROJECT_DIR/packaging/systemd/pulse.service" ]] || return 0
 }
 
 test_systemd_timer_syntax() {
-    if [[ -f "$PROJECT_DIR/packaging/systemd/sysmaint.timer" ]]; then
-        systemctl cat "$PROJECT_DIR/packaging/systemd/sysmaint.timer" &>/dev/null || return 1
+    if [[ -f "$PROJECT_DIR/packaging/systemd/pulse.timer" ]]; then
+        systemctl cat "$PROJECT_DIR/packaging/systemd/pulse.timer" &>/dev/null || return 1
     fi
     return 0
 }
 
 test_systemd_service_syntax() {
-    if [[ -f "$PROJECT_DIR/packaging/systemd/sysmaint.service" ]]; then
-        systemctl cat "$PROJECT_DIR/packaging/systemd/sysmaint.service" &>/dev/null || return 1
+    if [[ -f "$PROJECT_DIR/packaging/systemd/pulse.service" ]]; then
+        systemctl cat "$PROJECT_DIR/packaging/systemd/pulse.service" &>/dev/null || return 1
     fi
     return 0
 }
 
 test_systemd_executable_in_path() {
-    which sysmaint &>/dev/null || [[ -f "/usr/local/sbin/sysmaint" ]]
+    which pulse &>/dev/null || [[ -f "/usr/local/sbin/pulse" ]]
 }
 
 # Cron Integration Tests
@@ -130,10 +130,10 @@ test_docker_privileged_mode() {
     return 0
 }
 
-test_sysmaint_in_docker_image() {
-    # If running in Docker, verify sysmaint is accessible
+test_pulse_in_docker_image() {
+    # If running in Docker, verify pulse is accessible
     if [[ -f /.dockerenv ]] || grep -qa docker /proc/1/cgroup 2>/dev/null; then
-        which sysmaint &>/dev/null || [[ -f "/sysmaint/sysmaint" ]]
+        which pulse &>/dev/null || [[ -f "/pulse/pulse" ]]
     fi
     return 0
 }
@@ -150,7 +150,7 @@ test_deb_package_structure() {
 test_rpm_package_structure() {
     if [[ -d "$PROJECT_DIR/packaging/rpm" ]]; then
         # Check for RPM spec file
-        [[ -f "$PROJECT_DIR/packaging/rpm/sysmaint.spec" ]] || return 0
+        [[ -f "$PROJECT_DIR/packaging/rpm/pulse.spec" ]] || return 0
     fi
     return 0
 }
@@ -176,7 +176,7 @@ test_log_rotation_configured() {
     [[ -f "/etc/logrotate.conf" ]] || [[ -d "/etc/logrotate.d" ]] || return 0
 }
 
-test_sysmaint_log_dir() {
+test_pulse_log_dir() {
     [[ -d "/var/log/system-maintenance" ]] || mkdir -p /tmp/system-maintenance 2>/dev/null
 }
 
@@ -186,7 +186,7 @@ test_config_directory_exists() {
 }
 
 test_config_file_handling() {
-    # SYSMAINT should work with or without config
+    # OCTALUM-PULSE should work with or without config
     local test_config="/etc/system-maintenance/config.conf"
     if [[ -f "$test_config" ]]; then
         # Config exists - should be readable
@@ -197,7 +197,7 @@ test_config_file_handling() {
 
 test_default_config_works() {
     # Should work with default configuration
-    bash "$SYSMAINT" --help &>/dev/null
+    bash "$OCTALUM-PULSE" --help &>/dev/null
 }
 
 # Service Integration Tests
@@ -231,7 +231,7 @@ test_backup_script_exists() {
 # Monitoring Integration Tests
 test_monitoring_hooks() {
     # Check for monitoring/integration hooks
-    grep -q "monitor\|metrics\|telemetry" "$SYSMAINT" 2>/dev/null || return 0
+    grep -q "monitor\|metrics\|telemetry" "$OCTALUM-PULSE" 2>/dev/null || return 0
 }
 
 test_notification_support() {
@@ -247,14 +247,14 @@ test_github_updates_check() {
 
 test_version_check_integration() {
     # Version checking should work
-    bash "$SYSMAINT" --version &>/dev/null || bash "$SYSMAINT" --help 2>&1 | grep -qi "version\|Version"
+    bash "$OCTALUM-PULSE" --version &>/dev/null || bash "$OCTALUM-PULSE" --help 2>&1 | grep -qi "version\|Version"
 }
 
 # Security Integration Tests
 test_selinux_context() {
     if command -v restorecon &>/dev/null; then
         # SELinux utilities available
-        which sysmaint &>/dev/null && restorecon -R "$(which sysmaint)" &>/dev/null || true
+        which pulse &>/dev/null && restorecon -R "$(which pulse)" &>/dev/null || true
     fi
     return 0
 }
@@ -320,7 +320,7 @@ test_efi_variable_mount() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Integration Test Suite"
+    echo "OCTALUM-PULSE Integration Test Suite"
     echo "========================================"
     echo ""
 
@@ -331,7 +331,7 @@ main() {
     run_test "Systemd service file exists" test_systemd_service_file_exists
     run_test "Systemd timer syntax valid" test_systemd_timer_syntax
     run_test "Systemd service syntax valid" test_systemd_service_syntax
-    run_test "SYSMAINT in PATH" test_systemd_executable_in_path
+    run_test "OCTALUM-PULSE in PATH" test_systemd_executable_in_path
     echo ""
 
     # Cron tests
@@ -346,7 +346,7 @@ main() {
     run_test "Docker available" test_docker_available
     run_test "Docker daemon running" test_docker_daemon_running
     run_test "Privileged mode check" test_docker_privileged_mode
-    run_test "SYSMAINT in Docker image" test_sysmaint_in_docker_image
+    run_test "OCTALUM-PULSE in Docker image" test_pulse_in_docker_image
     echo ""
 
     # Package installation tests
@@ -362,7 +362,7 @@ main() {
     run_test "journald available" test_journald_integration
     run_test "syslog available" test_syslog_available
     run_test "Log rotation configured" test_log_rotation_configured
-    run_test "SYSMAINT log directory" test_sysmaint_log_dir
+    run_test "OCTALUM-PULSE log directory" test_pulse_log_dir
     echo ""
 
     # Service tests

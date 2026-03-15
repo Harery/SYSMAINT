@@ -156,7 +156,7 @@ test_zypper_search() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT SUSE Family Test Suite"
+    echo "OCTALUM-PULSE SUSE Family Test Suite"
     echo "========================================"
     echo ""
 

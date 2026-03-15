@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Major Release - Complete Revamp
 
-This is a complete rewrite from the ground up, transitioning from SYSMAINT (Bash) to OCTALUM-PULSE (Go).
+This is a complete rewrite from the ground up, transitioning from OCTALUM-PULSE (Bash) to OCTALUM-PULSE (Go).
 
 ### ✨ Added
 
@@ -56,7 +56,7 @@ This is a complete rewrite from the ground up, transitioning from SYSMAINT (Bash
 
 ### 🔧 Changed
 
-- **Project name**: SYSMAINT → OCTALUM-PULSE
+- **Project name**: OCTALUM-PULSE → OCTALUM-PULSE
 - **Language**: Bash → Go
 - **Architecture**: Monolith → Plugin-based modular
 - **CLI**: Raw arguments → Cobra-based CLI
@@ -70,7 +70,7 @@ This is a complete rewrite from the ground up, transitioning from SYSMAINT (Bash
 
 ## [1.0.0] - 2025-12-28
 
-### Initial Release (SYSMAINT)
+### Initial Release (OCTALUM-PULSE)
 
 #### Features
 - Multi-distro support (9 distributions)

@@ -57,7 +57,7 @@ export ASSUME_YES=true
 # Warmup runs (not counted)
 for ((i=1; i<=WARMUP_RUNS; i++)); do
     echo -n "Warmup run ${i}/${WARMUP_RUNS}... "
-    bash sysmaint --dry-run >/dev/null 2>&1 || true
+    bash pulse --dry-run >/dev/null 2>&1 || true
     echo "done"
 done
 echo ""
@@ -66,7 +66,7 @@ echo ""
 declare -a times
 for ((i=1; i<=ITERATIONS; i++)); do
     echo -n "Iteration ${i}/${ITERATIONS}... "
-    output=$(bash -c "time bash sysmaint --dry-run" 2>&1 >/dev/null || true)
+    output=$(bash -c "time bash pulse --dry-run" 2>&1 >/dev/null || true)
 
     # Extract real time from bash built-in time output
     # Format: "real\t0m3.237s"

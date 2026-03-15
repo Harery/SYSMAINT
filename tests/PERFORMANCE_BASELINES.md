@@ -1,4 +1,4 @@
-# SYSMAINT Performance Baselines
+# OCTALUM-PULSE Performance Baselines
 
 **Document Version:** 1.0  
 **Date:** December 28, 2025  
@@ -9,7 +9,7 @@
 
 ## Overview
 
-This document defines the performance baselines for SYSMAINT across all supported operating systems and test scenarios. Baselines are established through actual test runs and serve as reference points for regression detection.
+This document defines the performance baselines for OCTALUM-PULSE across all supported operating systems and test scenarios. Baselines are established through actual test runs and serve as reference points for regression detection.
 
 ---
 
@@ -166,17 +166,17 @@ A regression is flagged when:
 
 1. **Run performance tests on clean system:**
    ```bash
-   cd /path/to/sysmaint
+   cd /path/to/pulse
    bash tests/test_suite_performance.sh
    ```
 
 2. **Collect results from each OS:**
    ```bash
    # Ubuntu 22.04
-   docker run --rm -v $(pwd):/sysmaint ubuntu:22.04 bash /sysmaint/tests/test_suite_performance.sh
+   docker run --rm -v $(pwd):/pulse ubuntu:22.04 bash /pulse/tests/test_suite_performance.sh
    
    # Fedora 41
-   docker run --rm -v $(pwd):/sysmaint fedora:41 bash /sysmaint/tests/test_suite_performance.sh
+   docker run --rm -v $(pwd):/pulse fedora:41 bash /pulse/tests/test_suite_performance.sh
    ```
 
 3. **Update this document with actual measurements:**
@@ -283,10 +283,10 @@ Performance tests run automatically on:
 bash tests/test_suite_performance.sh BENCHMARK_RUNS=5
 
 # Check system resources during test
-/usr/bin/time -v bash ./sysmaint --dry-run
+/usr/bin/time -v bash ./pulse --dry-run
 
 # Profile with bash debugger
-bash -x ./sysmaint --dry-run 2>&1 | tee debug.log
+bash -x ./pulse --dry-run 2>&1 | tee debug.log
 ```
 
 ---

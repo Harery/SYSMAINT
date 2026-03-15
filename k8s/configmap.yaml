@@ -1,5 +1,5 @@
-# SYSMAINT Kubernetes ConfigMap
-# Configuration for sysmaint operations
+# OCTALUM-PULSE Kubernetes ConfigMap
+# Configuration for pulse operations
 #
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
@@ -7,16 +7,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sysmaint-config
-  namespace: sysmaint
+  name: pulse-config
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 data:
   # Log level: debug, info, warn, error
-  SYSMAINT_LOG_LEVEL: "info"
+  OCTALUM-PULSE_LOG_LEVEL: "info"
 
   # Timezone
   TZ: "UTC"

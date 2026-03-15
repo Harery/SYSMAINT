@@ -15,12 +15,12 @@ export ASSUME_YES=true
 # Debug Mode - Enable verbose output when DEBUG_TESTS=true
 if [[ "${DEBUG_TESTS:-false}" == "true" ]]; then
   set -x  # Enable bash debug mode (prints every command)
-  export DEBUG_SYSMAINT=true  # Pass to sysmaint
+  export DEBUG_OCTALUM-PULSE=true  # Pass to pulse
   echo "=== DEBUG MODE ENABLED ===" >&2
   echo "CI=$CI" >&2
   echo "NONINTERACTIVE=$NONINTERACTIVE" >&2
   echo "AUTO_MODE=$AUTO_MODE" >&2
-  echo "DEBUG_SYSMAINT=$DEBUG_SYSMAINT" >&2
+  echo "DEBUG_OCTALUM-PULSE=$DEBUG_OCTALUM-PULSE" >&2
   echo "========================" >&2
 fi
 

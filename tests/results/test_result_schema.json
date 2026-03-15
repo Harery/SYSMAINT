@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://sysmaint.io/schemas/test-result-v1.json",
-  "title": "SYSMAINT Test Result Format",
+  "$id": "https://pulse.io/schemas/test-result-v1.json",
+  "title": "OCTALUM-PULSE Test Result Format",
   "description": "Unified test result format for local Docker and GitHub Actions testing",
   "type": "object",
   "required": ["version", "run_id", "timestamp", "environment", "results"],
@@ -202,9 +202,9 @@
       "type": "object",
       "description": "Additional metadata about the test run",
       "properties": {
-        "sysmaint_version": {
+        "pulse_version": {
           "type": "string",
-          "description": "SYSMAINT script version"
+          "description": "OCTALUM-PULSE script version"
         },
         "commit_sha": {
           "type": "string",

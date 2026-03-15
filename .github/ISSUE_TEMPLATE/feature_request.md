@@ -22,7 +22,7 @@ Describe the feature you'd like to see implemented.
 
 ```bash
 # How would you use this feature?
-./sysmaint --new-feature-flag
+./pulse --new-feature-flag
 ```
 
 ---
@@ -63,4 +63,4 @@ Add any other context, mockups, or examples here.
 
 ---
 
-> 📖 **Existing Features:** [FEATURES.md](https://github.com/Harery/SYSMAINT/blob/master/FEATURES.md)
+> 📖 **Existing Features:** [FEATURES.md](https://github.com/Harery/OCTALUM-PULSE/blob/master/FEATURES.md)

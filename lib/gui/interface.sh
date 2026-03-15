@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# lib/gui/interface.sh - Modern TUI/GUI interface for sysmaint v1.0.0
-# sysmaint library
+# lib/gui/interface.sh - Modern TUI/GUI interface for pulse v1.0.0
+# pulse library
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright: 2025
 #
@@ -608,9 +608,9 @@ show_confirmation() {
   
   # Handle long commands
   if [[ $cmd_len -lt 60 ]]; then
-    printf "${C_WARNING}│${C_RESET}  ${C_BOLD}${C_ACCENT}sudo ./sysmaint %s${C_RESET}%*s${C_WARNING}│${C_RESET}\n" "$cmd_args" $((card_width - cmd_len - 22)) ""
+    printf "${C_WARNING}│${C_RESET}  ${C_BOLD}${C_ACCENT}sudo ./pulse %s${C_RESET}%*s${C_WARNING}│${C_RESET}\n" "$cmd_args" $((card_width - cmd_len - 22)) ""
   else
-    echo -e "${C_WARNING}│${C_RESET}  ${C_BOLD}${C_ACCENT}sudo ./sysmaint${C_RESET}$(printf ' %.0s' $(seq 1 52))${C_WARNING}│${C_RESET}"
+    echo -e "${C_WARNING}│${C_RESET}  ${C_BOLD}${C_ACCENT}sudo ./pulse${C_RESET}$(printf ' %.0s' $(seq 1 52))${C_WARNING}│${C_RESET}"
     printf "${C_WARNING}│${C_RESET}    ${C_ACCENT}%s${C_RESET}%*s${C_WARNING}│${C_RESET}\n" "$cmd_args" $((card_width - cmd_len - 6)) ""
   fi
   
@@ -643,7 +643,7 @@ show_gui_menu() {
     return $?
   fi
   
-  local title="SYSMAINT v${SCRIPT_VERSION:-stable} - Interactive Mode"
+  local title="OCTALUM-PULSE v${SCRIPT_VERSION:-stable} - Interactive Mode"
   local height=25
   local width=80
   local list_height=18
@@ -666,7 +666,7 @@ show_gui_menu() {
   
   local choices
   if [[ "$framework" == "dialog" ]]; then
-    if ! choices=$(dialog --backtitle "SYSMAINT - System Maintenance" \
+    if ! choices=$(dialog --backtitle "OCTALUM-PULSE - System Maintenance" \
                      --title "$title" \
                      --checklist "\n ↑/↓ Navigate  │  SPACE Toggle  │  ENTER Confirm\n" \
                      "$height" "$width" "$list_height" \
@@ -675,7 +675,7 @@ show_gui_menu() {
       return 1
     fi
   else
-    if ! choices=$(whiptail --backtitle "SYSMAINT - System Maintenance" \
+    if ! choices=$(whiptail --backtitle "OCTALUM-PULSE - System Maintenance" \
                        --title "$title" \
                        --checklist "\n ↑/↓ Navigate  │  SPACE Toggle  │  ENTER Confirm\n" \
                        "$height" "$width" "$list_height" \

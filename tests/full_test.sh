@@ -134,7 +134,7 @@ mkdir -p "$RESULTS_DIR"
 
 # Header
 echo "========================================"
-echo "SYSMAINT Full Test Suite"
+echo "OCTALUM-PULSE Full Test Suite"
 echo "========================================"
 echo "OS:      $OS_LIST"
 echo "Profile: $TEST_PROFILE"

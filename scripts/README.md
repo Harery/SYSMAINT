@@ -1,4 +1,4 @@
-# SYSMAINT Utility Scripts
+# OCTALUM-PULSE Utility Scripts
 
 This directory contains utility scripts for development, packaging, and CI/CD operations.
 

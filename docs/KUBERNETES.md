@@ -1,6 +1,6 @@
-# 🎣 SYSMAINT Kubernetes Deployment Guide
+# 🎣 OCTALUM-PULSE Kubernetes Deployment Guide
 
-**Complete guide for deploying SYSMAINT on Kubernetes clusters**
+**Complete guide for deploying OCTALUM-PULSE on Kubernetes clusters**
 
 ---
 
@@ -22,7 +22,7 @@
 
 ```bash
 # Using Helm (Recommended)
-helm install sysmaint ./helm/sysmaint
+helm install pulse ./helm/pulse
 
 # Using kubectl
 kubectl apply -f k8s/cronjob.yaml
@@ -53,9 +53,9 @@ helm version
 
 ### Important Notes
 
-⚠️ **Privileged Mode Required**: SYSMAINT requires `privileged: true` and `hostPID: true` to perform system-level operations on the host node. This is intentional and necessary for system maintenance.
+⚠️ **Privileged Mode Required**: OCTALUM-PULSE requires `privileged: true` and `hostPID: true` to perform system-level operations on the host node. This is intentional and necessary for system maintenance.
 
-⚠️ **Linux Nodes Only**: SYSMAINT is designed for Linux systems and will not work on Windows nodes.
+⚠️ **Linux Nodes Only**: OCTALUM-PULSE is designed for Linux systems and will not work on Windows nodes.
 
 ---
 
@@ -116,7 +116,7 @@ kubectl apply -f k8s/cronjob.yaml
 
 | File | Description |
 |------|-------------|
-| `namespace.yaml` | Creates `sysmaint` namespace |
+| `namespace.yaml` | Creates `pulse` namespace |
 | `cronjob.yaml` | Weekly, daily, and monthly CronJobs |
 | `deployment.yaml` | Long-running deployment (debugging) |
 | `daemonset.yaml` | Runs on all nodes |
@@ -141,10 +141,10 @@ kubectl apply -f k8s/cronjob.yaml
 
 ```bash
 # Trigger a one-time job from CronJob
-kubectl create job --from=cronjob/sysmaint manual-$(date +%s) -n sysmaint
+kubectl create job --from=cronjob/pulse manual-$(date +%s) -n pulse
 
 # Run in an interactive pod
-kubectl run -it --rm sysmaint-debug --image=ghcr.io/harery/sysmaint:latest \
+kubectl run -it --rm pulse-debug --image=ghcr.io/harery/pulse:latest \
   --privileged --restart=Never -- /bin/bash
 ```
 
@@ -156,17 +156,17 @@ kubectl run -it --rm sysmaint-debug --image=ghcr.io/harery/sysmaint:latest \
 
 ```bash
 # Add repository (if published)
-helm repo add sysmaint https://harery.github.io/SYSMAINT
+helm repo add pulse https://harery.github.io/OCTALUM-PULSE
 helm repo update
 
 # Install from local directory
-helm install sysmaint ./helm/sysmaint
+helm install pulse ./helm/pulse
 
 # Install with custom values
-helm install sysmaint ./helm/sysmaint -f custom-values.yaml
+helm install pulse ./helm/pulse -f custom-values.yaml
 
 # Install specific variant
-helm install sysmaint ./helm/sysmaint --set image.tag=ubuntu
+helm install pulse ./helm/pulse --set image.tag=ubuntu
 ```
 
 ### Configuration
@@ -203,30 +203,30 @@ daemonset:
 Install with custom values:
 
 ```bash
-helm install sysmaint ./helm/sysmaint -f custom-values.yaml
+helm install pulse ./helm/pulse -f custom-values.yaml
 ```
 
 ### Upgrading
 
 ```bash
 # Upgrade with new values
-helm upgrade sysmaint ./helm/sysmaint -f custom-values.yaml
+helm upgrade pulse ./helm/pulse -f custom-values.yaml
 
 # Upgrade with specific image
-helm upgrade sysmaint ./helm/sysmaint --set image.tag=v1.0.0
+helm upgrade pulse ./helm/pulse --set image.tag=v1.0.0
 
 # Reuse existing values
-helm upgrade sysmaint ./helm/sysmaint --reuse-values
+helm upgrade pulse ./helm/pulse --reuse-values
 ```
 
 ### Uninstalling
 
 ```bash
 # Uninstall release
-helm uninstall sysmaint
+helm uninstall pulse
 
 # Uninstall and remove all resources
-helm uninstall sysmaint --keep-history=false
+helm uninstall pulse --keep-history=false
 ```
 
 ### Helm Operations
@@ -236,19 +236,19 @@ helm uninstall sysmaint --keep-history=false
 helm list
 
 # Check release status
-helm status sysmaint
+helm status pulse
 
 # View rendered manifest (debug)
-helm template sysmaint ./helm/sysmaint
+helm template pulse ./helm/pulse
 
 # Dry run
-helm install sysmaint ./helm/sysmaint --dry-run --debug
+helm install pulse ./helm/pulse --dry-run --debug
 
 # Get values
-helm get values sysmaint
+helm get values pulse
 
 # Get all values (including defaults)
-helm get values sysmaint --all
+helm get values pulse --all
 ```
 
 ---
@@ -259,8 +259,8 @@ helm get values sysmaint --all
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SYSMAINT_LOG_LEVEL` | `info` | Log level: debug, info, warn, error |
-| `SYSMAINT_VERSION` | `1.0.0` | Version string |
+| `OCTALUM-PULSE_LOG_LEVEL` | `info` | Log level: debug, info, warn, error |
+| `OCTALUM-PULSE_VERSION` | `1.0.0` | Version string |
 | `TZ` | `UTC` | Timezone for schedule execution |
 
 ### Cron Schedules
@@ -319,7 +319,7 @@ tolerations:
 
 ### Privileged Mode
 
-SYSMAINT requires privileged mode to perform system-level operations:
+OCTALUM-PULSE requires privileged mode to perform system-level operations:
 
 ```yaml
 securityContext:
@@ -344,7 +344,7 @@ securityContext:
 The provided RBAC configuration grants minimal required permissions:
 
 ```yaml
-# Role: Read pods/jobs/cronjobs in sysmaint namespace
+# Role: Read pods/jobs/cronjobs in pulse namespace
 rules:
   - apiGroups: [""]
     resources: ["pods", "pods/log"]
@@ -368,12 +368,12 @@ Consider adding a NetworkPolicy to restrict network access:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: sysmaint-deny-ingress
-  namespace: sysmaint
+  name: pulse-deny-ingress
+  namespace: pulse
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: sysmaint
+      app.kubernetes.io/name: pulse
   policyTypes:
   - Ingress
   ingress: []  # Deny all ingress
@@ -387,7 +387,7 @@ For Kubernetes < 1.25, use PodSecurityPolicy:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: sysmaint
+  name: pulse
 spec:
   privileged: true
   hostPID: true
@@ -408,7 +408,7 @@ spec:
 Label your namespace:
 
 ```bash
-kubectl label namespace sysmaint \
+kubectl label namespace pulse \
   pod-security.kubernetes.io/enforce=privileged \
   pod-security.kubernetes.io/audit=privileged \
   pod-security.kubernetes.io/warn=privileged
@@ -422,18 +422,18 @@ kubectl label namespace sysmaint \
 
 ```bash
 # View CronJob logs
-kubectl logs -n sysmaint job/sysmaint-weekly-<timestamp>
+kubectl logs -n pulse job/pulse-weekly-<timestamp>
 
 # View recent jobs
-kubectl get jobs -n sysmaint -l app.kubernetes.io/name=sysmaint
+kubectl get jobs -n pulse -l app.kubernetes.io/name=pulse
 
 # Stream logs from running pod
-kubectl logs -n sysmaint -l app.kubernetes.io/name=sysmaint -f
+kubectl logs -n pulse -l app.kubernetes.io/name=pulse -f
 ```
 
 ### Metrics
 
-SYSMAINT supports JSON output for monitoring:
+OCTALUM-PULSE supports JSON output for monitoring:
 
 ```yaml
 args:
@@ -444,7 +444,7 @@ args:
 Parse the output with `jq`:
 
 ```bash
-kubectl logs -n sysmaint job/sysmaint-weekly-<timestamp> | jq .
+kubectl logs -n pulse job/pulse-weekly-<timestamp> | jq .
 ```
 
 ### Integrations
@@ -461,7 +461,7 @@ metadata:
 **ELK/EFK:**
 ```bash
 # Forward logs to Elasticsearch
-kubectl logs -n sysmaint -l app.kubernetes.io/name=sysmaint | \
+kubectl logs -n pulse -l app.kubernetes.io/name=pulse | \
   elasticsearch-loader
 ```
 
@@ -478,7 +478,7 @@ kubectl logs -n sysmaint -l app.kubernetes.io/name=sysmaint | \
 **Solution:**
 ```bash
 # Describe pod
-kubectl describe pod -n sysmaint sysmaint-xxx
+kubectl describe pod -n pulse pulse-xxx
 
 # Check node selector
 kubectl get nodes --show-labels
@@ -493,10 +493,10 @@ kubectl get nodes --show-labels
 **Solution:**
 ```bash
 # Check job logs
-kubectl logs -n sysmaint job/sysmaint-weekly-xxx
+kubectl logs -n pulse job/pulse-weekly-xxx
 
 # Run interactively for debugging
-kubectl run -it --rm debug --image=ghcr.io/harery/sysmaint:latest \
+kubectl run -it --rm debug --image=ghcr.io/harery/pulse:latest \
   --privileged --restart=Never -- /bin/bash
 ```
 
@@ -507,10 +507,10 @@ kubectl run -it --rm debug --image=ghcr.io/harery/sysmaint:latest \
 **Solution:**
 ```bash
 # Check service account permissions
-kubectl auth can-i list pods --as=system:serviceaccount:sysmaint:sysmaint
+kubectl auth can-i list pods --as=system:serviceaccount:pulse:pulse
 
 # Verify ClusterRoleBinding
-kubectl get clusterrolebinding sysmaint-privileged -o yaml
+kubectl get clusterrolebinding pulse-privileged -o yaml
 ```
 
 #### Issue: CronJob not triggering
@@ -520,35 +520,35 @@ kubectl get clusterrolebinding sysmaint-privileged -o yaml
 **Solution:**
 ```bash
 # Validate CronJob
-kubectl get cronjob -n sysmaint sysmaint -o yaml
+kubectl get cronjob -n pulse pulse -o yaml
 
 # Check controller logs
 kubectl logs -n kube-system deployment/cronjob-controller
 
 # Test schedule manually
-kubectl create job --from=cronjob/sysmaint test-$(date +%s) -n sysmaint
+kubectl create job --from=cronjob/pulse test-$(date +%s) -n pulse
 ```
 
 ### Debug Commands
 
 ```bash
 # Check all resources
-kubectl get all -n sysmaint
+kubectl get all -n pulse
 
 # Describe CronJob
-kubectl describe cronjob -n sysmaint sysmaint
+kubectl describe cronjob -n pulse pulse
 
 # List recent jobs
-kubectl get jobs -n sysmaint --sort-by=.metadata.creationTimestamp
+kubectl get jobs -n pulse --sort-by=.metadata.creationTimestamp
 
 # Get events
-kubectl get events -n sysmaint --sort-by='.lastTimestamp'
+kubectl get events -n pulse --sort-by='.lastTimestamp'
 
 # Execute command in pod
-kubectl exec -it -n sysmaint sysmaint-xxx -- sysmaint --version
+kubectl exec -it -n pulse pulse-xxx -- pulse --version
 
 # Port forward for debugging
-kubectl port-forward -n sysmaint deployment/sysmaint 8080:8080
+kubectl port-forward -n pulse deployment/pulse 8080:8080
 ```
 
 ---
@@ -563,17 +563,17 @@ Create an Application manifest:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sysmaint
+  name: pulse
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/Harery/SYSMAINT.git
-    path: helm/sysmaint
+    repoURL: https://github.com/Harery/OCTALUM-PULSE.git
+    path: helm/pulse
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
-    namespace: sysmaint
+    namespace: pulse
   syncPolicy:
     automated:
       prune: true
@@ -586,7 +586,7 @@ spec:
 # Deploy to multiple contexts
 for ctx in cluster1 cluster2 cluster3; do
   kubectl config use-context $ctx
-  helm install sysmaint ./helm/sysmaint
+  helm install pulse ./helm/pulse
 done
 ```
 
@@ -594,7 +594,7 @@ done
 
 ```yaml
 image:
-  repository: my-registry.example.com/sysmaint
+  repository: my-registry.example.com/pulse
   pullPolicy: IfNotPresent
   tag: "v1.0.0"
 
@@ -611,11 +611,11 @@ imagePullSecrets:
 | **Docker Guide** | [docs/DOCKER.md](DOCKER.md) |
 | **Installation Guide** | [docs/INSTALLATION.md](INSTALLATION.md) |
 | **Troubleshooting** | [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
-| **GitHub Repository** | https://github.com/Harery/SYSMAINT |
-| **Issue Tracker** | https://github.com/Harery/SYSMAINT/issues |
+| **GitHub Repository** | https://github.com/Harery/OCTALUM-PULSE |
+| **Issue Tracker** | https://github.com/Harery/OCTALUM-PULSE/issues |
 
 ---
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

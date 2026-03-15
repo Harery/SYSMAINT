@@ -1,4 +1,4 @@
-# SYSMAINT OS Support Matrix
+# OCTALUM-PULSE OS Support Matrix
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -6,7 +6,7 @@
 
 ## Overview
 
-SYSMAINT supports 9 Linux distributions across 14 versions, covering the major package manager families.
+OCTALUM-PULSE supports 9 Linux distributions across 14 versions, covering the major package manager families.
 
 ## Quick Reference
 
@@ -262,7 +262,7 @@ All test images are available for local testing:
 # Build local images
 docker build -f tests/docker/Dockerfile.ubuntu.test \
     --build-arg BASE_IMAGE=ubuntu:24.04 \
-    -t sysmaint-test:ubuntu-24.04 .
+    -t pulse-test:ubuntu-24.04 .
 ```
 
 See [TEST_GUIDE.md](TEST_GUIDE.md) for detailed instructions.

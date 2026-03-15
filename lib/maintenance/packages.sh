@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/packages.sh - Package management and maintenance
-# sysmaint library
+# pulse library
 
 wait_for_pkg_managers() {
   log "Validating no conflicting package operations are running..."

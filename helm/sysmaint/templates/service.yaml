@@ -1,4 +1,4 @@
-# SYSMAINT Helm Chart - Service Template
+# OCTALUM-PULSE Helm Chart - Service Template
 #
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
@@ -8,14 +8,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "sysmaint.labels" . | nindent 4 }}
+    {{- include "pulse.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    {{- include "sysmaint.selectorLabels" . | nindent 4 }}
+    {{- include "pulse.selectorLabels" . | nindent 4 }}
   ports:
   - name: metrics
     port: {{ .Values.service.port }}

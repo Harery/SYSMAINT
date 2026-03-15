@@ -1,4 +1,4 @@
-# SYSMAINT Test Commands Cheatsheet
+# OCTALUM-PULSE Test Commands Cheatsheet
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -310,7 +310,7 @@ bash tests/test_suite_docker.sh
 docker info
 
 # Rebuild test images
-docker rmi sysmaint-test:*
+docker rmi pulse-test:*
 bash tests/run_local_docker_tests.sh --rebuild
 
 # Test Docker access

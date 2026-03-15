@@ -7,7 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."  # repo root
 
-SCRIPT="./sysmaint"
+SCRIPT="./pulse"
 PASSED=0
 FAILED=0
 
@@ -286,7 +286,7 @@ echo "=== State Management Functions (12) ==="
 
 # Test 34: init_state_dir_root_user
 echo -n "[TEST] init_state_dir_creates_dir: "
-STATE_DIR="/tmp/test_sysmaint_state_$$"
+STATE_DIR="/tmp/test_pulse_state_$$"
 _init_state_dir
 if [[ -d "$STATE_DIR" ]]; then
     echo "✅ PASS"
@@ -299,9 +299,9 @@ fi
 
 # Test 35: state_file_path
 echo -n "[TEST] state_file_path: "
-STATE_DIR="/tmp/test_sysmaint_state_$$"
+STATE_DIR="/tmp/test_pulse_state_$$"
 result=$(_state_file)
-expected="/tmp/test_sysmaint_state_$$/timings.json"
+expected="/tmp/test_pulse_state_$$/timings.json"
 if [[ "$result" == "$expected" ]]; then
     echo "✅ PASS"
     PASSED=$((PASSED + 1))
@@ -313,7 +313,7 @@ rm -rf "$STATE_DIR"
 
 # Test 36: save_phase_estimates_empty
 echo -n "[TEST] save_phase_estimates_empty: "
-STATE_DIR="/tmp/test_sysmaint_state_$$"
+STATE_DIR="/tmp/test_pulse_state_$$"
 unset PHASE_EST_EMA
 declare -A PHASE_EST_EMA
 save_phase_estimates
@@ -329,7 +329,7 @@ fi
 
 # Test 37: save_phase_estimates_with_data
 echo -n "[TEST] save_phase_estimates_with_data: "
-STATE_DIR="/tmp/test_sysmaint_state_$$"
+STATE_DIR="/tmp/test_pulse_state_$$"
 declare -A PHASE_EST_EMA
 PHASE_EST_EMA["clean_tmp"]="2.500"
 PHASE_EST_EMA["validate_repos"]="4.000"
@@ -346,7 +346,7 @@ fi
 
 # Test 38: load_phase_estimates_valid_json
 echo -n "[TEST] load_phase_estimates_valid_json: "
-STATE_DIR="/tmp/test_sysmaint_state_$$"
+STATE_DIR="/tmp/test_pulse_state_$$"
 mkdir -p "$STATE_DIR"
 cat > "$STATE_DIR/timings.json" <<'EOF'
 {
@@ -369,7 +369,7 @@ fi
 
 # Test 39: load_phase_estimates_missing_file
 echo -n "[TEST] load_phase_estimates_missing_file: "
-STATE_DIR="/tmp/test_sysmaint_state_$$"
+STATE_DIR="/tmp/test_pulse_state_$$"
 unset PHASE_EST_EMA
 declare -A PHASE_EST_EMA
 load_phase_estimates  # Should not fail

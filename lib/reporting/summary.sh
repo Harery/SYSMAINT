@@ -169,7 +169,7 @@ print_summary() {
   # Emit JSON summary if requested
   if [[ "${JSON_SUMMARY:-false}" == "true" && "${_JSON_WRITTEN:-false}" != "true" ]]; then
     _JSON_WRITTEN=true
-    JSON_FILE="$LOG_DIR/sysmaint_${RUN_ID}.json"
+    JSON_FILE="$LOG_DIR/pulse_${RUN_ID}.json"
     timestamp=$(date --iso-8601=seconds)
     # Ensure phase estimates are loaded even if adaptive mode wasn't enabled
     if declare -f load_phase_estimates >/dev/null 2>&1; then

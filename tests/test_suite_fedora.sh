@@ -153,7 +153,7 @@ test_fedora_flatpak_support() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Fedora Test Suite"
+    echo "OCTALUM-PULSE Fedora Test Suite"
     echo "========================================"
     echo ""
 

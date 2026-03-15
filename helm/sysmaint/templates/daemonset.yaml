@@ -1,4 +1,4 @@
-# SYSMAINT Helm Chart - DaemonSet Template
+# OCTALUM-PULSE Helm Chart - DaemonSet Template
 #
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Harery
@@ -8,24 +8,24 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ include "sysmaint.fullname" . }}
+  name: {{ include "pulse.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "sysmaint.labels" . | nindent 4 }}
+    {{- include "pulse.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "sysmaint.selectorLabels" . | nindent 6 }}
+      {{- include "pulse.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "sysmaint.selectorLabels" . | nindent 8 }}
+        {{- include "pulse.selectorLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: {{ include "sysmaint.serviceAccountName" . }}
+      serviceAccountName: {{ include "pulse.serviceAccountName" . }}
       hostPID: {{ .Values.hostPID }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -43,23 +43,23 @@ spec:
         # Allow running on all tainted nodes
         - operator: Exists
       containers:
-      - name: sysmaint
-        image: {{ include "sysmaint.image" . }}
+      - name: pulse
+        image: {{ include "pulse.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["/bin/sh"]
         args: ["-c", "sleep infinity"]
         securityContext:
           privileged: {{ .Values.securityContext.privileged }}
         env:
-        - name: SYSMAINT_LOG_LEVEL
+        - name: OCTALUM-PULSE_LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: {{ include "sysmaint.fullname" . }}-config
-              key: SYSMAINT_LOG_LEVEL
+              name: {{ include "pulse.fullname" . }}-config
+              key: OCTALUM-PULSE_LOG_LEVEL
         - name: TZ
           valueFrom:
             configMapKeyRef:
-              name: {{ include "sysmaint.fullname" . }}-config
+              name: {{ include "pulse.fullname" . }}-config
               key: TZ
         volumeMounts:
         {{- toYaml .Values.volumeMounts | nindent 10 }}

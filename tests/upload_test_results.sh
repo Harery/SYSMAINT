@@ -171,8 +171,8 @@ upload_to_branch() {
         return 0
     fi
 
-    git config user.name "SYSMAINT Test Bot"
-    git config user.email "sysmaint-bot@harery.com"
+    git config user.name "OCTALUM-PULSE Test Bot"
+    git config user.email "pulse-bot@harery.com"
 
     git commit -m "$message"
     git push origin "$branch" || {

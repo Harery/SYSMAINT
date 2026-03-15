@@ -3,14 +3,14 @@
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
 #
-# Automated timing tests for sysmaint performance characteristics
+# Automated timing tests for pulse performance characteristics
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SCRIPT="./sysmaint"
+SCRIPT="./pulse"
 BENCHMARK_RUNS="${BENCHMARK_RUNS:-3}"
-RESULTS_DIR="/tmp/sysmaint-benchmarks"
+RESULTS_DIR="/tmp/pulse-benchmarks"
 mkdir -p "$RESULTS_DIR"
 
 # Colors
@@ -175,7 +175,7 @@ check_threshold() {
 }
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║         SYSMAINT PERFORMANCE BENCHMARK SUITE               ║"
+echo "║         OCTALUM-PULSE PERFORMANCE BENCHMARK SUITE               ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 echo "Configuration:"
@@ -347,7 +347,7 @@ echo "Kernel: $(uname -r)"
 echo "CPU: $(grep "model name" /proc/cpuinfo | head -1 | cut -d':' -f2 | xargs)"
 echo "CPU Cores: $(nproc)"
 echo "Memory: $(free -h | awk '/^Mem:/ {print $2}')"
-echo "sysmaint version: $(grep "SCRIPT_VERSION=" "$SCRIPT" | head -1 | cut -d'"' -f2)"
+echo "pulse version: $(grep "SCRIPT_VERSION=" "$SCRIPT" | head -1 | cut -d'"' -f2)"
 echo "Benchmark date: $(date '+%Y-%m-%d %H:%M:%S')"
 
 # ==================== FINAL SUMMARY ====================

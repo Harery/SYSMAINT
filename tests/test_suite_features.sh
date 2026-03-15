@@ -6,7 +6,7 @@
 # Copyright (c) 2025 Harery
 #
 # DESCRIPTION:
-#   Feature-specific test suite for SYSMAINT
+#   Feature-specific test suite for OCTALUM-PULSE
 #   Tests package management, cleanup, security, firmware, storage, and kernel features
 #
 # USAGE:
@@ -28,7 +28,7 @@ NC='\033[0m'
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SYSMAINT="$PROJECT_DIR/sysmaint"
+OCTALUM-PULSE="$PROJECT_DIR/pulse"
 
 log_test() {
     echo -e "${GREEN}[TEST]${NC} $*"
@@ -62,7 +62,7 @@ run_test() {
 
 # Package Management Tests
 test_upgrade_flag_exists() {
-    bash "$SYSMAINT" --help 2>&1 | grep -q "\-\-upgrade"
+    bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "\-\-upgrade"
 }
 
 test_package_manager_detected() {
@@ -76,7 +76,7 @@ test_dry_run_does_not_upgrade() {
     # --dry-run should not actually upgrade packages
     local before
     before=$(rpm -qa 2>/dev/null | wc -l || dpkg -l 2>/dev/null | wc -l)
-    bash "$SYSMAINT" --upgrade --dry-run &>/dev/null || true
+    bash "$OCTALUM-PULSE" --upgrade --dry-run &>/dev/null || true
     local after
     after=$(rpm -qa 2>/dev/null | wc -l || dpkg -l 2>/dev/null | wc -l)
     [[ "$before" -eq "$after" ]]
@@ -97,11 +97,11 @@ test_flatpak_support_if_available() {
 
 # System Cleanup Tests
 test_cleanup_flag_exists() {
-    bash "$SYSMAINT" --help 2>&1 | grep -q "\-\-cleanup"
+    bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "\-\-cleanup"
 }
 
 test_cleanup_dry_run_safe() {
-    bash "$SYSMAINT" --cleanup --dry-run &>/dev/null || return 1
+    bash "$OCTALUM-PULSE" --cleanup --dry-run &>/dev/null || return 1
 }
 
 test_temp_dir_exists() {
@@ -115,7 +115,7 @@ test_cache_dirs_exist() {
 
 # Kernel Purge Tests
 test_purge_kernels_flag_exists() {
-    bash "$SYSMAINT" --help 2>&1 | grep -q "\-\-purge-kernels" || bash "$SYSMAINT" --help 2>&1 | grep -q "purge.kernel"
+    bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "\-\-purge-kernels" || bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "purge.kernel"
 }
 
 test_kernel_detection() {
@@ -136,11 +136,11 @@ test_current_kernel_protected() {
 
 # Security Audit Tests
 test_security_audit_flag_exists() {
-    bash "$SYSMAINT" --help 2>&1 | grep -q "\-\-security-audit"
+    bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "\-\-security-audit"
 }
 
 test_security_audit_dry_run() {
-    bash "$SYSMAINT" --security-audit --dry-run &>/dev/null || return 1
+    bash "$OCTALUM-PULSE" --security-audit --dry-run &>/dev/null || return 1
 }
 
 test_faillock_check() {
@@ -150,7 +150,7 @@ test_faillock_check() {
 
 # Firmware Update Tests
 test_firmware_flag_exists() {
-    bash "$SYSMAINT" --help 2>&1 | grep -q "\-\-update-firmware" || bash "$SYSMAINT" --help 2>&1 | grep -q "firmware"
+    bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "\-\-update-firmware" || bash "$OCTALUM-PULSE" --help 2>&1 | grep -q "firmware"
 }
 
 test_fwupdtlr_if_available() {
@@ -240,21 +240,21 @@ test_package_keys_valid() {
 
 # Feature Integration Tests
 test_multiple_flags_work() {
-    bash "$SYSMAINT" --cleanup --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --cleanup --dry-run &>/dev/null
 }
 
 test_auto_with_cleanup() {
-    bash "$SYSMAINT" --auto --cleanup --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --auto --cleanup --dry-run &>/dev/null
 }
 
 test_verbose_with_security() {
-    bash "$SYSMAINT" --verbose --security-audit --dry-run &>/dev/null
+    bash "$OCTALUM-PULSE" --verbose --security-audit --dry-run &>/dev/null
 }
 
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Feature-Specific Test Suite"
+    echo "OCTALUM-PULSE Feature-Specific Test Suite"
     echo "========================================"
     echo ""
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/core/detection.sh - Phase 3 Auto-Detection Functions
-# sysmaint library
+# pulse library
 # Copyright (c) 2025 Mohamed Elharery
 
 # Phase 3 Enhancement: Intelligent auto-detection of package managers, init systems,
@@ -151,7 +151,7 @@ apply_manual_overrides() {
 show_detection_report() {
   echo ""
   echo "╔════════════════════════════════════════════════════════════════════════════╗"
-  echo "║              SYSMAINT v${SCRIPT_VERSION} - SYSTEM DETECTION REPORT                   ║"
+  echo "║              OCTALUM-PULSE v${SCRIPT_VERSION} - SYSTEM DETECTION REPORT                   ║"
   echo "╠════════════════════════════════════════════════════════════════════════════╣"
   
   # ═══ Operating System ═══

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/snap.sh - Snap package management
-# sysmaint library
+# pulse library
 
 snap_maintenance() {
   if ! command -v snap >/dev/null 2>&1; then

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/progress/panel.sh - Adaptive progress panel UI
-# sysmaint library
+# pulse library
 
 show_progress() {
   # args: duration mode message

@@ -1,4 +1,4 @@
-# Test Profiles for sysmaint
+# Test Profiles for pulse
 # Define different test execution profiles based on environment and requirements
 
 profiles:
@@ -132,9 +132,9 @@ ci_examples:
     minimal: |
       - name: Run Tests (Minimal)
         run: |
-          docker run --rm -v \${{ github.workspace }}:/sysmaint:ro \\
+          docker run --rm -v \${{ github.workspace }}:/pulse:ro \\
             ubuntu:24.04 \\
-            bash -c "cd /sysmaint && bash tests/cross_os_test_runner.sh --profile minimal"
+            bash -c "cd /pulse && bash tests/cross_os_test_runner.sh --profile minimal"
 
     standard: |
       - name: Run Tests (Standard)

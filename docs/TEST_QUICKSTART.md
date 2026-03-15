@@ -1,4 +1,4 @@
-# SYSMAINT Testing Quick Start Guide
+# OCTALUM-PULSE Testing Quick Start Guide
 
 **Version:** 1.0
 **Last Updated:** 2025-12-28
@@ -6,9 +6,9 @@
 
 ---
 
-## 👋 Welcome to SYSMAINT Testing!
+## 👋 Welcome to OCTALUM-PULSE Testing!
 
-This guide will help you get started with testing SYSMAINT in 5 minutes.
+This guide will help you get started with testing OCTALUM-PULSE in 5 minutes.
 
 ---
 
@@ -17,7 +17,7 @@ This guide will help you get started with testing SYSMAINT in 5 minutes.
 ### Step 1: Validate Your System
 
 ```bash
-cd /path/to/sysmaint
+cd /path/to/pulse
 
 # Run quick smoke tests
 bash tests/quick_test.sh
@@ -26,7 +26,7 @@ bash tests/quick_test.sh
 **Expected output:**
 ```
 ========================================
-SYSMAINT Quick Test
+OCTALUM-PULSE Quick Test
 ========================================
 ✓ All basic tests passed!
 ```
@@ -35,7 +35,7 @@ SYSMAINT Quick Test
 
 ```bash
 # Test with dry-run (safe, no changes)
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Or use the test suite
 bash tests/test_suite_smoke.sh
@@ -180,7 +180,7 @@ bash tests/test_suite_edge_cases.sh
 ### 1. Use Dry-Run Mode
 ```bash
 # Always safe to run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 ### 2. Combine Flags
@@ -284,8 +284,8 @@ timeout 60 bash tests/test_suite_smoke.sh
 ### Get More Help
 
 - 📖 Read [TEST_TROUBLESHOOTING.md](TEST_TROUBLESHOOTING.md)
-- 💬 Ask on [GitHub Discussions](https://github.com/Harery/SYSMAINT/discussions)
-- 🐛 Report [Issues](https://github.com/Harery/SYSMAINT/issues)
+- 💬 Ask on [GitHub Discussions](https://github.com/Harery/OCTALUM-PULSE/discussions)
+- 🐛 Report [Issues](https://github.com/Harery/OCTALUM-PULSE/issues)
 
 ---
 

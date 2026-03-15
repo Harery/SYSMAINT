@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 
 echo "# Test Run Summary"
 echo "**Date:** $(date -R)"
-echo "**Version:** $(grep '^VERSION=' "$PROJECT_ROOT/sysmaint" | cut -d= -f2 | tr -d '"')"
+echo "**Version:** $(grep '^VERSION=' "$PROJECT_ROOT/pulse" | cut -d= -f2 | tr -d '"')"
 echo ""
 echo "## Platform Results"
 echo ""

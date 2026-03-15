@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/progress/profiling.sh - Host profiling and scaling factors
-# sysmaint library
+# pulse library
 
 _collect_host_profile() {
   local cores ram_kb ram_mb rtt host_json rtt_ms ts profile_file

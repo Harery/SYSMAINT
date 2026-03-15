@@ -1,4 +1,4 @@
-# SYSMAINT Wiki
+# OCTALUM-PULSE Wiki
 
 **Enterprise-Grade System Maintenance Toolkit for Linux**
 
@@ -6,7 +6,7 @@
 
 ## 📋 Overview
 
-**SYSMAINT** (System Maintenance) is a comprehensive, production-ready automation toolkit designed for Linux system administration. It provides automated package management, intelligent system cleanup, security auditing, and performance optimization capabilities across nine major Linux distributions.
+**OCTALUM-PULSE** (System Maintenance) is a comprehensive, production-ready automation toolkit designed for Linux system administration. It provides automated package management, intelligent system cleanup, security auditing, and performance optimization capabilities across nine major Linux distributions.
 
 ### Key Characteristics
 
@@ -26,27 +26,27 @@
 
 \`\`\`bash
 # Clone the repository
-git clone --depth 1 https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
+git clone --depth 1 https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
 
 # Make executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Run with dry-run (recommended first)
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Run normally
-sudo ./sysmaint
+sudo ./pulse
 \`\`\`
 
 ### Docker Deployment
 
 \`\`\`bash
 # Pull the official image
-docker pull ghcr.io/harery/sysmaint:latest
+docker pull ghcr.io/harery/pulse:latest
 
 # Run with dry-run
-docker run --rm ghcr.io/harery/sysmaint:latest --dry-run
+docker run --rm ghcr.io/harery/pulse:latest --dry-run
 \`\`\`
 
 ---
@@ -66,9 +66,9 @@ docker run --rm ghcr.io/harery/sysmaint:latest --dry-run
 
 | Document | Location | Description |
 |----------|----------|-------------|
-| **README** | [Link](https://github.com/Harery/SYSMAINT#readme) | Main project documentation |
-| **Security Policy** | [Link](https://github.com/Harery/SYSMAINT/security/policy) | Security and vulnerability reporting |
-| **Packages** | [Link](https://github.com/Harery/SYSMAINT/blob/main/PACKAGES.md) | Docker images and container deployment |
+| **README** | [Link](https://github.com/Harery/OCTALUM-PULSE#readme) | Main project documentation |
+| **Security Policy** | [Link](https://github.com/Harery/OCTALUM-PULSE/security/policy) | Security and vulnerability reporting |
+| **Packages** | [Link](https://github.com/Harery/OCTALUM-PULSE/blob/main/PACKAGES.md) | Docker images and container deployment |
 
 ---
 
@@ -157,10 +157,10 @@ docker run --rm ghcr.io/harery/sysmaint:latest --dry-run
 
 \`\`\`bash
 # JSON output for monitoring systems
-sudo ./sysmaint --json | jq .
+sudo ./pulse --json | jq .
 
 # Example: Parse with monitoring tools
-sudo ./sysmaint --json | prometheus-client --
+sudo ./pulse --json | prometheus-client --
 \`\`\`
 
 ---
@@ -171,10 +171,10 @@ We welcome contributions from the community!
 
 | Resource | Link |
 |----------|------|
-| **Contributing Guide** | [Link](https://github.com/Harery/SYSMAINT/blob/main/CONTRIBUTING.md) |
+| **Contributing Guide** | [Link](https://github.com/Harery/OCTALUM-PULSE/blob/main/CONTRIBUTING.md) |
 | **Development Guide** | [Development Guide](Development-Guide) |
-| **Code of Conduct** | [Link](https://github.com/Harery/SYSMAINT/blob/main/CODE_OF_CONDUCT.md) |
-| **Issue Tracker** | [Link](https://github.com/Harery/SYSMAINT/issues) |
+| **Code of Conduct** | [Link](https://github.com/Harery/OCTALUM-PULSE/blob/main/CODE_OF_CONDUCT.md) |
+| **Issue Tracker** | [Link](https://github.com/Harery/OCTALUM-PULSE/issues) |
 
 ---
 
@@ -192,11 +192,11 @@ We welcome contributions from the community!
 
 ### Quick Links
 
-- **Repository:** https://github.com/Harery/SYSMAINT
-- **Issues:** https://github.com/Harery/SYSMAINT/issues
-- **Discussions:** https://github.com/Harery/SYSMAINT/discussions
-- **Releases:** https://github.com/Harery/SYSMAINT/releases
-- **Packages:** https://github.com/Harery?repo_name=SYSMAINT&tab=packages
+- **Repository:** https://github.com/Harery/OCTALUM-PULSE
+- **Issues:** https://github.com/Harery/OCTALUM-PULSE/issues
+- **Discussions:** https://github.com/Harery/OCTALUM-PULSE/discussions
+- **Releases:** https://github.com/Harery/OCTALUM-PULSE/releases
+- **Packages:** https://github.com/Harery?repo_name=OCTALUM-PULSE&tab=packages
 
 ---
 
@@ -219,13 +219,13 @@ This project is licensed under the **MIT License**.
 
 **SPDX-License-Identifier:** MIT
 
-See [LICENSE](https://github.com/Harery/SYSMAINT/blob/main/LICENSE) for details.
+See [LICENSE](https://github.com/Harery/OCTALUM-PULSE/blob/main/LICENSE) for details.
 
 ---
 
 ## 🔗 Navigation
 
-- **[Installation Guide](Installation-Guide)** - Get started with SYSMAINT
+- **[Installation Guide](Installation-Guide)** - Get started with OCTALUM-PULSE
 - **[Troubleshooting](Troubleshooting)** - Resolve common issues
 - **[FAQ](FAQ)** - Find answers quickly
 - **[Development Guide](Development-Guide)** - Contribute to the project

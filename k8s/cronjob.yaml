@@ -1,4 +1,4 @@
-# SYSMAINT Kubernetes CronJob
+# OCTALUM-PULSE Kubernetes CronJob
 # Recommended for automated system maintenance
 #
 # SPDX-License-Identifier: MIT
@@ -7,12 +7,12 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: sysmaint
-  namespace: sysmaint
+  name: pulse
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 spec:
   schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
@@ -22,29 +22,29 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        app.kubernetes.io/name: sysmaint
+        app.kubernetes.io/name: pulse
         app.kubernetes.io/component: system-maintenance
     spec:
       backoffLimit: 0  # Don't retry on failure
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: sysmaint
+            app.kubernetes.io/name: pulse
         spec:
           restartPolicy: OnFailure
           hostPID: true
           containers:
-          - name: sysmaint
-            image: ghcr.io/harery/sysmaint:latest
+          - name: pulse
+            image: ghcr.io/harery/pulse:latest
             imagePullPolicy: IfNotPresent
-            command: ["sysmaint"]
+            command: ["pulse"]
             args: ["--auto", "--quiet"]
             securityContext:
               privileged: true
             env:
-            - name: SYSMAINT_LOG_LEVEL
+            - name: OCTALUM-PULSE_LOG_LEVEL
               value: "info"
-            - name: SYSMAINT_VERSION
+            - name: OCTALUM-PULSE_VERSION
               value: "1.0.0"
             - name: TZ
               value: "UTC"
@@ -72,12 +72,12 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: sysmaint-daily
-  namespace: sysmaint
+  name: pulse-daily
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint-daily
+    app.kubernetes.io/name: pulse-daily
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 spec:
   schedule: "0 3 * * *"  # Daily at 3 AM
@@ -87,26 +87,26 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        app.kubernetes.io/name: sysmaint-daily
+        app.kubernetes.io/name: pulse-daily
     spec:
       backoffLimit: 0
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: sysmaint-daily
+            app.kubernetes.io/name: pulse-daily
         spec:
           restartPolicy: OnFailure
           hostPID: true
           containers:
-          - name: sysmaint
-            image: ghcr.io/harery/sysmaint:latest
+          - name: pulse
+            image: ghcr.io/harery/pulse:latest
             imagePullPolicy: IfNotPresent
-            command: ["sysmaint"]
+            command: ["pulse"]
             args: ["--upgrade", "--quiet"]  # Only updates
             securityContext:
               privileged: true
             env:
-            - name: SYSMAINT_LOG_LEVEL
+            - name: OCTALUM-PULSE_LOG_LEVEL
               value: "info"
             volumeMounts:
             - name: host-root
@@ -132,12 +132,12 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: sysmaint-monthly
-  namespace: sysmaint
+  name: pulse-monthly
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint-monthly
+    app.kubernetes.io/name: pulse-monthly
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 spec:
   schedule: "0 2 1 * *"  # Monthly on the 1st at 2 AM
@@ -147,26 +147,26 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        app.kubernetes.io/name: sysmaint-monthly
+        app.kubernetes.io/name: pulse-monthly
     spec:
       backoffLimit: 0
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: sysmaint-monthly
+            app.kubernetes.io/name: pulse-monthly
         spec:
           restartPolicy: OnFailure
           hostPID: true
           containers:
-          - name: sysmaint
-            image: ghcr.io/harery/sysmaint:latest
+          - name: pulse
+            image: ghcr.io/harery/pulse:latest
             imagePullPolicy: IfNotPresent
-            command: ["sysmaint"]
+            command: ["pulse"]
             args: ["--auto", "--cleanup", "--purge-kernels"]  # Full cleanup
             securityContext:
               privileged: true
             env:
-            - name: SYSMAINT_LOG_LEVEL
+            - name: OCTALUM-PULSE_LOG_LEVEL
               value: "info"
             volumeMounts:
             - name: host-root

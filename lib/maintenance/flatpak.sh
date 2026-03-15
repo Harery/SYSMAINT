@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/maintenance/flatpak.sh - Flatpak package management
-# sysmaint library
+# pulse library
 
 flatpak_maintenance() {
   if ! command -v flatpak >/dev/null 2>&1; then

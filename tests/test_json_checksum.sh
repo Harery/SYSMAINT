@@ -3,10 +3,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "=== JSON Checksum Integrity Test ==="
-DRY_RUN=true JSON_SUMMARY=true bash sysmaint --dry-run --json-summary >/dev/null 2>&1 || {
-  echo "❌ FAIL: sysmaint invocation failed"; exit 1; }
+DRY_RUN=true JSON_SUMMARY=true bash pulse --dry-run --json-summary >/dev/null 2>&1 || {
+  echo "❌ FAIL: pulse invocation failed"; exit 1; }
 
-JSON_FILE=$(ls -1t /tmp/system-maintenance/sysmaint_*.json 2>/dev/null | head -n1 || true)
+JSON_FILE=$(ls -1t /tmp/system-maintenance/pulse_*.json 2>/dev/null | head -n1 || true)
 if [[ -z "${JSON_FILE:-}" ]]; then
   echo "❌ FAIL: No JSON summary file found"; exit 1
 fi

@@ -184,9 +184,9 @@ source_platform_modules() {
     log "Platform: $(get_platform_name) ($(get_platform_family))"
 
     # Export platform info for other scripts
-    export SYSMAINT_PLATFORM="$(get_platform_name)"
-    export SYSMAINT_PLATFORM_FAMILY="$(get_platform_family)"
-    export SYSMAINT_PLATFORM_MODULE="$(get_platform_module)"
+    export OCTALUM-PULSE_PLATFORM="$(get_platform_name)"
+    export OCTALUM-PULSE_PLATFORM_FAMILY="$(get_platform_family)"
+    export OCTALUM-PULSE_PLATFORM_MODULE="$(get_platform_module)"
 }
 
 # Export functions

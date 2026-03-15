@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# lib/subcommands.sh — Embedded subcommands for sysmaint
-# sysmaint library
+# lib/subcommands.sh — Embedded subcommands for pulse
+# pulse library
 # License: MIT (see LICENSE file in repository root)
 # Author: Mohamed Elharery <Mohamed@Harery.com>
 # Copyright (c) 2025 Mohamed Elharery
@@ -133,8 +133,8 @@ JSON
 
 profiles_main() {
   set -euo pipefail
-  local sysmaint_bin
-  sysmaint_bin="${SYSMAINT_BIN:-$0}"
+  local pulse_bin
+  pulse_bin="${OCTALUM-PULSE_BIN:-$0}"
 
   local -a PROFILE_KEYS=(minimal standard desktop server aggressive)
   declare -A PROFILE_NAME PROFILE_DESC PROFILE_FLAGS PROFILE_EST PROFILE_RISK PROFILE_NOTES
@@ -176,17 +176,17 @@ profiles_main() {
 
   usage() {
     cat <<'USAGE'
-Usage: sysmaint profiles [options] [extra sysmaint flags...]
+Usage: pulse profiles [options] [extra pulse flags...]
 
 Options:
   -p, --profile <key>   Run the given profile non-interactively (minimal, standard, desktop, server, aggressive)
       --list            Print available profiles and exit
   -y, --yes             Skip confirmation prompt
-      --print-command   Output the resolved sysmaint command and exit (no execution)
-      --sysmaint <path> Use an alternate sysmaint binary
+      --print-command   Output the resolved pulse command and exit (no execution)
+      --pulse <path> Use an alternate pulse binary
   -h, --help            Show this help text
 
-Any additional flags after the options are appended to the generated sysmaint command.
+Any additional flags after the options are appended to the generated pulse command.
 USAGE
   }
 
@@ -209,7 +209,7 @@ USAGE
       --list) list_profiles; return 0;;
       -y|--yes) ASSUME_YES=true; shift;;
       --print-command) PRINT_ONLY=true; shift;;
-      --sysmaint) sysmaint_bin="$2"; shift 2;;
+      --pulse) pulse_bin="$2"; shift 2;;
       -h|--help) usage; return 0;;
       --) shift; while [[ $# -gt 0 ]]; do EXTRA_FLAGS+=("$1"); shift; done; break;;
       *) EXTRA_FLAGS+=("$1"); shift;;
@@ -262,13 +262,13 @@ USAGE
     if ((${#EXTRA_FLAGS[@]} > 0)); then
       echo "Extra   : ${EXTRA_FLAGS[*]}"
     fi
-    echo "Command : $sysmaint_bin ${cmd_args[*]}"
+    echo "Command : $pulse_bin ${cmd_args[*]}"
     echo ""
   }
   summary
 
   if [[ "$PRINT_ONLY" == "true" ]]; then
-    echo "$sysmaint_bin ${cmd_args[*]}"; return 0
+    echo "$pulse_bin ${cmd_args[*]}"; return 0
   fi
 
   if [[ "$ASSUME_YES" != "true" ]]; then
@@ -281,6 +281,6 @@ USAGE
     case "${confirm,,}" in y|yes) ;; *) echo "Aborted by user."; return 0;; esac
   fi
 
-  echo "Launching sysmaint..."
-  exec "$sysmaint_bin" "${cmd_args[@]}"
+  echo "Launching pulse..."
+  exec "$pulse_bin" "${cmd_args[@]}"
 }

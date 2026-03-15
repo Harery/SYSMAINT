@@ -156,7 +156,7 @@ test_arch_logging() {
 # Main test execution
 main() {
     echo "========================================"
-    echo "SYSMAINT Arch Family Test Suite"
+    echo "OCTALUM-PULSE Arch Family Test Suite"
     echo "========================================"
     echo ""
 

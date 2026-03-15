@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/validation/keys.sh - GPG/APT public key management
-# sysmaint library
+# pulse library
 
 detect_missing_pubkeys() {
   log "=== Checking for missing APT repository public keys (NO_PUBKEY) ==="

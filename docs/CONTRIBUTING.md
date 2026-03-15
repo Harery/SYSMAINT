@@ -1,6 +1,6 @@
 # Contributing
 
-**SYSMAINT v1.0.0**
+**OCTALUM-PULSE v1.0.0**
 
 ---
 
@@ -8,17 +8,17 @@
 
 ```bash
 # Fork and clone
-git clone https://github.com/YOUR_USERNAME/SYSMAINT.git
-cd SYSMAINT
+git clone https://github.com/YOUR_USERNAME/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
 
 # Create branch
 git checkout -b feature/your-feature
 
 # Make changes
-vim sysmaint
+vim pulse
 
 # Test
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 bash tests/test_suite_smoke.sh
 
 # Commit and push
@@ -62,7 +62,7 @@ bash tests/test_suite_smoke.sh
 bash tests/test_profile_ci.sh
 
 # Code quality
-shellcheck -x sysmaint lib/**/*.sh
+shellcheck -x pulse lib/**/*.sh
 ```
 
 ---
@@ -88,11 +88,11 @@ type(scope): description
 
 ## Need Help?
 
-- [GitHub Issues](https://github.com/Harery/SYSMAINT/issues)
+- [GitHub Issues](https://github.com/Harery/OCTALUM-PULSE/issues)
 - [Email](mailto:Mohamed@Harery.com)
 
 ---
 
 **Happy Contributing!**
 
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

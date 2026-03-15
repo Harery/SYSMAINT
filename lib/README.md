@@ -1,6 +1,6 @@
-# SYSMAINT Library Modules
+# OCTALUM-PULSE Library Modules
 
-This directory contains core library modules used by the main `sysmaint` script.
+This directory contains core library modules used by the main `pulse` script.
 
 ## 📁 Structure
 
@@ -73,7 +73,7 @@ Output formatting:
 
 ## 📖 Usage
 
-Library modules are sourced by the main `sysmaint` script:
+Library modules are sourced by the main `pulse` script:
 
 ```bash
 source lib/package_manager.sh

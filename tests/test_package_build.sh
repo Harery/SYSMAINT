@@ -15,7 +15,7 @@ if ! command -v dpkg-deb >/dev/null 2>&1; then
   exit 1
 fi
 
-WORK_DIR="$TMP_DIR/sysmaint-pkg"
+WORK_DIR="$TMP_DIR/pulse-pkg"
 mkdir -p "$WORK_DIR"
 rsync -a --delete --exclude '.git' --exclude '.github' --exclude '*.deb' --exclude 'build' "$ROOT_DIR/" "$WORK_DIR/"
 

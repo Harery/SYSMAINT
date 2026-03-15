@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/core/logging.sh - Logging infrastructure
-# sysmaint library
+# pulse library
 # Copyright (c) 2025 Mohamed Elharery
 
 # Functions:
@@ -8,7 +8,7 @@
 #   run()                     - Execute commands with comprehensive logging
 #   truncate_log_if_needed()  - Rotate/truncate oversized log files
 
-# This module provides the core logging infrastructure used throughout sysmaint.
+# This module provides the core logging infrastructure used throughout pulse.
 # All operations are logged with timestamps, and command execution is tracked
 # with full output capture.
 

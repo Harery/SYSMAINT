@@ -1,6 +1,6 @@
 # ⚡ Performance Benchmarks
 
-**SYSMAINT v1.0.0 — Performance Metrics by Platform**
+**OCTALUM-PULSE v1.0.0 — Performance Metrics by Platform**
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## Executive Summary
 
-SYSMAINT is engineered for **speed and efficiency** across all supported platforms. Our benchmarks demonstrate consistent sub-4-minute runtimes with minimal memory footprint.
+OCTALUM-PULSE is engineered for **speed and efficiency** across all supported platforms. Our benchmarks demonstrate consistent sub-4-minute runtimes with minimal memory footprint.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -242,18 +242,18 @@ Breakdown:
 
 ## Performance Comparison
 
-### SYSMAINT vs Traditional Methods
+### OCTALUM-PULSE vs Traditional Methods
 
-| Operation | SYSMAINT | Traditional Scripts | Improvement |
+| Operation | OCTALUM-PULSE | Traditional Scripts | Improvement |
 |-----------|:--------:|:-------------------:|:-----------:|
 | **Package Updates** | 1.2-2.2s | 5-30s | **5-15x faster** |
 | **System Cleanup** | 0.6-1.2s | 2-10s | **3-8x faster** |
 | **Security Audit** | 0.1-0.3s | 1-5s | **10-50x faster** |
 | **Total Time** | 0.7-3.8s | 8-45s | **10-60x faster** |
 
-### SYSMAINT vs Other Tools
+### OCTALUM-PULSE vs Other Tools
 
-| Metric | SYSMAINT | Linux Kernel Care | BleachBit |
+| Metric | OCTALUM-PULSE | Linux Kernel Care | BleachBit |
 |--------|:--------:|:-----------------:|:--------:|
 | **Runtime** | 0.7-3.8s | 30-60s | 10-30s |
 | **Memory** | 38-50 MB | 100-200 MB | 50-100 MB |
@@ -279,7 +279,7 @@ Breakdown:
 
 1. **Clean system state** (fresh installation or cleanup)
 2. **Simulate 30 days of usage** (install packages, generate logs)
-3. **Run SYSMAINT with `--dry-run`** (no actual changes)
+3. **Run OCTALUM-PULSE with `--dry-run`** (no actual changes)
 4. **Measure runtime, memory, and disk recovery potential**
 5. **Repeat 3 times per distribution**
 6. **Report average values**
@@ -298,6 +298,6 @@ Breakdown:
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE
 
 *Performance data based on internal testing. Your results may vary.*

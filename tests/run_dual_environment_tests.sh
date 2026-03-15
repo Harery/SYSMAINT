@@ -307,7 +307,7 @@ mkdir -p "$RESULTS_DIR"
 
 # Main execution
 echo "========================================"
-echo "SYSMAINT Dual Environment Test Runner"
+echo "OCTALUM-PULSE Dual Environment Test Runner"
 echo "========================================"
 echo "OS:       $OS_NAME $OS_VERSION"
 echo "Profile:  $TEST_PROFILE"

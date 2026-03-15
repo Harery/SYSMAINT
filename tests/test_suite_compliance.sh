@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test_suite_compliance.sh - Compliance and Regulatory Test Suite for sysmaint
+# test_suite_compliance.sh - Compliance and Regulatory Test Suite for pulse
 # Copyright (c) 2025 Mohamed Elharery <Mohamed@Harery.com>
 # License: MIT
 #
@@ -16,7 +16,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SYSMAINT="${SCRIPT_DIR}/../sysmaint"
+OCTALUM-PULSE="${SCRIPT_DIR}/../pulse"
 
 PASSED=0
 FAILED=0
@@ -41,7 +41,7 @@ run_test() {
 }
 
 cleanup() {
-  rm -rf /tmp/sysmaint-compliance-test-*
+  rm -rf /tmp/pulse-compliance-test-*
 }
 
 trap cleanup EXIT
@@ -52,7 +52,7 @@ trap cleanup EXIT
 
 # Test 1: PCI-DSS 8.2 - Password file permissions
 run_test "PCI-DSS 8.2 - Password file permissions are restrictive"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(shadow|gshadow)" <<< "$output"; then
   pass "PCI-DSS 8.2: Password files checked"
 else
@@ -61,8 +61,8 @@ fi
 
 # Test 2: PCI-DSS 10.2 - Audit trail generation
 run_test "PCI-DSS 10.2 - Audit trail of system activities"
-DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run >/dev/null 2>&1 || true
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+DRY_RUN=true JSON_SUMMARY=true bash "$OCTALUM-PULSE" --dry-run >/dev/null 2>&1 || true
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]] && grep -q '"timestamp"' "$json_file"; then
   pass "PCI-DSS 10.2: Audit trail generated"
 else
@@ -71,7 +71,7 @@ fi
 
 # Test 3: PCI-DSS 10.3 - Audit record content
 run_test "PCI-DSS 10.3 - Audit records contain required elements"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]]; then
   if grep -q '"timestamp"' "$json_file"; then
     pass "PCI-DSS 10.3: Audit records include timestamp"
@@ -84,7 +84,7 @@ fi
 
 # Test 4: PCI-DSS 2.2 - Security configuration standards
 run_test "PCI-DSS 2.2 - System hardening checks performed"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(Security audit|sudoers)" <<< "$output"; then
   pass "PCI-DSS 2.2: Security configuration validated"
 else
@@ -97,7 +97,7 @@ fi
 
 # Test 5: HIPAA 164.312(b) - Audit controls
 run_test "HIPAA 164.312(b) - Audit controls implementation"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]] && grep -q '"timestamp"' "$json_file"; then
   pass "HIPAA 164.312(b): Audit controls implemented"
 else
@@ -106,7 +106,7 @@ fi
 
 # Test 6: HIPAA 164.308(a)(1) - Security management process
 run_test "HIPAA 164.308(a)(1) - Security risk assessment"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(Security audit|checking)" <<< "$output"; then
   pass "HIPAA 164.308(a)(1): Security assessment performed"
 else
@@ -115,7 +115,7 @@ fi
 
 # Test 7: HIPAA 164.312(a)(1) - Access control
 run_test "HIPAA 164.312(a)(1) - Access control validation"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(sudoers|permissions|shadow)" <<< "$output"; then
   pass "HIPAA 164.312(a)(1): Access controls validated"
 else
@@ -124,7 +124,7 @@ fi
 
 # Test 8: HIPAA 164.308(a)(5) - Security awareness
 run_test "HIPAA 164.308(a)(5) - Security logging and monitoring"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(Security audit|results)" <<< "$output"; then
   pass "HIPAA 164.308(a)(5): Security monitoring active"
 else
@@ -137,8 +137,8 @@ fi
 
 # Test 9: SOC 2 CC8.1 - Change management
 run_test "SOC 2 CC8.1 - Change management documentation"
-DRY_RUN=true JSON_SUMMARY=true bash "$SYSMAINT" --dry-run --upgrade >/dev/null 2>&1 || true
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+DRY_RUN=true JSON_SUMMARY=true bash "$OCTALUM-PULSE" --dry-run --upgrade >/dev/null 2>&1 || true
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]]; then
   pass "SOC 2 CC8.1: Changes documented"
 else
@@ -147,7 +147,7 @@ fi
 
 # Test 10: SOC 2 CC7.2 - System monitoring
 run_test "SOC 2 CC7.2 - System monitoring and logging"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]] && grep -q '"package_count"' "$json_file"; then
   pass "SOC 2 CC7.2: System monitoring implemented"
 else
@@ -156,7 +156,7 @@ fi
 
 # Test 11: SOC 2 CC6.1 - Logical access controls
 run_test "SOC 2 CC6.1 - Logical access control validation"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(sudoers|shadow|permissions)" <<< "$output"; then
   pass "SOC 2 CC6.1: Access controls validated"
 else
@@ -165,7 +165,7 @@ fi
 
 # Test 12: SOC 2 CC6.6 - Logical access removal
 run_test "SOC 2 CC6.6 - User access audit capability"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(shadow|sudoers)" <<< "$output"; then
   pass "SOC 2 CC6.6: User access auditable"
 else
@@ -178,7 +178,7 @@ fi
 
 # Test 13: ISO 27001 A.9.4.1 - Information access restriction
 run_test "ISO 27001 A.9.4.1 - Information access controls"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(shadow|sudoers|permissions)" <<< "$output"; then
   pass "ISO 27001 A.9.4.1: Access controls verified"
 else
@@ -187,7 +187,7 @@ fi
 
 # Test 14: ISO 27001 A.12.4.1 - Event logging
 run_test "ISO 27001 A.12.4.1 - Event logging implementation"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]] && grep -q '"timestamp"' "$json_file"; then
   pass "ISO 27001 A.12.4.1: Event logging implemented"
 else
@@ -196,7 +196,7 @@ fi
 
 # Test 15: ISO 27001 A.12.1.2 - Change management
 run_test "ISO 27001 A.12.1.2 - Change management process"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --upgrade 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --upgrade 2>&1 || true)
 if grep -qE "(DRY RUN|would)" <<< "$output"; then
   pass "ISO 27001 A.12.1.2: Change management process exists"
 else
@@ -205,7 +205,7 @@ fi
 
 # Test 16: ISO 27001 A.9.2.3 - Privileged access management
 run_test "ISO 27001 A.9.2.3 - Privileged access controls"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(sudoers|Security audit)" <<< "$output"; then
   pass "ISO 27001 A.9.2.3: Privileged access managed"
 else
@@ -218,7 +218,7 @@ fi
 
 # Test 17: GDPR Art. 32 - Security of processing
 run_test "GDPR Art. 32 - Security measures implementation"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(Security audit|permissions)" <<< "$output"; then
   pass "GDPR Art. 32: Security measures implemented"
 else
@@ -227,7 +227,7 @@ fi
 
 # Test 18: GDPR Art. 32(2) - Ability to restore access
 run_test "GDPR Art. 32(2) - System resilience and backup validation"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run 2>&1 || true)
 if grep -qE "(DRY_RUN:|would run|System maintenance|System maintenance started|checking|verify)" <<< "$output"; then
   pass "GDPR Art. 32(2): System resilience validated"
 else
@@ -236,7 +236,7 @@ fi
 
 # Test 19: GDPR Art. 30 - Records of processing
 run_test "GDPR Art. 30 - Processing activity records"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]]; then
   pass "GDPR Art. 30: Processing records maintained"
 else
@@ -245,7 +245,7 @@ fi
 
 # Test 20: GDPR Art. 5(1)(f) - Integrity and confidentiality
 run_test "GDPR Art. 5(1)(f) - Data integrity controls"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(Security|permissions|checking)" <<< "$output"; then
   pass "GDPR Art. 5(1)(f): Integrity controls implemented"
 else
@@ -258,7 +258,7 @@ fi
 
 # Test 21: CIS 5.2.1 - Ensure permissions on /etc/ssh/sshd_config
 run_test "CIS 5.2.1 - SSH configuration security (framework extensible)"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(Security audit|checking)" <<< "$output"; then
   pass "CIS 5.2.1: Security audit framework extensible for SSH"
 else
@@ -267,7 +267,7 @@ fi
 
 # Test 22: CIS 5.3.1 - Password creation requirements
 run_test "CIS 5.3.1 - Password policy enforcement"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(shadow|security)" <<< "$output"; then
   pass "CIS 5.3.1: Password files validated"
 else
@@ -276,7 +276,7 @@ fi
 
 # Test 23: CIS 1.4.1 - Ensure permissions on bootloader config
 run_test "CIS 1.4.1 - Critical file permissions (sudoers as proxy)"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(sudoers|permissions)" <<< "$output"; then
   pass "CIS 1.4.1: Critical file permissions checked"
 else
@@ -285,7 +285,7 @@ fi
 
 # Test 24: CIS 4.1.2 - Ensure auditd is enabled
 run_test "CIS 4.1.2 - Audit logging enabled"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]]; then
   pass "CIS 4.1.2: Audit logging active"
 else
@@ -298,7 +298,7 @@ fi
 
 # Test 25: FedRAMP AC-2 - Account management
 run_test "FedRAMP AC-2 - Account management controls"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(shadow|sudoers)" <<< "$output"; then
   pass "FedRAMP AC-2: Account management validated"
 else
@@ -307,7 +307,7 @@ fi
 
 # Test 26: FedRAMP AU-2 - Auditable events
 run_test "FedRAMP AU-2 - Auditable events captured"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]] && grep -q '"timestamp"' "$json_file"; then
   pass "FedRAMP AU-2: Auditable events logged"
 else
@@ -316,7 +316,7 @@ fi
 
 # Test 27: FedRAMP CM-3 - Configuration change control
 run_test "FedRAMP CM-3 - Configuration change control"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --upgrade 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --upgrade 2>&1 || true)
 if grep -qE "(DRY RUN|would)" <<< "$output"; then
   pass "FedRAMP CM-3: Change control implemented"
 else
@@ -325,7 +325,7 @@ fi
 
 # Test 28: FedRAMP SI-2 - Flaw remediation
 run_test "FedRAMP SI-2 - Flaw remediation process"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --upgrade 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --upgrade 2>&1 || true)
 if grep -qE "(upgrade|update|checking)" <<< "$output"; then
   pass "FedRAMP SI-2: Flaw remediation process exists"
 else
@@ -338,7 +338,7 @@ fi
 
 # Test 29: NIST MA-2 - Controlled maintenance
 run_test "NIST 800-53 MA-2 - Controlled maintenance procedures"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run 2>&1 || true)
 if grep -qE "(DRY_RUN:|would run|System maintenance|System maintenance started)" <<< "$output"; then
   pass "NIST MA-2: Controlled maintenance implemented"
 else
@@ -347,7 +347,7 @@ fi
 
 # Test 30: NIST AU-3 - Content of audit records
 run_test "NIST 800-53 AU-3 - Audit record content"
-json_file=$(find /tmp/system-maintenance -name "sysmaint_*.json" -type f | tail -1)
+json_file=$(find /tmp/system-maintenance -name "pulse_*.json" -type f | tail -1)
 if [[ -f "$json_file" ]]; then
   if grep -q '"timestamp"' "$json_file"; then
     pass "NIST AU-3: Audit records include timestamp"
@@ -360,7 +360,7 @@ fi
 
 # Test 31: NIST AC-6 - Least privilege
 run_test "NIST 800-53 AC-6 - Least privilege enforcement"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(sudoers|permissions)" <<< "$output"; then
   pass "NIST AC-6: Least privilege validated"
 else
@@ -369,7 +369,7 @@ fi
 
 # Test 32: NIST CM-2 - Baseline configuration
 run_test "NIST 800-53 CM-2 - Baseline configuration validation"
-output=$(DRY_RUN=true JSON_SUMMARY=false bash "$SYSMAINT" --dry-run --security-audit 2>&1 || true)
+output=$(DRY_RUN=true JSON_SUMMARY=false bash "$OCTALUM-PULSE" --dry-run --security-audit 2>&1 || true)
 if grep -qE "(checking|Security audit|verify)" <<< "$output"; then
   pass "NIST CM-2: Configuration baseline validated"
 else

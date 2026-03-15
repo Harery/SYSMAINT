@@ -1,6 +1,6 @@
 # 🏗️ Architecture
 
-**SYSMAINT Modular Platform Architecture — System Design Document**
+**OCTALUM-PULSE Modular Platform Architecture — System Design Document**
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-SYSMAINT is built on a **modular, layered architecture** that enables cross-platform compatibility while maintaining distribution-specific optimizations. The design follows these principles:
+OCTALUM-PULSE is built on a **modular, layered architecture** that enables cross-platform compatibility while maintaining distribution-specific optimizations. The design follows these principles:
 
 | Principle | Description |
 |-----------|-------------|
@@ -33,8 +33,8 @@ SYSMAINT is built on a **modular, layered architecture** that enables cross-plat
 ## Directory Structure
 
 ```
-sysmaint/
-├── sysmaint                      # Main entry point (5,008 lines)
+pulse/
+├── pulse                      # Main entry point (5,008 lines)
 │
 ├── lib/                          # Core library modules
 │   ├── core/                     # Core functionality
@@ -111,7 +111,7 @@ sysmaint/
 │                    ORCHESTRATION LAYER                       │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
 │  │  Main Script │  │    Locking   │  │   Progress   │      │
-│  │  (sysmaint)  │  │  (lock.sh)   │  │  (progress/) │      │
+│  │  (pulse)  │  │  (lock.sh)   │  │  (progress/) │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 └─────────────────────────────────────────────────────────────┘
                               │
@@ -167,7 +167,7 @@ sysmaint/
 
 ```
 ┌─────────────────┐
-│  sysmaint start │
+│  pulse start │
 └────────┬────────┘
          │
          ▼
@@ -270,7 +270,7 @@ package_remove_orphans() # Remove orphaned packages
 
 ## Exit Codes
 
-SYSMAINT uses standardized exit codes for scripting and automation:
+OCTALUM-PULSE uses standardized exit codes for scripting and automation:
 
 | Code | Name | Description | Action Required |
 |------|------|-------------|-----------------|
@@ -291,8 +291,8 @@ SYSMAINT uses standardized exit codes for scripting and automation:
 ```bash
 #!/bin/bash
 
-# Run sysmaint
-sudo sysmaint --auto --quiet
+# Run pulse
+sudo pulse --auto --quiet
 EXIT_CODE=$?
 
 # Handle exit codes
@@ -315,7 +315,7 @@ exit $EXIT_CODE
 
 ```
                    ┌──────────────┐
-                   │   sysmaint   │
+                   │   pulse   │
                    │   (main)     │
                    └──────┬───────┘
                           │
@@ -388,7 +388,7 @@ exit $EXIT_CODE
 |---------|----------------|-------------|
 | **Input Validation** | Parameter sanitization in all modules | Command injection |
 | **Least Privilege** | Minimal sudo requirements | Privilege escalation |
-| **Lock File** | `/var/run/sysmaint.lock` | Concurrent execution |
+| **Lock File** | `/var/run/pulse.lock` | Concurrent execution |
 | **Dry-Run Mode** | Read-only simulation | Unintended changes |
 | **Audit Logging** | JSON output trail | Compliance & debugging |
 
@@ -441,7 +441,7 @@ To add support for a new Linux distribution:
 
 3. **Add to main execution flow:**
    ```bash
-   # In sysmaint main script
+   # In pulse main script
    if [[ "$RUN_NEW_OPERATION" == "true" ]]; then
        run_new_operation
    fi
@@ -483,4 +483,4 @@ To add support for a new Linux distribution:
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

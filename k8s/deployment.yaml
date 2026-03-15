@@ -1,4 +1,4 @@
-# SYSMAINT Kubernetes Deployment
+# OCTALUM-PULSE Kubernetes Deployment
 # For one-time maintenance runs, use the CronJob instead
 #
 # SPDX-License-Identifier: MIT
@@ -7,39 +7,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sysmaint
-  namespace: sysmaint
+  name: pulse
+  namespace: pulse
   labels:
-    app.kubernetes.io/name: sysmaint
+    app.kubernetes.io/name: pulse
     app.kubernetes.io/component: system-maintenance
-    app.kubernetes.io/part-of: sysmaint
+    app.kubernetes.io/part-of: pulse
     app.kubernetes.io/managed-by: kubectl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: sysmaint
+      app.kubernetes.io/name: pulse
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: sysmaint
+        app.kubernetes.io/name: pulse
         app.kubernetes.io/component: system-maintenance
-        app.kubernetes.io/part-of: sysmaint
+        app.kubernetes.io/part-of: pulse
     spec:
       restartPolicy: Always
       hostPID: true  # Required for system-level operations
       containers:
-      - name: sysmaint
-        image: ghcr.io/harery/sysmaint:latest
+      - name: pulse
+        image: ghcr.io/harery/pulse:latest
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: ["-c", "sleep 3600"]  # Keep alive for debugging
         securityContext:
           privileged: true  # Required for system maintenance
         env:
-        - name: SYSMAINT_LOG_LEVEL
+        - name: OCTALUM-PULSE_LOG_LEVEL
           value: "info"
-        - name: SYSMAINT_VERSION
+        - name: OCTALUM-PULSE_VERSION
           value: "1.0.0"
         - name: TZ
           value: "UTC"

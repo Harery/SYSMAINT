@@ -1,6 +1,6 @@
 # 📥 Installation Guide
 
-**SYSMAINT v1.0.0 — Complete Installation Instructions**
+**OCTALUM-PULSE v1.0.0 — Complete Installation Instructions**
 
 ---
 
@@ -41,27 +41,27 @@
 
 ## Quick Install
 
-The fastest way to get started with SYSMAINT:
+The fastest way to get started with OCTALUM-PULSE:
 
 ```bash
 # Clone repository
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
 
 # Make executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Preview (100% safe, read-only)
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Execute maintenance
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 **Or use Docker:**
 ```bash
-docker pull ghcr.io/harery/sysmaint:latest
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker pull ghcr.io/harery/pulse:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 ```
 
 ---
@@ -74,22 +74,22 @@ Best for: Users who want updates and easy modifications.
 
 ```bash
 # Clone the repository
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
 
 # Make executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Run with dry-run first
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Execute maintenance
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 **Updating:**
 ```bash
-cd SYSMAINT
+cd OCTALUM-PULSE
 git pull
 ```
 
@@ -101,21 +101,21 @@ Best for: Quick installation without git.
 
 ```bash
 # Download the script
-curl -O https://raw.githubusercontent.com/Harery/SYSMAINT/main/sysmaint
+curl -O https://raw.githubusercontent.com/Harery/OCTALUM-PULSE/main/pulse
 
 # Make executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Run with dry-run first
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Execute maintenance
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 **Updating:**
 ```bash
-curl -O https://raw.githubusercontent.com/Harery/SYSMAINT/main/sysmaint
+curl -O https://raw.githubusercontent.com/Harery/OCTALUM-PULSE/main/pulse
 ```
 
 ---
@@ -126,20 +126,20 @@ Best for: Containerized environments and testing.
 
 ```bash
 # Pull the image
-docker pull ghcr.io/harery/sysmaint:latest
+docker pull ghcr.io/harery/pulse:latest
 
 # Run maintenance
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest
+docker run --rm --privileged ghcr.io/harery/pulse:latest
 
 # Run specific operations
-docker run --rm --privileged ghcr.io/harery/sysmaint:latest --auto --cleanup
+docker run --rm --privileged ghcr.io/harery/pulse:latest --auto --cleanup
 ```
 
 **Docker Compose:**
 ```yaml
 services:
-  sysmaint:
-    image: ghcr.io/harery/sysmaint:latest
+  pulse:
+    image: ghcr.io/harery/pulse:latest
     privileged: true
     volumes:
       - /:/host:ro
@@ -153,17 +153,17 @@ Best for: Permanent installation with automation support.
 
 ```bash
 # Install to system path
-sudo install -Dm755 sysmaint /usr/local/sbin/sysmaint
+sudo install -Dm755 pulse /usr/local/sbin/pulse
 
 # Install systemd service files (for automation)
-sudo install -Dm644 packaging/systemd/sysmaint.service /etc/systemd/system/
-sudo install -Dm644 packaging/systemd/sysmaint.timer /etc/systemd/system/
+sudo install -Dm644 packaging/systemd/pulse.service /etc/systemd/system/
+sudo install -Dm644 packaging/systemd/pulse.timer /etc/systemd/system/
 
 # Enable weekly automatic maintenance
-sudo systemctl enable --now sysmaint.timer
+sudo systemctl enable --now pulse.timer
 
 # Verify installation
-sysmaint --version
+pulse --version
 ```
 
 ---
@@ -178,12 +178,12 @@ sudo apt update
 sudo apt install -y git curl dialog
 
 # Clone and install
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
 
 # Run dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 **Dependencies:**
@@ -202,12 +202,12 @@ sudo ./sysmaint --dry-run
 sudo dnf install -y git curl dialog
 
 # Clone and install
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
 
 # Run dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 **Dependencies:**
@@ -226,12 +226,12 @@ sudo ./sysmaint --dry-run
 sudo pacman -S git curl dialog
 
 # Clone and install
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
 
 # Run dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 **Dependencies:**
@@ -250,12 +250,12 @@ sudo ./sysmaint --dry-run
 sudo zypper install -y git curl dialog
 
 # Clone and install
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
 
 # Run dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 **Dependencies:**
@@ -273,28 +273,28 @@ sudo ./sysmaint --dry-run
 
 ```bash
 # Install to system path
-sudo install -Dm755 sysmaint /usr/local/sbin/sysmaint
+sudo install -Dm755 pulse /usr/local/sbin/pulse
 
 # Install service and timer files
-sudo install -Dm644 packaging/systemd/sysmaint.service /etc/systemd/system/
-sudo install -Dm644 packaging/systemd/sysmaint.timer /etc/systemd/system/
+sudo install -Dm644 packaging/systemd/pulse.service /etc/systemd/system/
+sudo install -Dm644 packaging/systemd/pulse.timer /etc/systemd/system/
 
 # Reload systemd
 sudo systemctl daemon-reload
 
 # Enable and start timer
-sudo systemctl enable --now sysmaint.timer
+sudo systemctl enable --now pulse.timer
 
 # Check status
-sudo systemctl status sysmaint.timer
+sudo systemctl status pulse.timer
 
 # View logs
-sudo journalctl -u sysmaint.service -f
+sudo journalctl -u pulse.service -f
 ```
 
 **Systemd Timer Schedule:**
 - Default: Weekly (Sunday at 2:00 AM)
-- Customizable: Edit `sysmaint.timer`
+- Customizable: Edit `pulse.timer`
 
 ---
 
@@ -307,13 +307,13 @@ crontab -e
 # Add one of the following:
 
 # Weekly (Sundays at 2 AM)
-0 2 * * 0 /usr/local/sbin/sysmaint --auto --quiet
+0 2 * * 0 /usr/local/sbin/pulse --auto --quiet
 
 # Daily (at 3 AM)
-0 3 * * * /usr/local/sbin/sysmaint --auto --quiet
+0 3 * * * /usr/local/sbin/pulse --auto --quiet
 
 # Monthly (1st of month at 4 AM)
-0 4 1 * * /usr/local/sbin/sysmaint --auto --quiet
+0 4 1 * * /usr/local/sbin/pulse --auto --quiet
 ```
 
 ---
@@ -324,7 +324,7 @@ crontab -e
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: sysmaint
+  name: pulse
   namespace: default
 spec:
   schedule: "0 2 * * 0"  # Weekly at 2 AM
@@ -335,8 +335,8 @@ spec:
       template:
         spec:
           containers:
-          - name: sysmaint
-            image: ghcr.io/harery/sysmaint:latest
+          - name: pulse
+            image: ghcr.io/harery/pulse:latest
             imagePullPolicy: Always
             securityContext:
               privileged: true
@@ -358,19 +358,19 @@ spec:
 
 ```bash
 # Verify script is executable
-ls -l sysmaint
+ls -l pulse
 
 # Check version
-./sysmaint --version
+./pulse --version
 
 # Test dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 ### Expected Output
 
 ```
-SYSMAINT v1.0.0 - Enterprise Linux System Maintenance
+OCTALUM-PULSE v1.0.0 - Enterprise Linux System Maintenance
 =======================================================
 
 [DRY-RUN MODE] No changes will be made.
@@ -391,34 +391,34 @@ Dry-run complete. Review output above.
 
 ```bash
 # Remove binary
-sudo rm /usr/local/sbin/sysmaint
+sudo rm /usr/local/sbin/pulse
 
 # Remove systemd files
-sudo rm /etc/systemd/system/sysmaint.service
-sudo rm /etc/systemd/system/sysmaint.timer
+sudo rm /etc/systemd/system/pulse.service
+sudo rm /etc/systemd/system/pulse.timer
 
 # Reload systemd
 sudo systemctl daemon-reload
 
 # Disable timer (if enabled)
-sudo systemctl disable sysmaint.timer 2>/dev/null
+sudo systemctl disable pulse.timer 2>/dev/null
 ```
 
 ### Remove Clone/Download
 
 ```bash
 # If cloned via git
-rm -rf SYSMAINT
+rm -rf OCTALUM-PULSE
 
 # If downloaded directly
-rm sysmaint
+rm pulse
 ```
 
 ### Remove Docker Image
 
 ```bash
 # Remove image
-docker rmi ghcr.io/harery/sysmaint:latest
+docker rmi ghcr.io/harery/pulse:latest
 
 # Prune dangling images
 docker image prune
@@ -432,10 +432,10 @@ docker image prune
 
 ```bash
 # Make script executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Run with sudo
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 ### "command not found: dialog"
@@ -458,7 +458,7 @@ sudo zypper install dialog
 
 ```bash
 # Use non-interactive mode
-sudo ./sysmaint --auto --quiet
+sudo ./pulse --auto --quiet
 ```
 
 > **📖 More Help:** [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md)
@@ -489,13 +489,13 @@ sudo ./sysmaint --auto --quiet
 
 | Resource | Link |
 |----------|------|
-| **GitHub Repository** | https://github.com/Harery/SYSMAINT |
-| **Docker Hub** | https://ghcr.io/harery/sysmaint |
-| **Issue Tracker** | https://github.com/Harery/SYSMAINT/issues |
-| **Discussions** | https://github.com/Harery/SYSMAINT/discussions |
+| **GitHub Repository** | https://github.com/Harery/OCTALUM-PULSE |
+| **Docker Hub** | https://ghcr.io/harery/pulse |
+| **Issue Tracker** | https://github.com/Harery/OCTALUM-PULSE/issues |
+| **Discussions** | https://github.com/Harery/OCTALUM-PULSE/discussions |
 
 ---
 
 **Document Version:** v1.0.0
 **Last Updated:** 2025-12-28
-**Project:** https://github.com/Harery/SYSMAINT
+**Project:** https://github.com/Harery/OCTALUM-PULSE

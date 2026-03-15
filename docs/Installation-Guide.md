@@ -1,6 +1,6 @@
 # Installation Guide
 
-**SYSMAINT v1.0.0**
+**OCTALUM-PULSE v1.0.0**
 
 ---
 
@@ -17,17 +17,17 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
 
 # Make executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Test with dry-run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # Run normally
-sudo ./sysmaint
+sudo ./pulse
 ```
 
 ---
@@ -36,13 +36,13 @@ sudo ./sysmaint
 
 ```bash
 # Download the script
-curl -O https://raw.githubusercontent.com/Harery/SYSMAINT/main/sysmaint
+curl -O https://raw.githubusercontent.com/Harery/OCTALUM-PULSE/main/pulse
 
 # Make executable
-chmod +x sysmaint
+chmod +x pulse
 
 # Run
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 ```
 
 ---
@@ -51,10 +51,10 @@ sudo ./sysmaint --dry-run
 
 ```bash
 # Build the image
-docker build -t sysmaint https://github.com/Harery/SYSMAINT.git
+docker build -t pulse https://github.com/Harery/OCTALUM-PULSE.git
 
 # Run in container
-docker run --rm --privileged sysmaint
+docker run --rm --privileged pulse
 ```
 
 ---
@@ -66,40 +66,40 @@ docker run --rm --privileged sysmaint
 ```bash
 sudo apt update
 sudo apt install -y dialog git
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
-sudo ./sysmaint --dry-run
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
+sudo ./pulse --dry-run
 ```
 
 ### Fedora/RHEL/Rocky/Alma/CentOS
 
 ```bash
 sudo dnf install -y dialog git
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
-sudo ./sysmaint --dry-run
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
+sudo ./pulse --dry-run
 ```
 
 ### Arch Linux
 
 ```bash
 sudo pacman -S dialog git
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
-sudo ./sysmaint --dry-run
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
+sudo ./pulse --dry-run
 ```
 
 ### openSUSE
 
 ```bash
 sudo zypper install dialog git
-git clone https://github.com/Harery/SYSMAINT.git
-cd SYSMAINT
-chmod +x sysmaint
-sudo ./sysmaint --dry-run
+git clone https://github.com/Harery/OCTALUM-PULSE.git
+cd OCTALUM-PULSE
+chmod +x pulse
+sudo ./pulse --dry-run
 ```
 
 ---
@@ -108,13 +108,13 @@ sudo ./sysmaint --dry-run
 
 ```bash
 # Check version
-./sysmaint --version
+./pulse --version
 
 # Test run (dry-run mode)
-sudo ./sysmaint --dry-run
+sudo ./pulse --dry-run
 
 # View help
-./sysmaint --help
+./pulse --help
 ```
 
 ---
@@ -128,21 +128,21 @@ sudo ./sysmaint --dry-run
 sudo crontab -e
 
 # Add this line for weekly maintenance every Sunday at 2 AM
-0 2 * * 0 /path/to/sysmaint --json > /var/log/sysmaint.log 2>&1
+0 2 * * 0 /path/to/pulse --json > /var/log/pulse.log 2>&1
 ```
 
 ### Create Systemd Service (Optional)
 
-Create `/etc/systemd/system/sysmaint.service`:
+Create `/etc/systemd/system/pulse.service`:
 
 ```ini
 [Unit]
-Description=SYSMAINT System Maintenance
+Description=OCTALUM-PULSE System Maintenance
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/path/to/sysmaint --json
+ExecStart=/path/to/pulse --json
 StandardOutput=journal
 StandardError=journal
 
@@ -152,8 +152,8 @@ WantedBy=multi-user.target
 
 Enable and start:
 ```bash
-sudo systemctl enable sysmaint.service
-sudo systemctl start sysmaint.service
+sudo systemctl enable pulse.service
+sudo systemctl start pulse.service
 ```
 
 ---
@@ -166,4 +166,4 @@ See [Troubleshooting](Troubleshooting) for common issues.
 
 ## Project
 
-https://github.com/Harery/SYSMAINT
+https://github.com/Harery/OCTALUM-PULSE
