@@ -12,7 +12,7 @@ func TestNewRootCommand(t *testing.T) {
 	v := version.Info{
 		Version:   "2.0.0",
 		GitCommit: "test",
-		BuildDate: "2026-01-01",
+		BuildTime: "2026-01-01",
 	}
 
 	cmd := NewRootCommand(cfg, v)
