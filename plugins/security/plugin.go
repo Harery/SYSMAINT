@@ -1,3 +1,4 @@
+// Package security provides security auditing and CVE scanning capabilities.
 package security
 
 import (
@@ -21,12 +22,12 @@ type Config struct {
 }
 
 type Result struct {
-	Success    bool
-	Output     string
-	Findings   []Finding
-	Duration   int64
-	CVECount   int
-	RiskScore  int
+	Success   bool
+	Output    string
+	Findings  []Finding
+	Duration  int64
+	CVECount  int
+	RiskScore int
 }
 
 type Finding struct {
@@ -126,11 +127,11 @@ func (p *SecurityPlugin) Close() error {
 }
 
 type ExecutionOptions struct {
-	DryRun     bool
-	Verbose    bool
-	Standards  []string
-	Fix        bool
-	CVEScan    bool
+	DryRun    bool
+	Verbose   bool
+	Standards []string
+	Fix       bool
+	CVEScan   bool
 }
 
 func (p *SecurityPlugin) scanCVEs(ctx context.Context, dryRun bool) ([]Finding, error) {

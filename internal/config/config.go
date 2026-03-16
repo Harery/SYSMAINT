@@ -24,10 +24,10 @@ type Config struct {
 
 // PluginsConfig contains plugin-specific configuration
 type PluginsConfig struct {
-	Packages     PackagesPluginConfig     `yaml:"packages" json:"packages" mapstructure:"packages"`
-	Security     SecurityPluginConfig     `yaml:"security" json:"security" mapstructure:"security"`
-	Performance  PerformancePluginConfig  `yaml:"performance" json:"performance" mapstructure:"performance"`
-	Compliance   CompliancePluginConfig   `yaml:"compliance" json:"compliance" mapstructure:"compliance"`
+	Packages      PackagesPluginConfig      `yaml:"packages" json:"packages" mapstructure:"packages"`
+	Security      SecurityPluginConfig      `yaml:"security" json:"security" mapstructure:"security"`
+	Performance   PerformancePluginConfig   `yaml:"performance" json:"performance" mapstructure:"performance"`
+	Compliance    CompliancePluginConfig    `yaml:"compliance" json:"compliance" mapstructure:"compliance"`
 	Observability ObservabilityPluginConfig `yaml:"observability" json:"observability" mapstructure:"observability"`
 }
 
@@ -61,10 +61,10 @@ type CompliancePluginConfig struct {
 
 // ObservabilityPluginConfig for observability plugin
 type ObservabilityPluginConfig struct {
-	Enabled     bool   `yaml:"enabled" json:"enabled" mapstructure:"enabled"`
-	Prometheus  bool   `yaml:"prometheus" json:"prometheus" mapstructure:"prometheus"`
-	Grafana     bool   `yaml:"grafana" json:"grafana" mapstructure:"grafana"`
-	Endpoint    string `yaml:"endpoint" json:"endpoint" mapstructure:"endpoint"`
+	Enabled    bool   `yaml:"enabled" json:"enabled" mapstructure:"enabled"`
+	Prometheus bool   `yaml:"prometheus" json:"prometheus" mapstructure:"prometheus"`
+	Grafana    bool   `yaml:"grafana" json:"grafana" mapstructure:"grafana"`
+	Endpoint   string `yaml:"endpoint" json:"endpoint" mapstructure:"endpoint"`
 }
 
 // AIConfig for AI/ML features

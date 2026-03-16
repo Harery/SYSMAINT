@@ -33,19 +33,19 @@ type Config struct {
 }
 
 type Result struct {
-	Success      bool
-	Output       string
-	Compliant    int
-	NonCompliant int
-	Skipped      int
-	Findings     []Violation
-	Duration     int64
-	Score        int
-	MaxScore     int
-	Status       string
-	Standard     string
+	Success       bool
+	Output        string
+	Compliant     int
+	NonCompliant  int
+	Skipped       int
+	Findings      []Violation
+	Duration      int64
+	Score         int
+	MaxScore      int
+	Status        string
+	Standard      string
 	PassingChecks int
-	TotalChecks  int
+	TotalChecks   int
 }
 
 type Violation struct {

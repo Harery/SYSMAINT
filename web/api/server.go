@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"OCTALUM-PULSE/internal/config"
-	"OCTALUM-PULSE/internal/state"
 	"OCTALUM-PULSE/internal/platform"
+	"OCTALUM-PULSE/internal/state"
 	"OCTALUM-PULSE/internal/version"
 )
 
@@ -201,7 +201,7 @@ func (s *Server) handleComplianceCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.state != nil {
-		s.state.RecordOperation("compliance_check", "Compliance check via API: "+standard, "success", "", 0)
+		_, _ = s.state.RecordOperation("compliance_check", "Compliance check via API: "+standard, "success", "", 0)
 	}
 
 	s.jsonResponse(w, http.StatusOK, result)

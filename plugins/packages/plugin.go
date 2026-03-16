@@ -1,3 +1,4 @@
+// Package packages provides package management across all Linux distributions.
 package packages
 
 import (
@@ -10,15 +11,15 @@ import (
 )
 
 type PackagesPlugin struct {
-	platform     PlatformInfo
-	packageMgr   PackageManager
+	platform   PlatformInfo
+	packageMgr PackageManager
 }
 
 type PlatformInfo struct {
-	OS            string
-	Distribution  string
-	Version       string
-	Family        string
+	OS             string
+	Distribution   string
+	Version        string
+	Family         string
 	PackageManager string
 }
 
@@ -26,7 +27,7 @@ type PackageManager interface {
 	Update(ctx context.Context, dryRun bool) error
 	Upgrade(ctx context.Context, dryRun bool) ([]string, error)
 	Cleanup(ctx context.Context, dryRun bool) error
-	ListUpgradable() ([]string, error)
+	ListUpgradable(ctx context.Context) ([]string, error)
 	Install(ctx context.Context, packages []string, dryRun bool) error
 	Remove(ctx context.Context, packages []string, dryRun bool) error
 }
@@ -104,10 +105,10 @@ func (p *PackagesPlugin) Close() error {
 }
 
 type ExecutionOptions struct {
-	DryRun     bool
-	Verbose    bool
+	DryRun       bool
+	Verbose      bool
 	SecurityOnly bool
-	Smart      bool
+	Smart        bool
 }
 
 type Result struct {
@@ -118,9 +119,9 @@ type Result struct {
 
 func detectPlatform() PlatformInfo {
 	return PlatformInfo{
-		OS:              runtime.GOOS,
-		Family:          "debian",
-		PackageManager:  "apt",
+		OS:             runtime.GOOS,
+		Family:         "debian",
+		PackageManager: "apt",
 	}
 }
 
@@ -169,8 +170,8 @@ func (m *AptManager) Cleanup(ctx context.Context, dryRun bool) error {
 	return cmd.Run()
 }
 
-func (m *AptManager) ListUpgradable() ([]string, error) {
-	cmd := exec.Command("apt", "list", "--upgradable")
+func (m *AptManager) ListUpgradable(ctx context.Context) ([]string, error) {
+	cmd := exec.CommandContext(ctx, "apt", "list", "--upgradable")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -226,8 +227,8 @@ func (m *DnfManager) Cleanup(ctx context.Context, dryRun bool) error {
 	return cmd.Run()
 }
 
-func (m *DnfManager) ListUpgradable() ([]string, error) {
-	cmd := exec.Command("dnf", "check-update", "--quiet")
+func (m *DnfManager) ListUpgradable(ctx context.Context) ([]string, error) {
+	cmd := exec.CommandContext(ctx, "dnf", "check-update", "--quiet")
 	out, _ := cmd.Output()
 	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
 }
@@ -280,8 +281,8 @@ func (m *PacmanManager) Cleanup(ctx context.Context, dryRun bool) error {
 	return cmd.Run()
 }
 
-func (m *PacmanManager) ListUpgradable() ([]string, error) {
-	cmd := exec.Command("pacman", "-Qu")
+func (m *PacmanManager) ListUpgradable(ctx context.Context) ([]string, error) {
+	cmd := exec.CommandContext(ctx, "pacman", "-Qu")
 	out, _ := cmd.Output()
 	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
 }
@@ -334,8 +335,8 @@ func (m *ZypperManager) Cleanup(ctx context.Context, dryRun bool) error {
 	return cmd.Run()
 }
 
-func (m *ZypperManager) ListUpgradable() ([]string, error) {
-	cmd := exec.Command("zypper", "list-updates")
+func (m *ZypperManager) ListUpgradable(ctx context.Context) ([]string, error) {
+	cmd := exec.CommandContext(ctx, "zypper", "list-updates")
 	out, _ := cmd.Output()
 	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
 }

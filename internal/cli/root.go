@@ -61,12 +61,12 @@ func NewApp(cfg *config.Config) (*App, error) {
 
 	if cfg.AI.Enabled {
 		aiCfg := ai.Config{
-			Enabled:      cfg.AI.Enabled,
-			Mode:         cfg.AI.Mode,
-			LocalModel:   cfg.AI.Local.Model,
-			OllamaURL:    cfg.AI.Local.OllamaEndpoint,
-			CloudModel:   cfg.AI.Cloud.Model,
-			CloudAPIKey:  cfg.AI.Cloud.APIKey,
+			Enabled:     cfg.AI.Enabled,
+			Mode:        cfg.AI.Mode,
+			LocalModel:  cfg.AI.Local.Model,
+			OllamaURL:   cfg.AI.Local.OllamaEndpoint,
+			CloudModel:  cfg.AI.Cloud.Model,
+			CloudAPIKey: cfg.AI.Cloud.APIKey,
 		}
 		app.aiEngine, err = ai.NewEngine(aiCfg)
 		if err != nil {
@@ -370,25 +370,25 @@ func (a *App) fullUpdate(ctx context.Context, pm string, dryRun bool) []string {
 	var actions []string
 
 	switch pm {
-			case "apt":
-				if !dryRun {
-					_, _ = a.executor.RunWithSudo(ctx, "apt-get", "update", "-qq")
-					_, _ = a.executor.RunWithSudo(ctx, "apt-get", "upgrade", "-y", "-qq")
-				}
+	case "apt":
+		if !dryRun {
+			_, _ = a.executor.RunWithSudo(ctx, "apt-get", "update", "-qq")
+			_, _ = a.executor.RunWithSudo(ctx, "apt-get", "upgrade", "-y", "-qq")
+		}
 		actions = append(actions, "✓ Package cache refreshed", "✓ Packages upgraded")
-			case "dnf", "yum":
-				if !dryRun {
-					_, _ = a.executor.RunWithSudo(ctx, pm, "upgrade", "-y", "--quiet")
-				}
+	case "dnf", "yum":
+		if !dryRun {
+			_, _ = a.executor.RunWithSudo(ctx, pm, "upgrade", "-y", "--quiet")
+		}
 		actions = append(actions, "✓ Packages upgraded")
 	case "pacman":
 		if !dryRun {
-			a.executor.RunWithSudo(ctx, "pacman", "-Syu", "--noconfirm")
+			_, _ = a.executor.RunWithSudo(ctx, "pacman", "-Syu", "--noconfirm")
 		}
 		actions = append(actions, "✓ Packages upgraded")
 	case "zypper":
 		if !dryRun {
-			a.executor.RunWithSudo(ctx, "zypper", "-n", "dup")
+			_, _ = a.executor.RunWithSudo(ctx, "zypper", "-n", "dup")
 		}
 		actions = append(actions, "✓ Packages upgraded")
 	default:
@@ -402,8 +402,8 @@ func (a *App) securityUpdate(ctx context.Context, pm string, dryRun bool) []stri
 	switch pm {
 	case "apt":
 		if !dryRun {
-			a.executor.RunWithSudo(ctx, "apt-get", "update", "-qq")
-			a.executor.RunWithSudo(ctx, "unattended-upgrade", "-v")
+			_, _ = a.executor.RunWithSudo(ctx, "apt-get", "update", "-qq")
+			_, _ = a.executor.RunWithSudo(ctx, "unattended-upgrade", "-v")
 		}
 		return []string{"✓ Security updates applied"}
 	case "dnf", "yum":

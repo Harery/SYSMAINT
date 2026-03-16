@@ -1,3 +1,4 @@
+// Package performance provides system performance optimization and tuning.
 package performance
 
 import (
@@ -47,11 +48,11 @@ type Optimization struct {
 }
 
 type Metrics struct {
-	CPUUsage     float64
-	MemoryUsage  float64
-	DiskUsage    float64
-	LoadAverage  []float64
-	Uptime       int64
+	CPUUsage    float64
+	MemoryUsage float64
+	DiskUsage   float64
+	LoadAverage []float64
+	Uptime      int64
 }
 
 func New() *PerformancePlugin {
@@ -176,10 +177,10 @@ func (p *PerformancePlugin) Close() error {
 }
 
 type ExecutionOptions struct {
-	DryRun       bool
-	Verbose      bool
-	Aggressive   bool
-	EnableBBRv3  bool
+	DryRun      bool
+	Verbose     bool
+	Aggressive  bool
+	EnableBBRv3 bool
 }
 
 func (p *PerformancePlugin) Optimize(ctx context.Context, dryRun bool) ([]Optimization, error) {
