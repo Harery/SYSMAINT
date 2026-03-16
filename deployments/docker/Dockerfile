@@ -1,8 +1,8 @@
 # Multi-stage build for OCTALUM-PULSE
 # Build stage
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
-RUN apk add --no-cache git ca-certificates tzdata
+RUN apk add --no-cache git ca-certificates tzdata gcc musl-dev
 
 WORKDIR /build
 
@@ -15,10 +15,10 @@ ARG VERSION=v2.0.0
 ARG BUILD_TIME
 ARG GIT_COMMIT
 
-RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags="-s -w -X github.com/Harery/OCTALUM-PULSE/internal/version.Version=${VERSION} \
-    -X github.com/Harery/OCTALUM-PULSE/internal/version.BuildTime=${BUILD_TIME} \
-    -X github.com/Harery/OCTALUM-PULSE/internal/version.GitCommit=${GIT_COMMIT}" \
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -ldflags="-s -w -X OCTALUM-PULSE/internal/version.Version=${VERSION} \
+    -X OCTALUM-PULSE/internal/version.BuildTime=${BUILD_TIME} \
+    -X OCTALUM-PULSE/internal/version.GitCommit=${GIT_COMMIT}" \
     -o pulse ./cmd/pulse
 
 # Runtime stage
