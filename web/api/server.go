@@ -1,3 +1,4 @@
+// Package api provides HTTP API endpoints for OCTALUM-PULSE.
 package api
 
 import (

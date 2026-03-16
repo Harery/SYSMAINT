@@ -103,11 +103,11 @@ func TestPlugin_ExportPrometheus(t *testing.T) {
 
 func TestExecutionOptions_Struct(t *testing.T) {
 	opts := &ExecutionOptions{
-		DryRun:        true,
-		Verbose:       true,
-		Prometheus:    true,
-		Grafana:       true,
-		Endpoint:      "http://localhost:9090",
+		DryRun:         true,
+		Verbose:        true,
+		Prometheus:     true,
+		Grafana:        true,
+		Endpoint:       "http://localhost:9090",
 		ScrapeInterval: 15,
 	}
 

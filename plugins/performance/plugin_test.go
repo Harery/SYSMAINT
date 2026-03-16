@@ -103,9 +103,9 @@ func TestPlugin_GetMetrics(t *testing.T) {
 
 func TestExecutionOptions_Struct(t *testing.T) {
 	opts := &ExecutionOptions{
-		DryRun:     true,
-		Verbose:    true,
-		Aggressive: true,
+		DryRun:      true,
+		Verbose:     true,
+		Aggressive:  true,
 		EnableBBRv3: true,
 	}
 
@@ -156,11 +156,11 @@ func TestOptimization_Struct(t *testing.T) {
 
 func TestMetrics_Struct(t *testing.T) {
 	m := Metrics{
-		CPUUsage:     25.5,
-		MemoryUsage:  60.0,
-		DiskUsage:    45.0,
-		LoadAverage:  []float64{1.0, 1.5, 2.0},
-		Uptime:       86400,
+		CPUUsage:    25.5,
+		MemoryUsage: 60.0,
+		DiskUsage:   45.0,
+		LoadAverage: []float64{1.0, 1.5, 2.0},
+		Uptime:      86400,
 	}
 
 	if m.CPUUsage != 25.5 {

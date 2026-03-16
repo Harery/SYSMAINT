@@ -106,10 +106,10 @@ func TestPlugin_ScanCVE(t *testing.T) {
 
 func TestExecutionOptions_Struct(t *testing.T) {
 	opts := &ExecutionOptions{
-		DryRun:     true,
-		Verbose:    true,
-		Standards:  []string{"cis", "hipaa"},
-		CVEScan:    true,
+		DryRun:    true,
+		Verbose:   true,
+		Standards: []string{"cis", "hipaa"},
+		CVEScan:   true,
 	}
 
 	if !opts.DryRun {
@@ -122,11 +122,11 @@ func TestExecutionOptions_Struct(t *testing.T) {
 
 func TestResult_Struct(t *testing.T) {
 	r := &Result{
-		Success:     true,
-		Output:      "test",
-		Findings:    []Finding{},
-		CVECount:    5,
-		RiskScore:   75,
+		Success:   true,
+		Output:    "test",
+		Findings:  []Finding{},
+		CVECount:  5,
+		RiskScore: 75,
 	}
 
 	if !r.Success {
