@@ -29,22 +29,24 @@ func TestDetect(t *testing.T) {
 
 func TestDetectPackageManager(t *testing.T) {
 	tests := []struct {
-		name     string
-		distros  []string
-		expected string
+		name      string
+		distro    string
+		versionID string
+		expected  string
 	}{
-		{"ubuntu", []string{"ubuntu"}, "apt"},
-		{"debian", []string{"debian"}, "apt"},
-		{"fedora", []string{"fedora"}, "dnf"},
-		{"rocky", []string{"rocky"}, "dnf"},
-		{"arch", []string{"arch"}, "pacman"},
-		{"opensuse", []string{"opensuse-tumbleweed"}, "zypper"},
-		{"alpine", []string{"alpine"}, "apk"},
+		{"ubuntu", "ubuntu", "24.04", "apt"},
+		{"debian", "debian", "12", "apt"},
+		{"fedora", "fedora", "41", "dnf"},
+		{"rocky", "rocky", "9", "dnf"},
+		{"rocky_old", "rocky", "7", "yum"},
+		{"arch", "arch", "", "pacman"},
+		{"opensuse", "opensuse-tumbleweed", "", "zypper"},
+		{"alpine", "alpine", "3.19", "apk"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			info := &Info{Distribution: tt.distros[0]}
+			info := &Info{Distribution: tt.distro, VersionID: tt.versionID}
 			info.detectPackageManager()
 
 			if info.PackageManager != tt.expected {
