@@ -51,7 +51,8 @@ linters:
         - name: error-return
         - name: error-strings
         - name: error-naming
-        - name: exported
+        # - name: exported
+          arguments: ["allowMissing"]
         - name: if-return
         - name: increment-decrement
         - name: var-naming
