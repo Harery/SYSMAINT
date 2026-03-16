@@ -24,7 +24,7 @@ jobs:
           cache: true
 
       - name: Download dependencies
-        run: go mod download
+        run: go mod tidy && go mod download
 
       - name: Build
         run: go build -v ./...
@@ -43,7 +43,7 @@ jobs:
           cache: true
 
       - name: Download dependencies
-        run: go mod download
+        run: go mod tidy && go mod download
 
       - name: Run tests
         run: go test -v -race -coverprofile=coverage.out ./...
