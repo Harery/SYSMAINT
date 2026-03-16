@@ -27,12 +27,12 @@ type ExecutionOptions struct {
 }
 
 type ExecutionResult struct {
-	Success   bool
-	Output    string
-	Error     error
-	Changes   []Change
-	Duration  int64
-	Metadata  map[string]interface{}
+	Success  bool
+	Output   string
+	Error    error
+	Changes  []Change
+	Duration int64
+	Metadata map[string]interface{}
 }
 
 type Change struct {

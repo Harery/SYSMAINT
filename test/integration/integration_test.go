@@ -63,7 +63,9 @@ func TestHelpCommand(t *testing.T) {
 		t.Skip("Binary not built, run 'make build' first")
 	}
 
-	cmd := exec.Command(binPath, "--help")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, binPath, "--help")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("--help failed: %v\nOutput: %s", err, output)
@@ -91,7 +93,9 @@ func TestDryRunFlag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := exec.Command(binPath, tt.args...)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, binPath, tt.args...)
 			output, err := cmd.CombinedOutput()
 			if err != nil {
 				t.Errorf("Command failed: %v\nOutput: %s", err, output)
@@ -106,7 +110,9 @@ func TestJSONOutput(t *testing.T) {
 		t.Skip("Binary not built, run 'make build' first")
 	}
 
-	cmd := exec.Command(binPath, "version", "--json")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, binPath, "version", "--json")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("version --json failed: %v\nOutput: %s", err, output)
@@ -123,7 +129,9 @@ func TestPluginList(t *testing.T) {
 		t.Skip("Binary not built, run 'make build' first")
 	}
 
-	cmd := exec.Command(binPath, "plugin", "list")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, binPath, "plugin", "list")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("plugin list failed: %v\nOutput: %s", err, output)

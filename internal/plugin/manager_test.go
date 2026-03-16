@@ -10,16 +10,16 @@ type mockPlugin struct {
 	version string
 }
 
-func (m *mockPlugin) Name() string                          { return m.name }
-func (m *mockPlugin) Version() string                       { return m.version }
-func (m *mockPlugin) Description() string                   { return "mock plugin" }
-func (m *mockPlugin) Dependencies() []string                { return nil }
+func (m *mockPlugin) Name() string                                    { return m.name }
+func (m *mockPlugin) Version() string                                 { return m.version }
+func (m *mockPlugin) Description() string                             { return "mock plugin" }
+func (m *mockPlugin) Dependencies() []string                          { return nil }
 func (m *mockPlugin) Init(ctx context.Context, cfg interface{}) error { return nil }
 func (m *mockPlugin) Execute(ctx context.Context, opts *ExecutionOptions) (*ExecutionResult, error) {
 	return &ExecutionResult{Success: true, Output: "ok"}, nil
 }
-func (m *mockPlugin) Validate(ctx context.Context) error    { return nil }
-func (m *mockPlugin) Close() error                          { return nil }
+func (m *mockPlugin) Validate(ctx context.Context) error { return nil }
+func (m *mockPlugin) Close() error                       { return nil }
 
 func TestNewManager(t *testing.T) {
 	mgr := NewManager("/tmp/plugins")
@@ -132,9 +132,9 @@ func TestManager_Close(t *testing.T) {
 
 func TestExecutionOptions(t *testing.T) {
 	opts := &ExecutionOptions{
-		DryRun:   true,
-		Verbose:  true,
-		AutoMode: true,
+		DryRun:     true,
+		Verbose:    true,
+		AutoMode:   true,
 		Parameters: map[string]interface{}{"key": "value"},
 	}
 

@@ -29,12 +29,12 @@ type Operation struct {
 }
 
 type HealthMetric struct {
-	ID          int64
-	Timestamp   time.Time
-	MetricType  string
-	Name        string
-	Value       float64
-	Unit        string
+	ID         int64
+	Timestamp  time.Time
+	MetricType string
+	Name       string
+	Value      float64
+	Unit       string
 }
 
 func New(dbPath string) (*State, error) {

@@ -1,3 +1,4 @@
+// Package observability provides metrics collection and Prometheus integration.
 package observability
 
 import (

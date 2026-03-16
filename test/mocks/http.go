@@ -1,3 +1,4 @@
+// Package mocks provides test mocks and utilities for testing.
 package mocks
 
 import (
