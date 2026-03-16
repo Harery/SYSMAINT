@@ -4,11 +4,10 @@ run:
   timeout: 5m
 
 linters:
-  default: fast
+  default: none
   enable:
     - errcheck
     - govet
-    - ineffassign
     - staticcheck
     - unused
     - misspell
@@ -22,6 +21,7 @@ linters:
     - noctx
     - sqlclosecheck
     - tparallel
+    - ineffassign
 
   settings:
     errcheck:
@@ -33,25 +33,62 @@ linters:
         - shadow
 
     gocyclo:
-      min-complexity: 15
+      min-complexity: 20
 
     dupl:
-      threshold: 100
+      threshold: 150
 
     goconst:
-      min-len: 3
-      min-occurrences: 3
+      min-len: 5
+      min-occurrences: 4
+
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unreachable-code
+        - name: redefines-builtin-id
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+        - wrapperFunc
+        - hugeParam
+        - rangeValCopy
 
   exclusions:
-    presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
     rules:
       - path: _test\.go
         linters:
           - errcheck
+          - dupl
+          - goconst
+          - gocyclo
       - path: test/mocks/
         linters:
           - unused
